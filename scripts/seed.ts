@@ -27,7 +27,7 @@ async function main() {
   console.log("Seeding Golden Kids Adventure Universe...\n");
 
   // --- Universes ---------------------------------------------------------
-  const universeRows = await db
+  const universeInserted = await db
     .insert(universes)
     .values([
       { key: "ocean", name: "Ocean Universe", color: "var(--color-universe-ocean)", sortOrder: 1 },
@@ -38,8 +38,11 @@ async function main() {
     ])
     .onConflictDoNothing()
     .returning();
+  // Re-fetch the full set (not just newly-inserted rows) so lookups below
+  // work whether this is a fresh seed or a safe re-run against existing data.
+  const universeRows = await db.select().from(universes);
   const universeByKey = new Map(universeRows.map((u) => [u.key, u]));
-  console.log(`  universes: ${universeRows.length}`);
+  console.log(`  universes: ${universeInserted.length} new (${universeRows.length} total)`);
 
   // --- Characters ----------------------------------------------------------
   const characterSeed: Array<{
@@ -75,7 +78,7 @@ async function main() {
     { universe: "discovery", key: "archaeologist", name: "Archaeologist", rarity: "legendary" },
   ];
 
-  const characterRows = await db
+  const characterInserted = await db
     .insert(characters)
     .values(
       characterSeed.map((c, i) => ({
@@ -88,10 +91,10 @@ async function main() {
     )
     .onConflictDoNothing()
     .returning();
-  console.log(`  characters: ${characterRows.length}`);
+  console.log(`  characters: ${characterInserted.length} new`);
 
   // --- Pack types + pools --------------------------------------------------
-  const packTypeRows = await db
+  await db
     .insert(packTypes)
     .values([
       { key: "attendance_pack", name: "Attendance Pack", coinCost: 50, cardsPerPack: 3 },
@@ -100,10 +103,10 @@ async function main() {
       { key: "story_pack", name: "Story Pack", coinCost: 60, cardsPerPack: 3 },
       { key: "achievement_pack", name: "Achievement Pack", coinCost: 100, cardsPerPack: 3 },
     ])
-    .onConflictDoNothing()
-    .returning();
+    .onConflictDoNothing();
+  const packTypeRows = await db.select().from(packTypes);
   const packTypeByKey = new Map(packTypeRows.map((p) => [p.key, p]));
-  console.log(`  pack types: ${packTypeRows.length}`);
+  console.log(`  pack types: ${packTypeRows.length} total`);
 
   const allUniverseIds = universeRows.map((u) => u.id);
   const poolRows: Array<{ packTypeId: string; universeId: string; weight: number }> = [];
@@ -123,7 +126,7 @@ async function main() {
     weight: 1,
   });
   const poolInserted = await db.insert(packTypePool).values(poolRows).onConflictDoNothing().returning();
-  console.log(`  pack pools: ${poolInserted.length}`);
+  console.log(`  pack pools: ${poolInserted.length} new`);
 
   // --- Avatar items ----------------------------------------------------------
   const avatarItemSeed = [
@@ -156,7 +159,7 @@ async function main() {
     { slot: "background", key: "background_forest", name: "Forest", acquisitionMethod: "level_unlock" as const, unlockLevel: 7 },
   ];
 
-  const avatarItemRows = await db
+  await db
     .insert(avatarItems)
     .values(
       avatarItemSeed.map((item) => ({
@@ -168,10 +171,10 @@ async function main() {
         coinPrice: "coinPrice" in item ? item.coinPrice : null,
       }))
     )
-    .onConflictDoNothing()
-    .returning();
+    .onConflictDoNothing();
+  const avatarItemRows = await db.select().from(avatarItems);
   const avatarItemByKey = new Map(avatarItemRows.map((a) => [a.key, a]));
-  console.log(`  avatar items: ${avatarItemRows.length}`);
+  console.log(`  avatar items: ${avatarItemRows.length} total`);
 
   // --- Reward rules ----------------------------------------------------------
   const rewardRuleRows = await db

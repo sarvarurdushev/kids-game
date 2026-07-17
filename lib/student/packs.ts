@@ -87,6 +87,12 @@ export async function openPack(
   grantId: string
 ): Promise<RevealedCard[]> {
   return db.transaction(async (tx) => {
+    // Lock the student row first so opening two different packs at the same
+    // time (two taps, two tabs) serializes here — both packs may draw the
+    // same character, and student_cards has a unique (student, character)
+    // index that a second, unserialized transaction would crash into.
+    await tx.select().from(students).where(eq(students.id, studentId)).for("update");
+
     const [grant] = await tx
       .select()
       .from(packGrants)

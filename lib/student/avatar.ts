@@ -52,10 +52,12 @@ export async function getAvatarItems(student: AuthedStudent) {
     const owns = isOwned(item, ownedIds, level);
     let state: "owned" | "purchasable" | "locked" = "owned";
     let reason: string | null = null;
+    let affordable = true;
 
     if (!owns) {
       if (item.acquisitionMethod === "coin_purchase") {
         state = "purchasable";
+        affordable = item.coinPrice !== null && student.coinsBalance >= item.coinPrice;
       } else if (item.acquisitionMethod === "level_unlock") {
         state = "locked";
         reason = `Reach level ${item.unlockLevel}`;
@@ -75,6 +77,7 @@ export async function getAvatarItems(student: AuthedStudent) {
       coinPrice: item.coinPrice,
       state,
       reason,
+      affordable,
       equipped: equippedIds.has(item.id),
     };
   });
@@ -97,6 +100,16 @@ export async function purchaseAvatarItem(studentId: string, avatarItemId: string
       throw new ServiceError("Item is not purchasable", 400);
     }
 
+    // Lock the student row before checking ownership, so two concurrent
+    // purchase requests (double-tap, two tabs) serialize here instead of
+    // both passing the "not yet owned" check and racing to insert the same
+    // (student, item) row.
+    const [student] = await tx
+      .select()
+      .from(students)
+      .where(eq(students.id, studentId))
+      .for("update");
+
     const [existing] = await tx
       .select()
       .from(studentAvatarItems)
@@ -109,11 +122,6 @@ export async function purchaseAvatarItem(studentId: string, avatarItemId: string
       .limit(1);
     if (existing) throw new ServiceError("Already owned", 409);
 
-    const [student] = await tx
-      .select()
-      .from(students)
-      .where(eq(students.id, studentId))
-      .for("update");
     if (student.coinsBalance < item.coinPrice) {
       throw new ServiceError("Not enough coins", 402);
     }

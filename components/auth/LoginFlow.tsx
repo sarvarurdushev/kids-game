@@ -17,6 +17,14 @@ export function LoginFlow({ members }: { members: FamilyMember[] }) {
   const [selected, setSelected] = useState<FamilyMember | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [lockedMessage, setLockedMessage] = useState<string | null>(null);
+
+  function pickStudent(id: string) {
+    const member = members.find((m) => m.id === id) ?? null;
+    setSelected(member);
+    setError(null);
+    setLockedMessage(null);
+  }
 
   async function handlePin(pin: string) {
     if (!selected) return;
@@ -30,6 +38,12 @@ export function LoginFlow({ members }: { members: FamilyMember[] }) {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        if (res.status === 423) {
+          // Locked: stop taking PIN input entirely rather than letting a
+          // locked-out kid keep tapping digits against a dead end.
+          setLockedMessage(data.error ?? "Too many tries. Ask a grown-up for help.");
+          return;
+        }
         setError(data.error ?? "That didn't work. Try again!");
         return;
       }
@@ -48,11 +62,7 @@ export function LoginFlow({ members }: { members: FamilyMember[] }) {
         </h1>
         <AvatarGrid
           members={members}
-          onSelect={(id) => {
-            const member = members.find((m) => m.id === id) ?? null;
-            setSelected(member);
-            setError(null);
-          }}
+          onSelect={pickStudent}
           onAddAnother={() => router.push("/welcome")}
         />
       </div>
@@ -63,8 +73,14 @@ export function LoginFlow({ members }: { members: FamilyMember[] }) {
     <Card className="flex w-full max-w-sm flex-col items-center gap-4">
       <AvatarRenderer equippedKeys={{}} size={80} />
       <h1 className="font-display text-xl font-bold">Hi, {selected.displayName}!</h1>
-      <p className="text-sm text-ink/60">Enter your secret PIN</p>
-      <PinPad onSubmit={handlePin} error={error} disabled={submitting} />
+      {lockedMessage ? (
+        <p className="text-center text-sm font-semibold text-coral">{lockedMessage}</p>
+      ) : (
+        <>
+          <p className="text-sm text-ink/60">Enter your secret PIN</p>
+          <PinPad onSubmit={handlePin} error={error} disabled={submitting} />
+        </>
+      )}
       <button
         type="button"
         onClick={() => setSelected(null)}

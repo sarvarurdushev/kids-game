@@ -16,6 +16,7 @@ interface AvatarItem {
   coinPrice: number | null;
   state: "owned" | "purchasable" | "locked";
   reason: string | null;
+  affordable: boolean;
   equipped: boolean;
 }
 
@@ -141,9 +142,9 @@ export function AvatarCustomizer({
                 variant="secondary"
                 className="!px-3 !py-1 !text-xs"
                 onClick={() => purchase(item)}
-                disabled={busyId === item.id}
+                disabled={busyId === item.id || !item.affordable}
               >
-                🪙 {item.coinPrice}
+                {item.affordable ? `🪙 ${item.coinPrice}` : "Not enough coins"}
               </Button>
             )}
             {item.state === "locked" && <p className="text-[10px] text-ink/40">{item.reason}</p>}
