@@ -14,9 +14,5 @@ export default async function LoginPage() {
     .from(students)
     .where(inArray(students.id, familyIds));
 
-  return (
-    <div className="flex min-h-full flex-1 items-center justify-center p-6">
-      <LoginFlow members={members} />
-    </div>
-  );
+  return <LoginFlow members={members} />;
 }

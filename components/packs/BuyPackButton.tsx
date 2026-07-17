@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { playCoin } from "@/lib/sound";
 
 export function BuyPackButton({
   packTypeId,
@@ -29,6 +30,7 @@ export function BuyPackButton({
         setError(data.error ?? "Couldn't buy that pack");
         return;
       }
+      playCoin();
       router.refresh();
     } finally {
       setLoading(false);

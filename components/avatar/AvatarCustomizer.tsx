@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { AvatarRenderer } from "./AvatarRenderer";
 import { Button } from "@/components/ui/Button";
 import { emojiForAvatarItem } from "@/lib/visuals";
+import { playCoin, playPop } from "@/lib/sound";
+import { CoinIcon } from "@/components/icons";
 
 type Slot = "hair" | "eyes" | "clothes" | "hat" | "accessory" | "background";
 
@@ -60,6 +62,7 @@ export function AvatarCustomizer({
         setError(data.error ?? "Couldn't equip that");
         return;
       }
+      playPop();
       router.refresh();
     } finally {
       setBusyId(null);
@@ -80,6 +83,7 @@ export function AvatarCustomizer({
         setError(data.error ?? "Couldn't buy that");
         return;
       }
+      playCoin();
       router.refresh();
     } finally {
       setBusyId(null);
@@ -92,7 +96,9 @@ export function AvatarCustomizer({
     <div className="flex flex-col gap-5">
       <div className="flex flex-col items-center gap-2">
         <AvatarRenderer equippedKeys={equippedKeys} size={120} />
-        <p className="text-sm font-semibold text-ink/60">🪙 {coinsBalance} coins</p>
+        <p className="flex items-center gap-1 text-sm font-semibold text-ink/60">
+          <CoinIcon size={16} /> {coinsBalance} coins
+        </p>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
@@ -140,11 +146,17 @@ export function AvatarCustomizer({
             {item.state === "purchasable" && (
               <Button
                 variant="secondary"
-                className="!px-3 !py-1 !text-xs"
+                className="!flex !items-center !gap-1 !px-3 !py-1 !text-xs"
                 onClick={() => purchase(item)}
                 disabled={busyId === item.id || !item.affordable}
               >
-                {item.affordable ? `🪙 ${item.coinPrice}` : "Not enough coins"}
+                {item.affordable ? (
+                  <>
+                    <CoinIcon size={13} /> {item.coinPrice}
+                  </>
+                ) : (
+                  "Not enough coins"
+                )}
               </Button>
             )}
             {item.state === "locked" && <p className="text-[10px] text-ink/40">{item.reason}</p>}

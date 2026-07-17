@@ -1,9 +1,12 @@
-import { RARITY_COLOR_VAR, emojiForCharacter } from "@/lib/visuals";
+import { RARITY_COLOR_VAR } from "@/lib/visuals";
+import { CreatureArt } from "@/components/creatures/CreatureArt";
+import { CardFrame } from "./CardFrame";
+import type { Rarity } from "@/lib/reward-engine/types";
 
 interface CardTileProps {
   characterKey: string;
   name: string;
-  rarity: "common" | "rare" | "epic" | "legendary";
+  rarity: Rarity;
   owned?: boolean;
   quantity?: number;
   isNew?: boolean;
@@ -18,23 +21,23 @@ export function CardTile({
   isNew,
 }: CardTileProps) {
   const color = RARITY_COLOR_VAR[rarity];
+
   return (
-    <div
-      className={`relative flex flex-col items-center gap-2 rounded-2xl border-4 p-3 text-center ${
-        owned ? "bg-white" : "bg-ink/5 grayscale"
-      }`}
-      style={{ borderColor: color }}
-    >
+    <CardFrame rarity={rarity} dimmed={!owned} className="flex flex-col items-center gap-1.5 p-3 pt-4">
       {isNew && (
-        <span className="absolute -top-2 -right-2 rounded-full bg-coral px-2 py-0.5 text-[10px] font-bold text-white shadow">
+        <span className="absolute -top-1 -right-2 z-10 rounded-full bg-coral px-2 py-0.5 text-[10px] font-bold text-white shadow">
           NEW
         </span>
       )}
       <div
-        className="flex h-16 w-16 items-center justify-center rounded-full text-4xl"
-        style={{ backgroundColor: owned ? `color-mix(in srgb, ${color} 20%, white)` : undefined }}
+        className="flex h-20 w-20 items-center justify-center rounded-full"
+        style={{ backgroundColor: `color-mix(in srgb, ${color} 16%, white)` }}
       >
-        {owned ? emojiForCharacter(characterKey) : "🔒"}
+        {owned ? (
+          <CreatureArt characterKey={characterKey} rarity={rarity} size={72} />
+        ) : (
+          <span className="text-3xl opacity-40">🔒</span>
+        )}
       </div>
       <p className="font-display text-sm font-semibold">{owned ? name : "???"}</p>
       <span
@@ -48,6 +51,6 @@ export function CardTile({
           x{quantity}
         </span>
       )}
-    </div>
+    </CardFrame>
   );
 }

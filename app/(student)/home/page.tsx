@@ -3,39 +3,52 @@ import { redirect } from "next/navigation";
 import { requireStudent } from "@/lib/auth/requireStudent";
 import { getDashboard } from "@/lib/student/dashboard";
 import { Card } from "@/components/ui/Card";
-import { ProgressBar } from "@/components/ui/ProgressBar";
+import { LevelRing } from "@/components/ui/LevelRing";
 import { DailyClaimButton } from "@/components/home/DailyClaimButton";
+import { Sparx } from "@/components/mascot/Sparx";
+import { BoosterPackIcon, CoinIcon, FlameIcon } from "@/components/icons";
 
 export default async function HomePage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
   const dashboard = await getDashboard(student);
 
+  const ringProgress =
+    dashboard.level.xpForNextLevel !== null
+      ? dashboard.level.xpIntoLevel / dashboard.level.xpForNextLevel
+      : 1;
+
   return (
     <div className="flex flex-col gap-5">
-      <div>
-        <h1 className="font-display text-2xl font-bold">Hi, {dashboard.displayName}!</h1>
-        <p className="text-ink/60">Let&apos;s see what&apos;s new today.</p>
+      <div className="flex items-center gap-3">
+        <Sparx size={64} />
+        <div className="relative flex-1 rounded-2xl rounded-bl-none bg-white/90 px-4 py-3 shadow-sm">
+          <h1 className="font-display text-lg font-bold">Hi, {dashboard.displayName}!</h1>
+          <p className="text-sm text-ink/60">Ready for today&apos;s adventure?</p>
+        </div>
       </div>
 
-      <Card className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <span className="font-display text-lg font-bold text-gold-dark">
-            Level {dashboard.level.level}
+      <Card className="flex items-center gap-4">
+        <LevelRing progress={ringProgress} size={92}>
+          <span className="font-display text-2xl leading-none font-bold text-gold-dark">
+            {dashboard.level.level}
           </span>
-          <span className="text-sm text-ink/60">
+          <span className="text-[9px] font-bold tracking-wide text-ink/40 uppercase">Level</span>
+        </LevelRing>
+        <div className="flex flex-1 flex-col gap-2">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <CoinIcon size={22} />
+            {dashboard.coinsBalance} coins
+          </div>
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <FlameIcon size={22} />
+            {dashboard.currentStreak} day streak
+          </div>
+          <p className="text-xs text-ink/50">
             {dashboard.level.xpForNextLevel !== null
-              ? `${dashboard.level.xpIntoLevel}/${dashboard.level.xpForNextLevel} XP`
+              ? `${dashboard.level.xpIntoLevel}/${dashboard.level.xpForNextLevel} XP to next level`
               : "Max level!"}
-          </span>
-        </div>
-        <ProgressBar
-          value={dashboard.level.xpIntoLevel}
-          max={dashboard.level.xpForNextLevel ?? 1}
-        />
-        <div className="flex items-center justify-between text-sm font-semibold">
-          <span>🪙 {dashboard.coinsBalance} coins</span>
-          <span>🔥 {dashboard.currentStreak} day streak</span>
+          </p>
         </div>
       </Card>
 
@@ -47,10 +60,11 @@ export default async function HomePage() {
       {dashboard.unopenedPackCount > 0 && (
         <Link
           href="/packs"
-          className="gk-pop-in flex items-center justify-between rounded-2xl bg-coral px-5 py-4 font-display font-semibold text-white shadow-md"
+          className="gk-pop-in flex items-center gap-3 rounded-2xl bg-gradient-to-br from-coral to-[#d4507a] px-4 py-3 font-display font-semibold text-white shadow-md"
         >
-          <span>
-            🎁 You have {dashboard.unopenedPackCount} pack
+          <BoosterPackIcon size={44} />
+          <span className="flex-1">
+            You have {dashboard.unopenedPackCount} pack
             {dashboard.unopenedPackCount > 1 ? "s" : ""} to open!
           </span>
           <span>→</span>

@@ -1,29 +1,43 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { CardTile } from "@/components/cards/CardTile";
 import { Button } from "@/components/ui/Button";
+import { BoosterPackIcon } from "@/components/icons";
+import { Sparx } from "@/components/mascot/Sparx";
+import { playCardFlip, playFanfare, playWhoosh } from "@/lib/sound";
+import type { Rarity } from "@/lib/reward-engine/types";
 
 interface RevealedCard {
   characterId: string;
   characterKey: string;
   name: string;
-  rarity: "common" | "rare" | "epic" | "legendary";
+  rarity: Rarity;
   isNew: boolean;
 }
 
-type Phase = "loading" | "shaking" | "revealing" | "error";
+type Phase = "loading" | "shaking" | "burst" | "revealing" | "error";
+
+const BEST_RARITY_RANK: Record<Rarity, number> = { common: 0, rare: 1, epic: 2, legendary: 3 };
 
 export function PackOpenFlow({ grantId }: { grantId: string }) {
   const [phase, setPhase] = useState<Phase>("loading");
   const [cards, setCards] = useState<RevealedCard[]>([]);
   const [revealedCount, setRevealedCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  // Opening a pack is a real, non-idempotent mutation, not a cancellable
+  // fetch-for-display — a `cancelled` flag alone can't stop the request
+  // from having already fired once. This ref (which survives React Strict
+  // Mode's dev-only double-invoke of effects) makes sure it only ever goes
+  // out once per mounted instance.
+  const hasRequestedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
+    if (hasRequestedRef.current) return;
+    hasRequestedRef.current = true;
 
     async function open() {
       try {
@@ -38,8 +52,14 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
         setCards(data.cards);
         setPhase("shaking");
         setTimeout(() => {
+          if (!cancelled) {
+            setPhase("burst");
+            playWhoosh();
+          }
+        }, 1100);
+        setTimeout(() => {
           if (!cancelled) setPhase("revealing");
-        }, 900);
+        }, 1500);
       } catch {
         if (!cancelled) {
           setError("Something went wrong. Try again!");
@@ -56,11 +76,27 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
 
   useEffect(() => {
     if (phase !== "revealing" || revealedCount >= cards.length) return;
-    const timer = setTimeout(() => setRevealedCount((c) => c + 1), 500);
+    const timer = setTimeout(() => {
+      setRevealedCount((c) => c + 1);
+      playCardFlip();
+    }, 550);
     return () => clearTimeout(timer);
   }, [phase, revealedCount, cards.length]);
 
   const allRevealed = phase === "revealing" && revealedCount >= cards.length;
+  const bestRarity = cards.reduce<Rarity>(
+    (best, c) => (BEST_RARITY_RANK[c.rarity] > BEST_RARITY_RANK[best] ? c.rarity : best),
+    "common"
+  );
+  const showMascotCheer = allRevealed && (bestRarity === "epic" || bestRarity === "legendary");
+  const hasPlayedFanfareRef = useRef(false);
+
+  useEffect(() => {
+    if (showMascotCheer && !hasPlayedFanfareRef.current) {
+      hasPlayedFanfareRef.current = true;
+      playFanfare();
+    }
+  }, [showMascotCheer]);
 
   if (phase === "loading") {
     return <p className="text-center font-display text-lg">Getting your pack ready...</p>;
@@ -77,17 +113,32 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
     );
   }
 
-  if (phase === "shaking") {
+  if (phase === "shaking" || phase === "burst") {
     return (
-      <div className="flex flex-col items-center gap-4">
-        <motion.span
-          className="text-8xl"
-          animate={{ rotate: [0, -8, 8, -8, 8, 0] }}
-          transition={{ duration: 0.8, repeat: Infinity }}
+      <div className="relative flex flex-col items-center gap-4">
+        {phase === "burst" && (
+          <motion.div
+            className="pointer-events-none absolute inset-0 rounded-full bg-gold"
+            initial={{ opacity: 0.9, scale: 0.2 }}
+            animate={{ opacity: 0, scale: 4 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          />
+        )}
+        <motion.div
+          animate={
+            phase === "shaking"
+              ? { rotate: [0, -10, 10, -10, 10, 0], scale: [1, 1.04, 1] }
+              : { scale: [1, 1.4, 0], opacity: [1, 1, 0] }
+          }
+          transition={
+            phase === "shaking"
+              ? { duration: 0.55, repeat: Infinity }
+              : { duration: 0.45, ease: "easeIn" }
+          }
         >
-          🎁
-        </motion.span>
-        <p className="font-display text-lg">Opening...</p>
+          <BoosterPackIcon size={140} />
+        </motion.div>
+        {phase === "shaking" && <p className="font-display text-lg">Opening...</p>}
       </div>
     );
   }
@@ -113,6 +164,19 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
           ))}
         </AnimatePresence>
       </div>
+
+      {showMascotCheer && (
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 14 }}
+          className="flex flex-col items-center gap-1"
+        >
+          <Sparx expression="cheer" bounce size={72} />
+          <p className="font-display text-sm font-bold text-gold-dark">Amazing pull!</p>
+        </motion.div>
+      )}
+
       {allRevealed && (
         <Link href="/packs">
           <Button>Back to packs</Button>

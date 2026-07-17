@@ -10,30 +10,6 @@ export const UNIVERSE_EMOJI: Record<string, string> = {
   discovery: "🔬",
 };
 
-export const CHARACTER_EMOJI: Record<string, string> = {
-  dolphin: "🐬",
-  whale: "🐋",
-  shark: "🦈",
-  octopus: "🐙",
-  turtle: "🐢",
-  t_rex: "🦖",
-  triceratops: "🦕",
-  stegosaurus: "🐊",
-  pterodactyl: "🦅",
-  astronaut: "👩‍🚀",
-  alien: "👽",
-  space_cat: "🐱",
-  rocket_robot: "🤖",
-  wizard: "🧙",
-  dragon: "🐉",
-  fairy: "🧚",
-  knight: "🛡️",
-  scientist: "🔬",
-  explorer: "🧭",
-  inventor: "💡",
-  archaeologist: "🏺",
-};
-
 export const AVATAR_ITEM_EMOJI: Record<string, string> = {
   hair_brown: "💇",
   hair_curly: "💇‍♀️",
@@ -69,10 +45,6 @@ export const RARITY_COLOR_VAR: Record<string, string> = {
 
 export function emojiForUniverse(key: string): string {
   return UNIVERSE_EMOJI[key] ?? "❔";
-}
-
-export function emojiForCharacter(key: string): string {
-  return CHARACTER_EMOJI[key] ?? "❔";
 }
 
 export function emojiForAvatarItem(key: string): string {

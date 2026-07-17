@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Sparx } from "@/components/mascot/Sparx";
 
 export function EnrollForm() {
   const router = useRouter();
@@ -35,10 +36,13 @@ export function EnrollForm() {
 
   return (
     <Card className="w-full max-w-sm">
-      <h1 className="font-display mb-1 text-2xl font-bold text-gold-dark">
+      <div className="mb-2 flex justify-center">
+        <Sparx expression={error ? "sleepy" : "idle"} size={100} />
+      </div>
+      <h1 className="font-display mb-1 text-center text-2xl font-bold text-gold-dark">
         Welcome to Golden Kids!
       </h1>
-      <p className="mb-6 text-sm text-ink/60">
+      <p className="mb-6 text-center text-sm text-ink/60">
         Ask your teacher or parent for your code, then type it in below.
       </p>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">

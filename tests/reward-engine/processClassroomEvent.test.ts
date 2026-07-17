@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   achievements as achievementsTable,
@@ -17,8 +17,23 @@ const RULE_KEYS = ["test_attendance", "test_participation"];
 const ACHIEVEMENT_KEY = "test_first_class";
 const PACK_TYPE_KEY = "test_achievement_pack";
 const LEVELS = [1, 2, 3];
+const TEST_LEVEL_CURVE = [
+  { level: 1, minXp: 0, bonusCoins: 0, bonusPackTypeId: null as string | null },
+  { level: 2, minXp: 100, bonusCoins: 10, bonusPackTypeId: null as string | null },
+  { level: 3, minXp: 250, bonusCoins: 15, bonusPackTypeId: null as string | null },
+];
+
+// Seeded reward rules ("class_attendance", "active_participation") match the
+// same metrics fields this test drives, so they'd double-fire alongside the
+// test's own rules. Deactivate them for the test window and restore after.
+const COLLIDING_SOURCE_FIELDS = ["attendance", "participationScore"];
 
 let packTypeId: string;
+// levels 1-3 already exist once the real seed data has run; this test needs
+// exact control over their thresholds, so snapshot whatever's there and
+// restore it in afterAll instead of deleting real seeded rows.
+let priorLevelCurveRows: (typeof TEST_LEVEL_CURVE)[number][] = [];
+let deactivatedRuleIds: string[] = [];
 
 async function createTestStudent(externalId: string) {
   const [student] = await db
@@ -49,11 +64,35 @@ beforeAll(async () => {
     .returning();
   packTypeId = packType.id;
 
-  await db.insert(levelCurve).values([
-    { level: 1, minXp: 0, bonusCoins: 0, bonusPackTypeId: null },
-    { level: 2, minXp: 100, bonusCoins: 10, bonusPackTypeId: null },
-    { level: 3, minXp: 250, bonusCoins: 15, bonusPackTypeId: packTypeId },
-  ]);
+  priorLevelCurveRows = await db
+    .select()
+    .from(levelCurve)
+    .where(inArray(levelCurve.level, LEVELS));
+
+  for (const row of TEST_LEVEL_CURVE) {
+    const bonusPackTypeId = row.level === 3 ? packTypeId : null;
+    await db
+      .insert(levelCurve)
+      .values({ ...row, bonusPackTypeId })
+      .onConflictDoUpdate({
+        target: levelCurve.level,
+        set: { minXp: row.minXp, bonusCoins: row.bonusCoins, bonusPackTypeId },
+      });
+  }
+
+  const collidingRules = await db
+    .select({ id: rewardRules.id })
+    .from(rewardRules)
+    .where(
+      and(inArray(rewardRules.sourceField, COLLIDING_SOURCE_FIELDS), eq(rewardRules.active, true))
+    );
+  deactivatedRuleIds = collidingRules.map((r) => r.id);
+  if (deactivatedRuleIds.length > 0) {
+    await db
+      .update(rewardRules)
+      .set({ active: false })
+      .where(inArray(rewardRules.id, deactivatedRuleIds));
+  }
 
   await db.insert(rewardRules).values([
     {
@@ -85,7 +124,26 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await db.delete(webhookEvents).where(eq(webhookEvents.sourceSystem, SOURCE_SYSTEM));
-  await db.delete(levelCurve).where(inArray(levelCurve.level, LEVELS));
+
+  if (deactivatedRuleIds.length > 0) {
+    await db
+      .update(rewardRules)
+      .set({ active: true })
+      .where(inArray(rewardRules.id, deactivatedRuleIds));
+  }
+
+  for (const level of LEVELS) {
+    const prior = priorLevelCurveRows.find((r) => r.level === level);
+    if (prior) {
+      await db
+        .update(levelCurve)
+        .set({ minXp: prior.minXp, bonusCoins: prior.bonusCoins, bonusPackTypeId: prior.bonusPackTypeId })
+        .where(eq(levelCurve.level, level));
+    } else {
+      await db.delete(levelCurve).where(eq(levelCurve.level, level));
+    }
+  }
+
   await db.delete(achievementsTable).where(eq(achievementsTable.key, ACHIEVEMENT_KEY));
   await db.delete(rewardRules).where(inArray(rewardRules.ruleKey, RULE_KEYS));
   await db.delete(packTypes).where(eq(packTypes.key, PACK_TYPE_KEY));
