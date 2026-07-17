@@ -1,0 +1,77 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { AvatarGrid } from "@/components/avatar/AvatarGrid";
+import { AvatarRenderer } from "@/components/avatar/AvatarRenderer";
+import { PinPad } from "@/components/auth/PinPad";
+import { Card } from "@/components/ui/Card";
+
+interface FamilyMember {
+  id: string;
+  displayName: string;
+}
+
+export function LoginFlow({ members }: { members: FamilyMember[] }) {
+  const router = useRouter();
+  const [selected, setSelected] = useState<FamilyMember | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handlePin(pin: string) {
+    if (!selected) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId: selected.id, pin }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "That didn't work. Try again!");
+        return;
+      }
+      router.push("/home");
+      router.refresh();
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (!selected) {
+    return (
+      <div className="w-full max-w-sm">
+        <h1 className="font-display mb-6 text-center text-2xl font-bold text-gold-dark">
+          Who&apos;s playing?
+        </h1>
+        <AvatarGrid
+          members={members}
+          onSelect={(id) => {
+            const member = members.find((m) => m.id === id) ?? null;
+            setSelected(member);
+            setError(null);
+          }}
+          onAddAnother={() => router.push("/welcome")}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <Card className="flex w-full max-w-sm flex-col items-center gap-4">
+      <AvatarRenderer equippedKeys={{}} size={80} />
+      <h1 className="font-display text-xl font-bold">Hi, {selected.displayName}!</h1>
+      <p className="text-sm text-ink/60">Enter your secret PIN</p>
+      <PinPad onSubmit={handlePin} error={error} disabled={submitting} />
+      <button
+        type="button"
+        onClick={() => setSelected(null)}
+        className="text-sm font-semibold text-teal underline-offset-2 hover:underline"
+      >
+        Not me — pick someone else
+      </button>
+    </Card>
+  );
+}

@@ -1,0 +1,174 @@
+import "server-only";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { db } from "@/lib/db/client";
+import {
+  characters,
+  packGrants,
+  packTypePool,
+  packTypes,
+  studentCards,
+  students,
+} from "@/lib/db/schema";
+import { rollPackContents } from "@/lib/reward-engine/packs";
+import type { CharacterConfig } from "@/lib/reward-engine/types";
+import { ServiceError } from "./errors";
+
+export async function getPackShop(coinsBalance: number) {
+  const types = await db.select().from(packTypes).where(eq(packTypes.active, true));
+  return types.map((t) => ({
+    id: t.id,
+    key: t.key,
+    name: t.name,
+    coinCost: t.coinCost,
+    cardsPerPack: t.cardsPerPack,
+    iconUrl: t.iconUrl,
+    affordable: coinsBalance >= t.coinCost,
+  }));
+}
+
+export async function getPackInventory(studentId: string) {
+  return db
+    .select({
+      id: packGrants.id,
+      grantedAt: packGrants.grantedAt,
+      source: packGrants.source,
+      packType: packTypes,
+    })
+    .from(packGrants)
+    .innerJoin(packTypes, eq(packGrants.packTypeId, packTypes.id))
+    .where(and(eq(packGrants.studentId, studentId), isNull(packGrants.openedAt)))
+    .orderBy(asc(packGrants.grantedAt));
+}
+
+export async function purchasePack(studentId: string, packTypeId: string) {
+  return db.transaction(async (tx) => {
+    const [packType] = await tx
+      .select()
+      .from(packTypes)
+      .where(and(eq(packTypes.id, packTypeId), eq(packTypes.active, true)))
+      .limit(1);
+    if (!packType) throw new ServiceError("Pack type not found", 404);
+
+    const [student] = await tx
+      .select()
+      .from(students)
+      .where(eq(students.id, studentId))
+      .for("update");
+    if (student.coinsBalance < packType.coinCost) {
+      throw new ServiceError("Not enough coins", 402);
+    }
+
+    await tx
+      .update(students)
+      .set({ coinsBalance: student.coinsBalance - packType.coinCost, updatedAt: new Date() })
+      .where(eq(students.id, studentId));
+
+    const [grant] = await tx
+      .insert(packGrants)
+      .values({ studentId, packTypeId, source: "purchase" })
+      .returning();
+
+    return grant;
+  });
+}
+
+export interface RevealedCard {
+  characterId: string;
+  characterKey: string;
+  name: string;
+  rarity: string;
+  imageUrl: string | null;
+  universeId: string;
+  isNew: boolean;
+}
+
+export async function openPack(
+  studentId: string,
+  grantId: string
+): Promise<RevealedCard[]> {
+  return db.transaction(async (tx) => {
+    const [grant] = await tx
+      .select()
+      .from(packGrants)
+      .where(eq(packGrants.id, grantId))
+      .for("update");
+    if (!grant || grant.studentId !== studentId) {
+      throw new ServiceError("Pack not found", 404);
+    }
+    if (grant.openedAt) {
+      throw new ServiceError("Pack already opened", 409);
+    }
+
+    const [packType] = await tx
+      .select()
+      .from(packTypes)
+      .where(eq(packTypes.id, grant.packTypeId))
+      .limit(1);
+    if (!packType) throw new ServiceError("Pack type not found", 500);
+
+    const pool = await tx
+      .select()
+      .from(packTypePool)
+      .where(eq(packTypePool.packTypeId, grant.packTypeId));
+    if (pool.length === 0) {
+      throw new ServiceError("Pack type has no configured universe pool", 500);
+    }
+
+    const universeIds = pool.map((p) => p.universeId);
+    const universeCharacters = await tx
+      .select()
+      .from(characters)
+      .where(inArray(characters.universeId, universeIds));
+
+    const byUniverse = new Map<string, CharacterConfig[]>();
+    for (const c of universeCharacters) {
+      const list = byUniverse.get(c.universeId) ?? [];
+      list.push({ id: c.id, universeId: c.universeId, rarity: c.rarity });
+      byUniverse.set(c.universeId, list);
+    }
+
+    const rolled = rollPackContents(
+      packType.cardsPerPack,
+      pool.map((p) => ({ universeId: p.universeId, weight: p.weight })),
+      byUniverse
+    );
+
+    const revealed: RevealedCard[] = [];
+    for (const card of rolled) {
+      const detail = universeCharacters.find((c) => c.id === card.id)!;
+      const [existing] = await tx
+        .select()
+        .from(studentCards)
+        .where(
+          and(eq(studentCards.studentId, studentId), eq(studentCards.characterId, card.id))
+        )
+        .limit(1);
+
+      if (existing) {
+        await tx
+          .update(studentCards)
+          .set({ quantity: existing.quantity + 1 })
+          .where(eq(studentCards.id, existing.id));
+      } else {
+        await tx.insert(studentCards).values({ studentId, characterId: card.id });
+      }
+
+      revealed.push({
+        characterId: detail.id,
+        characterKey: detail.key,
+        name: detail.name,
+        rarity: detail.rarity,
+        imageUrl: detail.imageUrl,
+        universeId: detail.universeId,
+        isNew: !existing,
+      });
+    }
+
+    await tx
+      .update(packGrants)
+      .set({ openedAt: new Date(), openedResult: revealed })
+      .where(eq(packGrants.id, grantId));
+
+    return revealed;
+  });
+}

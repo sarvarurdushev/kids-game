@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fffaf0;
+  --foreground: #2d2a26;
+
+  --color-gk-gold: #ffb703;
+  --color-gk-gold-dark: #e89400;
+  --color-gk-teal: #219ebc;
+  --color-gk-coral: #fb6f92;
+  --color-gk-cream: #fffaf0;
+  --color-gk-ink: #2d2a26;
+
+  --color-rarity-common: #8d99ae;
+  --color-rarity-rare: #3a86ff;
+  --color-rarity-epic: #8338ec;
+  --color-rarity-legendary: #ffb703;
+
+  --color-universe-ocean: #219ebc;
+  --color-universe-dinosaur: #588157;
+  --color-universe-space: #8338ec;
+  --color-universe-story: #fb6f92;
+  --color-universe-discovery: #fb8500;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-nunito);
+  --font-display: var(--font-baloo);
+
+  --color-gold: var(--color-gk-gold);
+  --color-gold-dark: var(--color-gk-gold-dark);
+  --color-teal: var(--color-gk-teal);
+  --color-coral: var(--color-gk-coral);
+  --color-cream: var(--color-gk-cream);
+  --color-ink: var(--color-gk-ink);
+
+  --color-rarity-common: var(--color-rarity-common);
+  --color-rarity-rare: var(--color-rarity-rare);
+  --color-rarity-epic: var(--color-rarity-epic);
+  --color-rarity-legendary: var(--color-rarity-legendary);
+
+  --color-universe-ocean: var(--color-universe-ocean);
+  --color-universe-dinosaur: var(--color-universe-dinosaur);
+  --color-universe-space: var(--color-universe-space);
+  --color-universe-story: var(--color-universe-story);
+  --color-universe-discovery: var(--color-universe-discovery);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #211d1a;
+    --foreground: #fdf6ec;
+    --color-gk-cream: #2b2521;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-nunito), Arial, Helvetica, sans-serif;
+}
+
+@keyframes gk-pop-in {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.gk-pop-in {
+  animation: gk-pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes gk-shake {
+  10%,
+  90% {
+    transform: translateX(-2px);
+  }
+  20%,
+  80% {
+    transform: translateX(4px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-8px);
+  }
+  40%,
+  60% {
+    transform: translateX(8px);
+  }
+}
+
+.gk-shake {
+  animation: gk-shake 0.5s;
+}

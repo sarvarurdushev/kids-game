@@ -1,0 +1,155 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { AvatarRenderer } from "./AvatarRenderer";
+import { Button } from "@/components/ui/Button";
+import { emojiForAvatarItem } from "@/lib/visuals";
+
+type Slot = "hair" | "eyes" | "clothes" | "hat" | "accessory" | "background";
+
+interface AvatarItem {
+  id: string;
+  slot: Slot;
+  key: string;
+  name: string;
+  coinPrice: number | null;
+  state: "owned" | "purchasable" | "locked";
+  reason: string | null;
+  equipped: boolean;
+}
+
+const SLOTS: Slot[] = ["hair", "eyes", "clothes", "hat", "accessory", "background"];
+const SLOT_LABELS: Record<Slot, string> = {
+  hair: "Hair",
+  eyes: "Eyes",
+  clothes: "Clothes",
+  hat: "Hat",
+  accessory: "Accessory",
+  background: "Background",
+};
+
+export function AvatarCustomizer({
+  items,
+  coinsBalance,
+}: {
+  items: AvatarItem[];
+  coinsBalance: number;
+}) {
+  const router = useRouter();
+  const [activeSlot, setActiveSlot] = useState<Slot>("clothes");
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const equippedKeys = Object.fromEntries(
+    SLOTS.map((slot) => [slot, items.find((i) => i.slot === slot && i.equipped)?.key])
+  );
+
+  async function equip(item: AvatarItem) {
+    setBusyId(item.id);
+    setError(null);
+    try {
+      const res = await fetch("/api/avatar/equip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarItemId: item.id }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "Couldn't equip that");
+        return;
+      }
+      router.refresh();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function purchase(item: AvatarItem) {
+    setBusyId(item.id);
+    setError(null);
+    try {
+      const res = await fetch("/api/avatar/purchase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarItemId: item.id }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "Couldn't buy that");
+        return;
+      }
+      router.refresh();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const slotItems = items.filter((i) => i.slot === activeSlot);
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col items-center gap-2">
+        <AvatarRenderer equippedKeys={equippedKeys} size={120} />
+        <p className="text-sm font-semibold text-ink/60">🪙 {coinsBalance} coins</p>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {SLOTS.map((slot) => (
+          <button
+            key={slot}
+            type="button"
+            onClick={() => setActiveSlot(slot)}
+            className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${
+              activeSlot === slot ? "bg-gold text-ink" : "bg-white text-ink/60"
+            }`}
+          >
+            {SLOT_LABELS[slot]}
+          </button>
+        ))}
+      </div>
+
+      {error && <p className="text-center text-sm font-semibold text-coral">{error}</p>}
+
+      <div className="grid grid-cols-3 gap-3">
+        {slotItems.map((item) => (
+          <div
+            key={item.id}
+            className={`flex flex-col items-center gap-2 rounded-2xl p-3 text-center ${
+              item.equipped ? "bg-gold/20 ring-2 ring-gold" : "bg-white"
+            }`}
+          >
+            <span className={`text-4xl ${item.state === "locked" ? "opacity-50 grayscale" : ""}`}>
+              {item.state === "locked" ? "🔒" : emojiForAvatarItem(item.key)}
+            </span>
+            <p className="text-xs font-semibold">{item.name}</p>
+            {item.state === "owned" && !item.equipped && (
+              <Button
+                variant="ghost"
+                className="!px-3 !py-1 !text-xs"
+                onClick={() => equip(item)}
+                disabled={busyId === item.id}
+              >
+                Wear
+              </Button>
+            )}
+            {item.state === "owned" && item.equipped && (
+              <span className="text-xs font-bold text-gold-dark">Equipped</span>
+            )}
+            {item.state === "purchasable" && (
+              <Button
+                variant="secondary"
+                className="!px-3 !py-1 !text-xs"
+                onClick={() => purchase(item)}
+                disabled={busyId === item.id}
+              >
+                🪙 {item.coinPrice}
+              </Button>
+            )}
+            {item.state === "locked" && <p className="text-[10px] text-ink/40">{item.reason}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
