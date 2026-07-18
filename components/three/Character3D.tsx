@@ -22,14 +22,16 @@ const BODY_Y = -0.18;
 const FUR: Record<string, { color: string; accent?: () => ReactNode }> = {
   hair_brown: {
     color: "#e8935a",
+    // Positioned on the crown/nape, well above the eye line, so these read
+    // as tabby markings on top of the head rather than furrowed eyebrows.
     accent: () => (
       <>
         {[
-          [-0.14, HEAD_Y + 0.28, 0.3],
-          [0.11, HEAD_Y + 0.22, 0.33],
-          [-0.02, HEAD_Y + 0.14, 0.37],
+          [-0.1, HEAD_Y + 0.36, 0.05],
+          [0.12, HEAD_Y + 0.4, -0.05],
+          [0, HEAD_Y + 0.3, -0.18],
         ].map(([x, y, z], i) => (
-          <mesh key={i} position={[x, y, z]} rotation={[0, 0, i * 0.5]}>
+          <mesh key={i} position={[x, y, z]} rotation={[0, 0, i * 0.4]}>
             <boxGeometry args={[0.13, 0.03, 0.02]} />
             <meshStandardMaterial color="#c46a34" flatShading />
           </mesh>
@@ -357,10 +359,23 @@ export function Character3D({ equippedKeys, mood = "neutral" }: Character3DProps
   return (
     <group ref={groupRef}>
       <mesh position={[0, BODY_Y, 0]}>
-        <capsuleGeometry args={[0.28, 0.22, 4, 8]} />
+        <capsuleGeometry args={[0.3, 0.16, 4, 8]} />
         <meshStandardMaterial color={clothes.color} flatShading />
       </mesh>
       {clothes.accent?.()}
+
+      {[-1, 1].map((side) => (
+        <group key={side} position={[side * 0.3, BODY_Y + 0.03, 0.06]}>
+          <mesh>
+            <sphereGeometry args={[0.085, 8, 8]} />
+            <meshStandardMaterial color={clothes.color} flatShading />
+          </mesh>
+          <mesh position={[0, -0.06, 0.03]} scale={[0.75, 0.6, 0.75]}>
+            <sphereGeometry args={[0.075, 8, 8]} />
+            <meshStandardMaterial color={fur.color} flatShading />
+          </mesh>
+        </group>
+      ))}
 
       <Tail furColor={fur.color} mood={mood} />
 
@@ -374,6 +389,17 @@ export function Character3D({ equippedKeys, mood = "neutral" }: Character3DProps
 
       <Eyes eyesKey={eyesKey} />
 
+      {[-1, 1].map((side) => (
+        <mesh
+          key={side}
+          position={[side * HEAD_R * 0.72, faceY - 0.02, HEAD_R * 0.75]}
+          scale={[1, 0.6, 0.3]}
+        >
+          <sphereGeometry args={[0.08, 8, 8]} />
+          <meshStandardMaterial color="#f9a8b8" flatShading transparent opacity={0.55} />
+        </mesh>
+      ))}
+
       <mesh position={[0, faceY, faceZ]} rotation={[Math.PI, 0, Math.PI / 2]}>
         <coneGeometry args={[0.045, 0.06, 3]} />
         <meshStandardMaterial color={noseColor} flatShading />
@@ -386,11 +412,13 @@ export function Character3D({ equippedKeys, mood = "neutral" }: Character3DProps
         </mesh>
       ) : (
         <>
-          <mesh position={[-0.03, faceY - 0.06, faceZ]} rotation={[0, 0, 0.6]}>
+          {/* Corners tilt up toward center (u-shape smile) for neutral; flipped
+              to an arch (frown) only when sad. */}
+          <mesh position={[-0.03, faceY - 0.06, faceZ]} rotation={[0, 0, mood === "sad" ? 0.6 : -0.6]}>
             <boxGeometry args={[0.07, 0.018, 0.015]} />
             <meshStandardMaterial color={INK} flatShading />
           </mesh>
-          <mesh position={[0.03, faceY - 0.06, faceZ]} rotation={[0, 0, -0.6]}>
+          <mesh position={[0.03, faceY - 0.06, faceZ]} rotation={[0, 0, mood === "sad" ? -0.6 : 0.6]}>
             <boxGeometry args={[0.07, 0.018, 0.015]} />
             <meshStandardMaterial color={INK} flatShading />
           </mesh>
