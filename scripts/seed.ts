@@ -130,9 +130,9 @@ async function main() {
 
   // --- Avatar items ----------------------------------------------------------
   const avatarItemSeed = [
-    { slot: "hair", key: "hair_brown", name: "Brown Hair", acquisitionMethod: "starter" as const },
-    { slot: "hair", key: "hair_curly", name: "Curly Hair", acquisitionMethod: "level_unlock" as const, unlockLevel: 3 },
-    { slot: "hair", key: "hair_spiky", name: "Spiky Hair", acquisitionMethod: "coin_purchase" as const, coinPrice: 40 },
+    { slot: "hair", key: "hair_brown", name: "Ginger Fur", acquisitionMethod: "starter" as const },
+    { slot: "hair", key: "hair_curly", name: "Fluffy Fur", acquisitionMethod: "level_unlock" as const, unlockLevel: 3 },
+    { slot: "hair", key: "hair_spiky", name: "Tuxedo Fur", acquisitionMethod: "coin_purchase" as const, coinPrice: 40 },
 
     { slot: "eyes", key: "eyes_round", name: "Round Eyes", acquisitionMethod: "starter" as const },
     { slot: "eyes", key: "eyes_star", name: "Star Eyes", acquisitionMethod: "level_unlock" as const, unlockLevel: 4 },

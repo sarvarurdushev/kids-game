@@ -24,7 +24,7 @@ export interface AvatarItem {
 
 const SLOTS: Slot[] = ["hair", "eyes", "clothes", "hat", "accessory", "background"];
 const SLOT_LABELS: Record<Slot, string> = {
-  hair: "Hair",
+  hair: "Fur",
   eyes: "Eyes",
   clothes: "Clothes",
   hat: "Hat",

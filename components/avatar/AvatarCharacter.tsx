@@ -7,27 +7,26 @@ import { useSvgId } from "@/components/creatures/primitives";
 export type AvatarSlot = "hair" | "eyes" | "clothes" | "hat" | "accessory" | "background";
 export type AvatarMood = "neutral" | "happy" | "sad";
 
-const SKIN = "#f2c49b";
 const INK = "#2d2a26";
 
 function Mouth({ mood }: { mood: AvatarMood }) {
   if (mood === "happy") {
     return (
       <path
-        d="M 82 108 Q 100 130 118 108 Q 100 122 82 108 Z"
-        fill="#a8402c"
+        d="M 86 108 Q 100 122 114 108"
         stroke={INK}
         strokeWidth={2.5}
-        strokeLinejoin="round"
+        strokeLinecap="round"
+        fill="none"
       />
     );
   }
   if (mood === "sad") {
     return (
       <path
-        d="M 84 116 Q 100 104 116 116"
+        d="M 88 114 Q 100 106 112 114"
         stroke={INK}
-        strokeWidth={3}
+        strokeWidth={2.5}
         strokeLinecap="round"
         fill="none"
       />
@@ -35,129 +34,162 @@ function Mouth({ mood }: { mood: AvatarMood }) {
   }
   return (
     <path
-      d="M 85 107 Q 100 118 115 107"
+      d="M 90 108 Q 100 114 110 108"
       stroke={INK}
-      strokeWidth={3}
+      strokeWidth={2.5}
       strokeLinecap="round"
       fill="none"
     />
   );
 }
 
-function Brows({ mood }: { mood: AvatarMood }) {
-  if (mood === "sad") {
-    return (
-      <>
-        <path d="M 72 68 Q 82 74 92 70" stroke={INK} strokeWidth={2.5} strokeLinecap="round" fill="none" />
-        <path d="M 128 68 Q 118 74 108 70" stroke={INK} strokeWidth={2.5} strokeLinecap="round" fill="none" />
-      </>
-    );
-  }
-  return null;
+function FaceDetails() {
+  return (
+    <>
+      <path d="M 100 96 L 94 103 L 106 103 Z" fill="#f4869a" />
+      {[-1, 1].map((side) =>
+        [0, 1].map((i) => (
+          <line
+            key={`${side}-${i}`}
+            x1={100 + side * 14}
+            y1={103 + i * 3}
+            x2={100 + side * 34}
+            y2={100 + i * 6}
+            stroke="#fff"
+            strokeWidth={1.4}
+            strokeLinecap="round"
+          />
+        ))
+      )}
+    </>
+  );
 }
 
-const EYES: Record<string, (mood: AvatarMood) => ReactNode> = {
+const EYE_COLORS: Record<string, string> = {
+  eyes_round: "#4a7a3f",
+  eyes_sparkle: "#2f6fa8",
+  eyes_star: "#ffb703",
+};
+
+const EYES: Record<string, () => ReactNode> = {
   eyes_round: () => (
     <>
-      <circle cx={84} cy={86} r={7} fill={INK} />
-      <circle cx={81.5} cy={83} r={2} fill="#fff" />
-      <circle cx={116} cy={86} r={7} fill={INK} />
-      <circle cx={113.5} cy={83} r={2} fill="#fff" />
+      {[84, 116].map((cx) => (
+        <g key={cx}>
+          <circle cx={cx} cy={86} r={9} fill="#fff" />
+          <circle cx={cx} cy={87} r={5.5} fill={EYE_COLORS.eyes_round} />
+          <circle cx={cx} cy={87} r={2.6} fill={INK} />
+          <circle cx={cx - 2} cy={84} r={1.8} fill="#fff" />
+        </g>
+      ))}
     </>
   ),
   eyes_sparkle: () => (
     <>
-      <circle cx={84} cy={86} r={9} fill={INK} />
-      <circle cx={81} cy={82} r={2.6} fill="#fff" />
-      <circle cx={87} cy={90} r={1.4} fill="#fff" />
-      <circle cx={116} cy={86} r={9} fill={INK} />
-      <circle cx={113} cy={82} r={2.6} fill="#fff" />
-      <circle cx={119} cy={90} r={1.4} fill="#fff" />
+      {[84, 116].map((cx) => (
+        <g key={cx}>
+          <circle cx={cx} cy={86} r={10} fill="#fff" />
+          <circle cx={cx} cy={87} r={6.2} fill={EYE_COLORS.eyes_sparkle} />
+          <circle cx={cx} cy={87} r={2.8} fill={INK} />
+          <circle cx={cx - 2.4} cy={83.5} r={2.1} fill="#fff" />
+          <circle cx={cx + 2.6} cy={90} r={1.1} fill="#fff" />
+        </g>
+      ))}
     </>
   ),
   eyes_star: () => {
     const star = (cx: number, cy: number) =>
-      `M ${cx} ${cy - 8} L ${cx + 2.4} ${cy - 2.4} L ${cx + 8} ${cy} L ${cx + 2.4} ${cy + 2.4} L ${cx} ${cy + 8} L ${cx - 2.4} ${cy + 2.4} L ${cx - 8} ${cy} L ${cx - 2.4} ${cy - 2.4} Z`;
+      `M ${cx} ${cy - 7} L ${cx + 2.1} ${cy - 2.1} L ${cx + 7} ${cy} L ${cx + 2.1} ${cy + 2.1} L ${cx} ${cy + 7} L ${cx - 2.1} ${cy + 2.1} L ${cx - 7} ${cy} L ${cx - 2.1} ${cy - 2.1} Z`;
     return (
       <>
-        <circle cx={84} cy={86} r={8} fill="#fff" stroke={INK} strokeWidth={1.5} />
-        <path d={star(84, 86)} fill="#ffb703" />
-        <circle cx={116} cy={86} r={8} fill="#fff" stroke={INK} strokeWidth={1.5} />
-        <path d={star(116, 86)} fill="#ffb703" />
+        {[84, 116].map((cx) => (
+          <g key={cx}>
+            <circle cx={cx} cy={86} r={9.5} fill="#fff" stroke={INK} strokeWidth={1.2} />
+            <path d={star(cx, 87)} fill={EYE_COLORS.eyes_star} />
+          </g>
+        ))}
       </>
     );
   },
 };
 
-const HAIR: Record<string, () => ReactNode> = {
-  hair_brown: () => (
+function Ears({ furColor, innerColor }: { furColor: string; innerColor: string }) {
+  return (
     <>
-      <path
-        d="M 56 84 Q 50 32 100 30 Q 150 32 144 84 Q 144 58 100 54 Q 56 58 56 84 Z"
-        fill="#6b4226"
-      />
-      <path d="M 58 76 Q 100 58 142 76 L 142 66 Q 100 50 58 66 Z" fill="#5a3620" />
+      <path d="M 60 60 L 46 18 L 82 48 Z" fill={furColor} />
+      <path d="M 65 54 L 55 28 L 76 46 Z" fill={innerColor} />
+      <path d="M 140 60 L 154 18 L 118 48 Z" fill={furColor} />
+      <path d="M 135 54 L 145 28 L 124 46 Z" fill={innerColor} />
     </>
-  ),
-  hair_curly: () => (
-    <>
-      {[
-        [68, 48, 18],
-        [100, 34, 22],
-        [132, 48, 18],
-        [54, 68, 15],
-        [146, 68, 15],
-      ].map(([cx, cy, r], i) => (
-        <circle key={i} cx={cx} cy={cy} r={r} fill="#3d2a1a" />
-      ))}
-    </>
-  ),
-  hair_spiky: () => (
-    <>
-      {[
-        [58, 46, 16],
-        [78, 68, 14],
-        [100, 100, 15],
-        [122, 132, 14],
-        [142, 154, 16],
-      ].map(([bx, tx, ty], i) => (
-        <path key={i} d={`M ${bx} 66 L ${tx} ${ty} L ${bx + 16} 66 Z`} fill="#4a3628" />
-      ))}
-      <path d="M 56 82 Q 52 60 100 56 Q 148 60 144 82 Q 144 68 100 64 Q 56 68 56 82 Z" fill="#4a3628" />
-    </>
-  ),
+  );
+}
+
+// "Fur" (the old human-hair slot, reused as-is so no schema/economy change was
+// needed) — matches the 3D character's coat colors/patterns so the shop
+// thumbnails and login picker don't show a different-looking character than
+// the live 3D view.
+const FUR: Record<string, { color: string; render: () => ReactNode }> = {
+  hair_brown: {
+    color: "#e8935a",
+    render: () => (
+      <>
+        <Ears furColor="#e8935a" innerColor="#f4b8c4" />
+        {[[78, 56], [100, 50], [122, 56]].map(([x, y], i) => (
+          <path key={i} d={`M ${x - 8} ${y} Q ${x} ${y - 6} ${x + 8} ${y}`} stroke="#c46a34" strokeWidth={3} fill="none" strokeLinecap="round" />
+        ))}
+      </>
+    ),
+  },
+  hair_curly: {
+    color: "#cdc6d8",
+    render: () => (
+      <>
+        <Ears furColor="#cdc6d8" innerColor="#f4b8c4" />
+        {[[62, 66, 12], [138, 66, 12], [100, 44, 14], [78, 48, 10], [122, 48, 10]].map(([cx, cy, r], i) => (
+          <circle key={i} cx={cx} cy={cy} r={r} fill="#cdc6d8" />
+        ))}
+      </>
+    ),
+  },
+  hair_spiky: {
+    color: "#33302e",
+    render: () => (
+      <>
+        <Ears furColor="#33302e" innerColor="#4a4644" />
+        <ellipse cx={100} cy={108} rx={26} ry={20} fill="#f5efe4" />
+      </>
+    ),
+  },
 };
 
 const CLOTHES: Record<string, () => ReactNode> = {
   clothes_tshirt: () => (
     <>
-      <path d="M 40 200 Q 42 138 100 130 Q 158 138 160 200 Z" fill="#4fb3d9" />
-      <path d="M 84 132 Q 100 148 116 132 Q 100 140 84 132 Z" fill="#3a92b3" />
+      <path d="M 44 200 Q 46 144 100 138 Q 154 144 156 200 Z" fill="#4fb3d9" />
+      <path d="M 86 140 Q 100 154 114 140 Q 100 148 86 140 Z" fill="#3a92b3" />
     </>
   ),
   clothes_hoodie: () => (
     <>
-      <path d="M 40 200 Q 42 136 100 128 Q 158 136 160 200 Z" fill="#33475b" />
-      <path d="M 74 138 Q 100 126 126 138 L 122 150 Q 100 140 78 150 Z" fill="#25333f" />
-      <rect x={90} y={165} width={20} height={18} rx={4} fill="#25333f" />
-      <line x1={92} y1={140} x2={88} y2={158} stroke="#e8e3d8" strokeWidth={2} strokeLinecap="round" />
-      <line x1={108} y1={140} x2={112} y2={158} stroke="#e8e3d8" strokeWidth={2} strokeLinecap="round" />
+      <path d="M 44 200 Q 46 142 100 136 Q 154 142 156 200 Z" fill="#33475b" />
+      <path d="M 78 146 Q 100 134 122 146 L 118 158 Q 100 148 82 158 Z" fill="#25333f" />
+      <rect x={90} y={170} width={20} height={16} rx={4} fill="#25333f" />
     </>
   ),
   clothes_dress: () => (
     <>
-      <path d="M 34 200 Q 38 140 100 130 Q 162 140 166 200 Z" fill="#d46fb8" />
-      <path d="M 84 132 Q 100 144 116 132 Q 100 138 84 132 Z" fill="#b6549a" />
-      <circle cx={100} cy={140} r={4.5} fill="#fff" opacity={0.85} />
+      <path d="M 38 200 Q 42 146 100 138 Q 158 146 162 200 Z" fill="#d46fb8" />
+      <path d="M 86 140 Q 100 152 114 140 Q 100 146 86 140 Z" fill="#b6549a" />
+      <circle cx={100} cy={148} r={4} fill="#fff" opacity={0.85} />
     </>
   ),
   clothes_superhero: () => (
     <>
-      <path d="M 44 196 Q 20 150 46 132 Q 40 168 56 192 Z" fill="#2b5fb0" opacity={0.9} />
-      <path d="M 156 196 Q 180 150 154 132 Q 160 168 144 192 Z" fill="#2b5fb0" opacity={0.9} />
-      <path d="M 40 200 Q 42 138 100 130 Q 158 138 160 200 Z" fill="#e74c3c" />
+      <path d="M 48 196 Q 26 156 50 140 Q 44 172 58 192 Z" fill="#2b5fb0" opacity={0.9} />
+      <path d="M 152 196 Q 174 156 150 140 Q 156 172 142 192 Z" fill="#2b5fb0" opacity={0.9} />
+      <path d="M 44 200 Q 46 144 100 138 Q 154 144 156 200 Z" fill="#e74c3c" />
       <path
-        d="M 100 148 L 104 158 L 114 158 L 106 164 L 109 174 L 100 168 L 91 174 L 94 164 L 86 158 L 96 158 Z"
+        d="M 100 154 L 104 163 L 113 163 L 106 169 L 109 178 L 100 172 L 91 178 L 94 169 L 87 163 L 96 163 Z"
         fill="#ffd23f"
       />
     </>
@@ -167,17 +199,16 @@ const CLOTHES: Record<string, () => ReactNode> = {
 const HATS: Record<string, () => ReactNode> = {
   hat_cap: () => (
     <>
-      <path d="M 58 56 Q 60 20 100 18 Q 140 20 142 56 Q 100 44 58 56 Z" fill="var(--color-teal)" />
-      <ellipse cx={132} cy={54} rx={26} ry={8} fill="var(--color-teal)" transform="rotate(-8 132 54)" />
+      <path d="M 60 54 Q 62 22 100 20 Q 138 22 140 54 Q 100 42 60 54 Z" fill="var(--color-teal)" />
+      <ellipse cx={130} cy={52} rx={24} ry={7} fill="var(--color-teal)" transform="rotate(-8 130 52)" />
     </>
   ),
   hat_wizard: () => (
     <>
-      <ellipse cx={100} cy={44} rx={44} ry={10} fill="#6a3fb5" />
-      <path d="M 68 44 L 100 -6 L 132 44 Z" fill="#7c4fc9" />
-      <path d="M 84 44 L 100 12 L 116 44 Z" fill="#6a3fb5" opacity={0.6} />
+      <ellipse cx={100} cy={40} rx={40} ry={9} fill="#6a3fb5" />
+      <path d="M 70 40 L 100 -8 L 130 40 Z" fill="#7c4fc9" />
       <path
-        d="M 100 -6 L 102.4 -1.4 L 107.6 -1.4 L 103.6 1.4 L 105 6 L 100 3 L 95 6 L 96.4 1.4 L 92.4 -1.4 L 97.6 -1.4 Z"
+        d="M 100 -8 L 102.3 -3.6 L 107.2 -3.6 L 103.4 -1 L 104.8 3.4 L 100 0.6 L 95.2 3.4 L 96.6 -1 L 92.8 -3.6 L 97.7 -3.6 Z"
         fill="#ffd23f"
       />
     </>
@@ -185,24 +216,21 @@ const HATS: Record<string, () => ReactNode> = {
   hat_crown: () => (
     <>
       <path
-        d="M 62 52 L 68 26 L 84 42 L 100 20 L 116 42 L 132 26 L 138 52 Z"
+        d="M 64 50 L 70 26 L 85 41 L 100 20 L 115 41 L 130 26 L 136 50 Z"
         fill="#ffd23f"
         stroke="#e0a800"
         strokeWidth={2}
         strokeLinejoin="round"
       />
-      <circle cx={100} cy={38} r={4} fill="#e63946" />
-      <circle cx={80} cy={44} r={3} fill="#2b5fb0" />
-      <circle cx={120} cy={44} r={3} fill="#2b5fb0" />
+      <circle cx={100} cy={36} r={3.6} fill="#e63946" />
     </>
   ),
   hat_party: () => (
     <>
-      <path d="M 78 52 L 100 6 L 122 52 Z" fill="#ff6f91" />
-      <path d="M 82 44 L 100 30 L 118 44 Z" fill="#ffd23f" opacity={0.7} />
-      <circle cx={100} cy={4} r={7} fill="#fff" />
-      {[[86, 40], [110, 30], [96, 22]].map(([cx, cy], i) => (
-        <circle key={i} cx={cx} cy={cy} r={2.4} fill="#fff" />
+      <path d="M 80 50 L 100 8 L 120 50 Z" fill="#ff6f91" />
+      <circle cx={100} cy={6} r={6.5} fill="#fff" />
+      {[[88, 40], [110, 32], [98, 24]].map(([cx, cy], i) => (
+        <circle key={i} cx={cx} cy={cy} r={2.2} fill="#fff" />
       ))}
     </>
   ),
@@ -214,28 +242,24 @@ const ACCESSORIES: Record<string, () => ReactNode> = {
       <circle cx={84} cy={86} r={11} fill="#bfe8ff" fillOpacity={0.35} stroke={INK} strokeWidth={2.2} />
       <circle cx={116} cy={86} r={11} fill="#bfe8ff" fillOpacity={0.35} stroke={INK} strokeWidth={2.2} />
       <line x1={95} y1={86} x2={105} y2={86} stroke={INK} strokeWidth={2.2} />
-      <line x1={73} y1={84} x2={64} y2={80} stroke={INK} strokeWidth={2.2} strokeLinecap="round" />
-      <line x1={127} y1={84} x2={136} y2={80} stroke={INK} strokeWidth={2.2} strokeLinecap="round" />
     </>
   ),
   accessory_bowtie: () => (
     <>
-      <path d="M 86 132 L 100 138 L 86 144 Z" fill="#e63946" />
-      <path d="M 114 132 L 100 138 L 114 144 Z" fill="#e63946" />
-      <circle cx={100} cy={138} r={4} fill="#c1121f" />
+      <path d="M 86 140 L 100 146 L 86 152 Z" fill="#e63946" />
+      <path d="M 114 140 L 100 146 L 114 152 Z" fill="#e63946" />
+      <circle cx={100} cy={146} r={4} fill="#c1121f" />
     </>
   ),
   accessory_scarf: () => (
     <>
-      <path d="M 78 128 Q 100 144 122 128 Q 122 138 100 148 Q 78 138 78 128 Z" fill="#e63946" />
-      <path d="M 96 144 Q 92 168 88 180 L 100 182 Q 100 160 104 144 Z" fill="#c1121f" />
+      <path d="M 78 136 Q 100 150 122 136 Q 122 146 100 154 Q 78 146 78 136 Z" fill="#e63946" />
     </>
   ),
   accessory_medal: () => (
     <>
-      <path d="M 90 132 L 100 168 L 110 132 Z" fill="#2b5fb0" opacity={0.85} />
-      <circle cx={100} cy={176} r={13} fill="#ffd23f" stroke="#e0a800" strokeWidth={2} />
-      <circle cx={100} cy={176} r={6} fill="#e0a800" />
+      <path d="M 92 140 L 100 172 L 108 140 Z" fill="#2b5fb0" opacity={0.85} />
+      <circle cx={100} cy={178} r={12} fill="#ffd23f" stroke="#e0a800" strokeWidth={2} />
     </>
   ),
 };
@@ -334,14 +358,14 @@ export function AvatarCharacter({
 }: AvatarCharacterProps) {
   const clipId = useSvgId("avatar-clip");
 
-  const hairKey = equippedKeys.hair ?? DEFAULTS.hair;
+  const furKey = equippedKeys.hair ?? DEFAULTS.hair;
   const eyesKey = equippedKeys.eyes ?? DEFAULTS.eyes;
   const clothesKey = equippedKeys.clothes ?? DEFAULTS.clothes;
   const backgroundKey = equippedKeys.background ?? DEFAULTS.background;
   const hatKey = equippedKeys.hat;
   const accessoryKey = equippedKeys.accessory;
 
-  const renderHair = HAIR[hairKey] ?? HAIR[DEFAULTS.hair];
+  const fur = FUR[furKey] ?? FUR[DEFAULTS.hair];
   const renderEyes = EYES[eyesKey] ?? EYES[DEFAULTS.eyes];
   const renderClothes = CLOTHES[clothesKey] ?? CLOTHES[DEFAULTS.clothes];
   const renderBackground = BACKGROUNDS[backgroundKey] ?? BACKGROUNDS[DEFAULTS.background];
@@ -376,11 +400,11 @@ export function AvatarCharacter({
         {renderBackground()}
         <Wrapper {...wrapperProps}>
           {renderClothes()}
-          <ellipse cx={100} cy={124} rx={15} ry={13} fill={SKIN} />
-          <circle cx={100} cy={88} r={42} fill={SKIN} />
-          {renderHair()}
-          {renderEyes(mood)}
-          <Brows mood={mood} />
+          <ellipse cx={100} cy={126} rx={16} ry={13} fill={fur.color} />
+          {fur.render()}
+          <circle cx={100} cy={88} r={40} fill={fur.color} />
+          {renderEyes()}
+          <FaceDetails />
           <Mouth mood={mood} />
           {renderAccessory?.()}
           {renderHat?.()}

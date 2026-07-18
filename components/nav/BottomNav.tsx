@@ -9,7 +9,7 @@ const TABS = [
   { href: "/games", label: "Games", icon: GameControllerIcon },
   { href: "/packs", label: "Packs", emoji: "🎁" },
   { href: "/collection", label: "Collection", emoji: "📚" },
-  { href: "/avatar", label: "Avatar", emoji: "🧑" },
+  { href: "/avatar", label: "Cat", emoji: "🐱" },
   { href: "/achievements", label: "Badges", emoji: "🏅" },
 ] as const;
 
