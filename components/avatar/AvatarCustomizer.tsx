@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AvatarRenderer } from "./AvatarRenderer";
+import { Avatar3D } from "@/components/three/Avatar3D";
 import { Button } from "@/components/ui/Button";
 import { playCoin, playPop } from "@/lib/sound";
 import { CoinIcon } from "@/components/icons";
@@ -94,7 +95,7 @@ export function AvatarCustomizer({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col items-center gap-2">
-        <AvatarRenderer equippedKeys={equippedKeys} size={120} />
+        <Avatar3D equippedKeys={equippedKeys} size={160} />
         <p className="flex items-center gap-1 text-sm font-semibold text-ink/60">
           <CoinIcon size={16} /> {coinsBalance} coins
         </p>

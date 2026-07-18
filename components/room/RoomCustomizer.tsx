@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RoomScene } from "./RoomScene";
+import { RoomScene3D } from "@/components/three/RoomScene3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
 import { playCoin, playPop } from "@/lib/sound";
@@ -90,7 +91,7 @@ export function RoomCustomizer({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col items-center gap-2">
-        <RoomScene equippedKeys={equippedKeys} avatarSize={110} className="w-full" />
+        <RoomScene3D equippedKeys={equippedKeys} className="w-full" />
         <p className="flex items-center gap-1 text-sm font-semibold text-ink/60">
           <CoinIcon size={16} /> {coinsBalance} coins
         </p>

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
-import { RoomScene } from "./RoomScene";
+import { RoomScene3D } from "@/components/three/RoomScene3D";
 import type { AvatarEquippedKeys, AvatarMood } from "@/components/avatar/AvatarCharacter";
 import { playGiggle } from "@/lib/sound";
 
@@ -39,7 +39,7 @@ export function PokeableRoom({ equippedKeys }: { equippedKeys: AvatarEquippedKey
   return (
     <div className="flex flex-col gap-2">
       <div className="relative">
-        <RoomScene equippedKeys={equippedKeys} mood={mood} onTapAvatar={poke} animated />
+        <RoomScene3D equippedKeys={equippedKeys} mood={mood} onTapAvatar={poke} />
         <AnimatePresence>
           {message && (
             <motion.div

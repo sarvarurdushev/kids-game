@@ -2,20 +2,20 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "motion/react";
-import { AvatarRenderer } from "@/components/avatar/AvatarRenderer";
+import { AnimatePresence, motion } from "motion/react";
+import { Avatar3D } from "@/components/three/Avatar3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
 import { CoinIcon, StarIcon } from "@/components/icons";
 import { playCorrect, playWrong, playGameOver } from "@/lib/sound";
 import { randomWords, shuffle, wordsUpToDifficulty, type WordEntry } from "@/lib/games/wordBank";
+import { WordCatchScene3D, type BlockTint } from "./WordCatchScene3D";
 
 const TOTAL_ROUNDS = 10;
 const LIVES_START = 3;
 const INITIAL_FALL_MS = 3200;
 const MIN_FALL_MS = 1900;
 const FALL_STEP_MS = 140;
-const LANE_HEIGHT = 280;
 const RESULT_PAUSE_MS = 900;
 
 type Phase = "ready" | "playing" | "result" | "submitting" | "gameover";
@@ -166,7 +166,7 @@ export function WordCatch({ equippedKeys }: { equippedKeys: AvatarEquippedKeys }
   if (phase === "ready") {
     return (
       <div className="flex flex-col items-center gap-5 text-center">
-        <AvatarRenderer equippedKeys={equippedKeys} size={110} mood="happy" animated />
+        <Avatar3D equippedKeys={equippedKeys} size={130} mood="happy" />
         <div>
           <h1 className="font-display text-2xl font-bold text-gold-dark">Word Catch</h1>
           <p className="mt-1 text-sm text-ink/60">
@@ -188,11 +188,10 @@ export function WordCatch({ equippedKeys }: { equippedKeys: AvatarEquippedKeys }
   if (phase === "gameover") {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
-        <AvatarRenderer
+        <Avatar3D
           equippedKeys={equippedKeys}
-          size={100}
+          size={120}
           mood={correctCount >= finalRoundsPlayed * 0.6 ? "happy" : "neutral"}
-          animated
         />
         <h1 className="font-display text-2xl font-bold text-gold-dark">Nice work!</h1>
         <p className="text-ink/70">
@@ -247,44 +246,26 @@ export function WordCatch({ equippedKeys }: { equippedKeys: AvatarEquippedKeys }
       </div>
 
       <div className="flex flex-col items-center gap-2 rounded-3xl bg-white/80 py-4 shadow-sm">
-        <AvatarRenderer equippedKeys={equippedKeys} size={56} mood={avatarMood} animated />
+        <Avatar3D equippedKeys={equippedKeys} size={72} mood={avatarMood} />
         <div className="text-5xl">{round.target.emoji}</div>
         <p className="text-sm font-semibold text-ink/60">What is this?</p>
       </div>
 
-      <div
-        key={roundIndex}
-        className="relative flex justify-between gap-2 overflow-hidden rounded-3xl bg-gradient-to-b from-gold/10 to-teal/10"
-        style={{ height: LANE_HEIGHT }}
-      >
-        {round.bubbles.map((bubble) => {
+      <WordCatchScene3D
+        roundKey={roundIndex}
+        isPlaying={phase === "playing"}
+        fallDurationMs={fallDurationFor(roundIndex)}
+        onTap={(word) => resolve(word)}
+        bubbles={round.bubbles.map((bubble) => {
           const isTapped = phase === "result" && tappedWord === bubble.word;
           const isTargetReveal = phase === "result" && bubble.word === round.target.word;
-          return (
-            <div key={bubble.word} className="relative h-full flex-1">
-              <motion.button
-                type="button"
-                disabled={phase !== "playing"}
-                onClick={() => resolve(bubble.word)}
-                initial={{ top: -60 }}
-                animate={{ top: phase === "playing" ? LANE_HEIGHT - 56 : undefined }}
-                transition={{ duration: fallDurationFor(roundIndex) / 1000, ease: "linear" }}
-                className={`absolute left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl border-2 px-1 text-center text-xs font-bold shadow-md ${
-                  isTapped && outcome === "correct"
-                    ? "border-teal bg-teal/20 text-teal"
-                    : isTapped && outcome === "wrong"
-                      ? "border-coral bg-coral/20 text-coral"
-                      : isTargetReveal && outcome === "miss"
-                        ? "border-teal bg-teal/20 text-teal"
-                        : "border-ink/10 bg-white text-ink"
-                }`}
-              >
-                {bubble.word}
-              </motion.button>
-            </div>
-          );
+          let tint: BlockTint = "neutral";
+          if (isTapped && outcome === "correct") tint = "correct";
+          else if (isTapped && outcome === "wrong") tint = "wrong";
+          else if (isTargetReveal && outcome === "miss") tint = "correct";
+          return { word: bubble.word, tint };
         })}
-      </div>
+      />
 
       <AnimatePresence>
         {phase === "result" && (

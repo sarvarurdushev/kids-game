@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "motion/react";
-import { AvatarRenderer } from "@/components/avatar/AvatarRenderer";
+import { AnimatePresence, motion } from "motion/react";
+import { Avatar3D } from "@/components/three/Avatar3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
 import { CoinIcon, StarIcon } from "@/components/icons";
 import { playCorrect, playWrong, playGameOver, playTick, playPop } from "@/lib/sound";
 import { shuffle, wordsUpToDifficulty, type WordEntry } from "@/lib/games/wordBank";
+import { WordScrambleScene3D } from "./WordScrambleScene3D";
 
 const TOTAL_ROUNDS = 8;
 const TIME_BASE_MS = 5000;
@@ -202,7 +203,7 @@ export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKey
   if (phase === "ready") {
     return (
       <div className="flex flex-col items-center gap-5 text-center">
-        <AvatarRenderer equippedKeys={equippedKeys} size={110} mood="happy" animated />
+        <Avatar3D equippedKeys={equippedKeys} size={130} mood="happy" />
         <div>
           <h1 className="font-display text-2xl font-bold text-gold-dark">Word Scramble</h1>
           <p className="mt-1 text-sm text-ink/60">
@@ -224,11 +225,10 @@ export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKey
   if (phase === "gameover") {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
-        <AvatarRenderer
+        <Avatar3D
           equippedKeys={equippedKeys}
-          size={100}
+          size={120}
           mood={correctCount >= TOTAL_ROUNDS * 0.6 ? "happy" : "neutral"}
-          animated
         />
         <h1 className="font-display text-2xl font-bold text-gold-dark">All done!</h1>
         <p className="text-ink/70">
@@ -291,7 +291,7 @@ export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKey
       </div>
 
       <div className="flex flex-col items-center gap-2 rounded-3xl bg-white/80 py-4 shadow-sm">
-        <AvatarRenderer equippedKeys={equippedKeys} size={56} mood={avatarMood} animated />
+        <Avatar3D equippedKeys={equippedKeys} size={64} mood={avatarMood} />
         <div className="text-5xl">{round.target.emoji}</div>
       </div>
 
@@ -313,24 +313,17 @@ export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKey
         ))}
       </motion.div>
 
-      <div className="flex flex-wrap justify-center gap-2">
-        {round.tiles.map((tile) => {
-          const used = placedIds.includes(tile.id);
-          return (
-            <button
-              key={tile.id}
-              type="button"
-              disabled={used || phase !== "playing"}
-              onClick={() => tapTile(tile)}
-              className={`flex h-12 w-10 items-center justify-center rounded-xl text-lg font-bold uppercase shadow-sm transition-opacity ${
-                used ? "bg-ink/5 opacity-0" : "bg-white text-ink active:scale-90"
-              }`}
-            >
-              {tile.char}
-            </button>
-          );
-        })}
-      </div>
+      <WordScrambleScene3D
+        tiles={round.tiles.map((tile) => ({
+          id: tile.id,
+          char: tile.char,
+          used: placedIds.includes(tile.id),
+        }))}
+        onTap={(id) => {
+          const tile = round.tiles.find((t) => t.id === id);
+          if (tile) tapTile(tile);
+        }}
+      />
 
       <div className="flex justify-center">
         <button

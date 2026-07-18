@@ -2,13 +2,14 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "motion/react";
-import { AvatarRenderer } from "@/components/avatar/AvatarRenderer";
+import { AnimatePresence, motion } from "motion/react";
+import { Avatar3D } from "@/components/three/Avatar3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
 import { CoinIcon, StarIcon } from "@/components/icons";
 import { playCorrect, playWrong, playGameOver, playPop } from "@/lib/sound";
 import { shuffle, wordsUpToDifficulty, type WordEntry } from "@/lib/games/wordBank";
+import { MemoryMatchScene3D } from "./MemoryMatchScene3D";
 
 const PAIR_COUNT = 6;
 const MISMATCH_PAUSE_MS = 800;
@@ -136,7 +137,7 @@ export function MemoryMatch({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
   if (phase === "ready") {
     return (
       <div className="flex flex-col items-center gap-5 text-center">
-        <AvatarRenderer equippedKeys={equippedKeys} size={110} mood="happy" animated />
+        <Avatar3D equippedKeys={equippedKeys} size={130} mood="happy" />
         <div>
           <h1 className="font-display text-2xl font-bold text-gold-dark">Memory Match</h1>
           <p className="mt-1 text-sm text-ink/60">
@@ -158,7 +159,7 @@ export function MemoryMatch({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
   if (phase === "gameover") {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
-        <AvatarRenderer equippedKeys={equippedKeys} size={100} mood="happy" animated />
+        <Avatar3D equippedKeys={equippedKeys} size={120} mood="happy" />
         <h1 className="font-display text-2xl font-bold text-gold-dark">All matched!</h1>
         <p className="text-ink/70">
           You found all {PAIR_COUNT} pairs in <span className="font-bold text-ink">{moves}</span> moves!
@@ -205,48 +206,22 @@ export function MemoryMatch({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
       </div>
 
       <div className="flex justify-center">
-        <AvatarRenderer equippedKeys={equippedKeys} size={48} mood={avatarMood} animated />
+        <Avatar3D equippedKeys={equippedKeys} size={64} mood={avatarMood} />
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
-        {deck.map((card) => {
-          const isFlipped = flippedIds.includes(card.id) || matchedPairIds.has(card.pairId);
-          const isMatched = matchedPairIds.has(card.pairId);
-          return (
-            <button
-              key={card.id}
-              type="button"
-              onClick={() => onCardTap(card)}
-              className="aspect-square"
-              style={{ perspective: 600 }}
-              disabled={isMatched}
-              data-pair-id={card.pairId}
-            >
-              <motion.div
-                animate={{ rotateY: isFlipped ? 180 : 0 }}
-                transition={{ duration: 0.35 }}
-                className="relative h-full w-full"
-                style={{ transformStyle: "preserve-3d" }}
-              >
-                <div
-                  className="absolute inset-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-gold to-gold-dark text-lg font-bold text-white shadow-sm"
-                  style={{ backfaceVisibility: "hidden" }}
-                >
-                  ?
-                </div>
-                <div
-                  className={`absolute inset-0 flex items-center justify-center rounded-xl border-2 px-1 text-center shadow-sm ${
-                    isMatched ? "border-teal bg-teal/15" : "border-ink/10 bg-white"
-                  } ${card.kind === "emoji" ? "text-2xl" : "text-xs font-bold text-ink"}`}
-                  style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-                >
-                  {card.value}
-                </div>
-              </motion.div>
-            </button>
-          );
-        })}
-      </div>
+      <MemoryMatchScene3D
+        cards={deck.map((card) => ({
+          id: card.id,
+          kind: card.kind,
+          value: card.value,
+          isFlipped: flippedIds.includes(card.id) || matchedPairIds.has(card.pairId),
+          isMatched: matchedPairIds.has(card.pairId),
+        }))}
+        onTap={(id) => {
+          const card = deck.find((c) => c.id === id);
+          if (card) onCardTap(card);
+        }}
+      />
 
       <AnimatePresence>
         {feedback && (

@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { Sparx } from "@/components/mascot/Sparx";
 import { CreatureArt } from "@/components/creatures/CreatureArt";
+import { Avatar3D } from "@/components/three/Avatar3D";
+import { RoomScene3D } from "@/components/three/RoomScene3D";
 import { BoosterPackIcon, ChestIcon, CoinIcon, FlameIcon, StarIcon } from "@/components/icons";
 import type { Rarity } from "@/lib/reward-engine/types";
 
@@ -93,6 +95,49 @@ export default function ShowcasePage() {
           <div className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4">
             <BoosterPackIcon size={90} color="var(--color-rarity-legendary)" />
             <span className="text-sm font-semibold">Pack (legendary)</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-10">
+        <h2 className="font-display mb-3 text-lg font-semibold">3D Avatar smoke test</h2>
+        <div className="flex flex-wrap gap-6">
+          <div className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4">
+            <Avatar3D equippedKeys={{}} size={180} mood="neutral" />
+            <span className="text-sm font-semibold">defaults / neutral</span>
+          </div>
+          <div className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4">
+            <Avatar3D
+              equippedKeys={{ hair: "hair_spiky", clothes: "clothes_superhero", hat: "hat_crown", accessory: "accessory_glasses", eyes: "eyes_star" }}
+              size={180}
+              mood="happy"
+            />
+            <span className="text-sm font-semibold">decked out / happy</span>
+          </div>
+          <div className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4">
+            <Avatar3D
+              equippedKeys={{ hair: "hair_curly", clothes: "clothes_dress", hat: "hat_party", accessory: "accessory_bowtie" }}
+              size={180}
+              mood="sad"
+            />
+            <span className="text-sm font-semibold">party / sad</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-10">
+        <h2 className="font-display mb-3 text-lg font-semibold">3D Room smoke test</h2>
+        <div className="flex flex-wrap gap-6">
+          <div className="w-80 rounded-2xl bg-white p-4">
+            <RoomScene3D equippedKeys={{}} mood="neutral" />
+            <span className="text-sm font-semibold">defaults</span>
+          </div>
+          <div className="w-80 rounded-2xl bg-white p-4">
+            <RoomScene3D
+              equippedKeys={{ wallpaper: "wallpaper_stars", floor: "floor_rug", furniture: "furniture_bookshelf", hat: "hat_wizard" }}
+              mood="happy"
+            />
+            <span className="text-sm font-semibold">decked out / happy</span>
           </div>
         </div>
       </section>
