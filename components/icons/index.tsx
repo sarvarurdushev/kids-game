@@ -108,6 +108,94 @@ export function ChestIcon({
   );
 }
 
+export function GameControllerIcon({ size = 24, className = "" }: { size?: number; className?: string }) {
+  const id = useSvgId("controller");
+  return (
+    <svg viewBox="0 0 48 48" width={size} height={size} className={className}>
+      <defs>
+        <linearGradient id={id} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="var(--color-teal)" />
+          <stop offset="100%" stopColor="#2a7d8c" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M 12 18 Q 4 18 4 28 Q 4 38 11 38 Q 15 38 17 32 L 31 32 Q 33 38 37 38 Q 44 38 44 28 Q 44 18 36 18 Z"
+        fill={`url(#${id})`}
+      />
+      <rect x={11} y={25} width={3} height={9} rx={1.4} fill="#eafaff" />
+      <rect x={7.5} y={28.5} width={9} height={3} rx={1.4} fill="#eafaff" />
+      <circle cx={33} cy={24} r={2.6} fill="#eafaff" />
+      <circle cx={39} cy={28} r={2.6} fill="#eafaff" />
+    </svg>
+  );
+}
+
+export function WordCatchIcon({ size = 48, className = "" }: { size?: number; className?: string }) {
+  const id = useSvgId("catch");
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} className={className}>
+      <defs>
+        <linearGradient id={id} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#ffe8a3" />
+          <stop offset="100%" stopColor="var(--color-gk-gold)" />
+        </linearGradient>
+      </defs>
+      <rect x={38} y={10} width={24} height={24} rx={6} fill={`url(#${id})`} stroke="#2d2a26" strokeWidth={2} />
+      <text x={50} y={28} textAnchor="middle" fontSize={16} fontWeight={800} fill="#2d2a26">
+        A
+      </text>
+      <line x1={50} y1={36} x2={50} y2={54} stroke="#2d2a26" strokeWidth={2} strokeDasharray="3 4" opacity={0.5} />
+      <path d="M 18 62 Q 50 84 82 62 L 74 88 Q 50 96 26 88 Z" fill="var(--color-teal)" stroke="#2d2a26" strokeWidth={2} strokeLinejoin="round" />
+      <path d="M 18 62 Q 50 74 82 62" fill="none" stroke="#2d2a26" strokeWidth={2} />
+    </svg>
+  );
+}
+
+export function MemoryMatchIcon({ size = 48, className = "" }: { size?: number; className?: string }) {
+  const idA = useSvgId("matchA");
+  const idB = useSvgId("matchB");
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} className={className}>
+      <defs>
+        <linearGradient id={idA} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffb3c6" />
+          <stop offset="100%" stopColor="var(--color-gk-coral)" />
+        </linearGradient>
+        <linearGradient id={idB} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#bfe8ff" />
+          <stop offset="100%" stopColor="var(--color-teal)" />
+        </linearGradient>
+      </defs>
+      <rect x={16} y={30} width={38} height={50} rx={8} fill={`url(#${idA})`} stroke="#2d2a26" strokeWidth={2} transform="rotate(-8 35 55)" />
+      <rect x={46} y={26} width={38} height={50} rx={8} fill={`url(#${idB})`} stroke="#2d2a26" strokeWidth={2} transform="rotate(6 65 51)" />
+      <path d="M 56 46 L 62 54 L 74 40" fill="none" stroke="#fff" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function WordScrambleIcon({ size = 48, className = "" }: { size?: number; className?: string }) {
+  const colors = ["#ffd23f", "var(--color-teal)", "var(--color-gk-coral)"];
+  const letters = ["W", "O", "N"];
+  const transforms = ["rotate(-12 30 40)", "rotate(10 55 30)", "rotate(-6 76 55)"];
+  const positions: [number, number][] = [
+    [16, 26],
+    [42, 16],
+    [62, 40],
+  ];
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} className={className}>
+      {positions.map(([x, y], i) => (
+        <g key={i} transform={transforms[i]}>
+          <rect x={x} y={y} width={28} height={28} rx={7} fill={colors[i]} stroke="#2d2a26" strokeWidth={2} />
+          <text x={x + 14} y={y + 20} textAnchor="middle" fontSize={15} fontWeight={800} fill="#2d2a26">
+            {letters[i]}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
 export function BoosterPackIcon({
   size = 64,
   className = "",

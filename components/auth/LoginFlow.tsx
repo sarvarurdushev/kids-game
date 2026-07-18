@@ -4,12 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AvatarGrid } from "@/components/avatar/AvatarGrid";
 import { AvatarRenderer } from "@/components/avatar/AvatarRenderer";
+import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { PinPad } from "@/components/auth/PinPad";
 import { Card } from "@/components/ui/Card";
 
 interface FamilyMember {
   id: string;
   displayName: string;
+  equippedKeys: AvatarEquippedKeys;
 }
 
 export function LoginFlow({ members }: { members: FamilyMember[] }) {
@@ -71,7 +73,7 @@ export function LoginFlow({ members }: { members: FamilyMember[] }) {
 
   return (
     <Card className="flex w-full max-w-sm flex-col items-center gap-4">
-      <AvatarRenderer equippedKeys={{}} size={80} />
+      <AvatarRenderer equippedKeys={selected.equippedKeys} size={80} />
       <h1 className="font-display text-xl font-bold">Hi, {selected.displayName}!</h1>
       {lockedMessage ? (
         <p className="text-center text-sm font-semibold text-coral">{lockedMessage}</p>

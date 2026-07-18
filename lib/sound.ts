@@ -112,3 +112,31 @@ export function playPop(): void {
     tone(ctx, { freq: 700, endFreq: 1000, start: now, duration: 0.09, type: "sine", peakGain: 0.13 });
   });
 }
+
+export function playCorrect(): void {
+  play((ctx, now) => {
+    tone(ctx, { freq: 784, start: now, duration: 0.1, type: "sine", peakGain: 0.14 });
+    tone(ctx, { freq: 1175, start: now + 0.07, duration: 0.16, type: "sine", peakGain: 0.13 });
+  });
+}
+
+export function playWrong(): void {
+  play((ctx, now) => {
+    tone(ctx, { freq: 220, endFreq: 140, start: now, duration: 0.22, type: "sawtooth", peakGain: 0.09 });
+  });
+}
+
+export function playTick(): void {
+  play((ctx, now) => {
+    tone(ctx, { freq: 900, start: now, duration: 0.04, type: "square", peakGain: 0.05 });
+  });
+}
+
+export function playGameOver(): void {
+  play((ctx, now) => {
+    const notes = [660, 550, 440];
+    notes.forEach((freq, i) => {
+      tone(ctx, { freq, start: now + i * 0.12, duration: 0.2, type: "triangle", peakGain: 0.11 });
+    });
+  });
+}

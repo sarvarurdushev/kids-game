@@ -28,5 +28,12 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/home", "/packs/:path*", "/collection/:path*", "/avatar", "/achievements"],
+  matcher: [
+    "/home",
+    "/packs/:path*",
+    "/collection/:path*",
+    "/avatar",
+    "/achievements",
+    "/games/:path*",
+  ],
 };

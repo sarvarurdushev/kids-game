@@ -1,10 +1,11 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { avatarItems, students, studentAvatarItems } from "@/lib/db/schema";
 import { getLevelInfo } from "./levelInfo";
 import { ServiceError } from "./errors";
 import type { AuthedStudent } from "@/lib/auth/requireStudent";
+import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 
 type AvatarItemRow = typeof avatarItems.$inferSelect;
 
@@ -168,4 +169,56 @@ export async function equipAvatarItem(student: AuthedStudent, avatarItemId: stri
     .where(eq(students.id, student.id));
 
   return { slot: item.slot, avatarItemId: item.id };
+}
+
+type EquippedIdRow = Pick<
+  typeof students.$inferSelect,
+  | "id"
+  | "equippedHairId"
+  | "equippedEyesId"
+  | "equippedClothesId"
+  | "equippedHatId"
+  | "equippedAccessoryId"
+  | "equippedBackgroundId"
+>;
+
+function resolveEquippedKeys(row: EquippedIdRow, keyById: Map<string, string>): AvatarEquippedKeys {
+  return {
+    hair: row.equippedHairId ? keyById.get(row.equippedHairId) : undefined,
+    eyes: row.equippedEyesId ? keyById.get(row.equippedEyesId) : undefined,
+    clothes: row.equippedClothesId ? keyById.get(row.equippedClothesId) : undefined,
+    hat: row.equippedHatId ? keyById.get(row.equippedHatId) : undefined,
+    accessory: row.equippedAccessoryId ? keyById.get(row.equippedAccessoryId) : undefined,
+    background: row.equippedBackgroundId ? keyById.get(row.equippedBackgroundId) : undefined,
+  };
+}
+
+/** Batch-resolves equipped avatar item keys for several students in one query (login grid, etc). */
+export async function getEquippedAvatarKeysForMany(
+  rows: EquippedIdRow[]
+): Promise<Map<string, AvatarEquippedKeys>> {
+  const ids = [
+    ...new Set(
+      rows
+        .flatMap((r) => [
+          r.equippedHairId,
+          r.equippedEyesId,
+          r.equippedClothesId,
+          r.equippedHatId,
+          r.equippedAccessoryId,
+          r.equippedBackgroundId,
+        ])
+        .filter((id): id is string => Boolean(id))
+    ),
+  ];
+  const itemRows = ids.length
+    ? await db.select({ id: avatarItems.id, key: avatarItems.key }).from(avatarItems).where(inArray(avatarItems.id, ids))
+    : [];
+  const keyById = new Map(itemRows.map((i) => [i.id, i.key]));
+  return new Map(rows.map((r) => [r.id, resolveEquippedKeys(r, keyById)]));
+}
+
+export async function getEquippedAvatarKeys(student: AuthedStudent): Promise<AvatarEquippedKeys> {
+  const result = await getEquippedAvatarKeysForMany([student]);
+  return result.get(student.id) ?? {};
 }

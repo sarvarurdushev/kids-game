@@ -8,6 +8,13 @@
       "when": 1784303622464,
       "tag": "0000_dashing_rage",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784379528820,
+      "tag": "0001_dry_sprite",
+      "breakpoints": true
     }
   ]
 }

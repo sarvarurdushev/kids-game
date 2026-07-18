@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AvatarRenderer } from "./AvatarRenderer";
 import { Button } from "@/components/ui/Button";
-import { emojiForAvatarItem } from "@/lib/visuals";
 import { playCoin, playPop } from "@/lib/sound";
 import { CoinIcon } from "@/components/icons";
 
@@ -126,9 +125,9 @@ export function AvatarCustomizer({
               item.equipped ? "bg-gold/20 ring-2 ring-gold" : "bg-white"
             }`}
           >
-            <span className={`text-4xl ${item.state === "locked" ? "opacity-50 grayscale" : ""}`}>
-              {item.state === "locked" ? "🔒" : emojiForAvatarItem(item.key)}
-            </span>
+            <div className={item.state === "locked" ? "opacity-40 grayscale" : ""}>
+              <AvatarRenderer equippedKeys={{ [item.slot]: item.key }} size={56} />
+            </div>
             <p className="text-xs font-semibold">{item.name}</p>
             {item.state === "owned" && !item.equipped && (
               <Button

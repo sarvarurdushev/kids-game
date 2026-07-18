@@ -6,6 +6,7 @@ import {
   timestamp,
   date,
   jsonb,
+  boolean,
   uniqueIndex,
   index,
 } from "drizzle-orm/pg-core";
@@ -120,5 +121,28 @@ export const dailyClaims = pgTable("daily_claims", {
   uniqueIndex("daily_claims_student_date_idx").on(
     table.studentId,
     table.claimDate
+  ),
+]).enableRLS();
+
+export const gameSessions = pgTable("game_sessions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: uuid("student_id")
+    .notNull()
+    .references(() => students.id, { onDelete: "cascade" }),
+  gameKey: text("game_key").notNull(),
+  score: integer("score").notNull(),
+  correctCount: integer("correct_count").notNull(),
+  totalCount: integer("total_count").notNull(),
+  xpAwarded: integer("xp_awarded").notNull().default(0),
+  coinsAwarded: integer("coins_awarded").notNull().default(0),
+  rewarded: boolean("rewarded").notNull().default(true),
+  playedAt: timestamp("played_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+}, (table) => [
+  index("game_sessions_student_game_played_idx").on(
+    table.studentId,
+    table.gameKey,
+    table.playedAt
   ),
 ]).enableRLS();

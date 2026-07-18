@@ -1,10 +1,12 @@
 "use client";
 
 import { AvatarRenderer } from "./AvatarRenderer";
+import type { AvatarEquippedKeys } from "./AvatarCharacter";
 
 interface FamilyMember {
   id: string;
   displayName: string;
+  equippedKeys: AvatarEquippedKeys;
 }
 
 interface AvatarGridProps {
@@ -23,7 +25,7 @@ export function AvatarGrid({ members, onSelect, onAddAnother }: AvatarGridProps)
           onClick={() => onSelect(m.id)}
           className="flex flex-col items-center gap-2 rounded-2xl bg-white/80 p-4 shadow-md transition-transform active:scale-95"
         >
-          <AvatarRenderer equippedKeys={{}} size={72} />
+          <AvatarRenderer equippedKeys={m.equippedKeys} size={72} />
           <span className="font-display font-semibold">{m.displayName}</span>
         </button>
       ))}
