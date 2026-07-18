@@ -2,16 +2,19 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireStudent } from "@/lib/auth/requireStudent";
 import { getDashboard } from "@/lib/student/dashboard";
+import { getEquippedAvatarKeys } from "@/lib/student/avatar";
 import { Card } from "@/components/ui/Card";
 import { LevelRing } from "@/components/ui/LevelRing";
 import { DailyClaimButton } from "@/components/home/DailyClaimButton";
 import { Sparx } from "@/components/mascot/Sparx";
+import { PokeableRoom } from "@/components/room/PokeableRoom";
 import { BoosterPackIcon, CoinIcon, FlameIcon } from "@/components/icons";
 
 export default async function HomePage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
   const dashboard = await getDashboard(student);
+  const equippedKeys = await getEquippedAvatarKeys(student);
 
   const ringProgress =
     dashboard.level.xpForNextLevel !== null
@@ -27,6 +30,8 @@ export default async function HomePage() {
           <p className="text-sm text-ink/60">Ready for today&apos;s adventure?</p>
         </div>
       </div>
+
+      <PokeableRoom equippedKeys={equippedKeys} />
 
       <Card className="flex items-center gap-4">
         <LevelRing progress={ringProgress} size={92}>

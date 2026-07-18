@@ -20,6 +20,9 @@ export default async function LoginPage() {
       equippedHatId: students.equippedHatId,
       equippedAccessoryId: students.equippedAccessoryId,
       equippedBackgroundId: students.equippedBackgroundId,
+      equippedWallpaperId: students.equippedWallpaperId,
+      equippedFloorId: students.equippedFloorId,
+      equippedFurnitureId: students.equippedFurnitureId,
     })
     .from(students)
     .where(inArray(students.id, familyIds));

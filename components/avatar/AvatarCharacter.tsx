@@ -302,6 +302,12 @@ export interface AvatarEquippedKeys {
   hat?: string;
   accessory?: string;
   background?: string;
+  // Room-decoration slots ride along on the same type as the character
+  // slots above — both come from one getEquippedKeys() DB round trip, and
+  // AvatarCharacter simply ignores whichever fields it doesn't render.
+  wallpaper?: string;
+  floor?: string;
+  furniture?: string;
 }
 
 interface AvatarCharacterProps {

@@ -41,6 +41,13 @@ export const students = pgTable("students", {
   equippedBackgroundId: uuid("equipped_background_id").references(
     () => avatarItems.id
   ),
+  equippedWallpaperId: uuid("equipped_wallpaper_id").references(
+    () => avatarItems.id
+  ),
+  equippedFloorId: uuid("equipped_floor_id").references(() => avatarItems.id),
+  equippedFurnitureId: uuid("equipped_furniture_id").references(
+    () => avatarItems.id
+  ),
 
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

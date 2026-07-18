@@ -35,5 +35,6 @@ export const config = {
     "/avatar",
     "/achievements",
     "/games/:path*",
+    "/room",
   ],
 };

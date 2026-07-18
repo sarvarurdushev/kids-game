@@ -140,3 +140,12 @@ export function playGameOver(): void {
     });
   });
 }
+
+export function playGiggle(): void {
+  play((ctx, now) => {
+    const notes = [700, 850, 750, 950];
+    notes.forEach((freq, i) => {
+      tone(ctx, { freq, start: now + i * 0.07, duration: 0.09, type: "sine", peakGain: 0.1 });
+    });
+  });
+}

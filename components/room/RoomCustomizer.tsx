@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AvatarRenderer } from "./AvatarRenderer";
+import { RoomScene } from "./RoomScene";
+import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
 import { playCoin, playPop } from "@/lib/sound";
 import { CoinIcon } from "@/components/icons";
 
-type Slot = "hair" | "eyes" | "clothes" | "hat" | "accessory" | "background";
+type RoomSlot = "wallpaper" | "floor" | "furniture";
 
-export interface AvatarItem {
+export interface RoomItem {
   id: string;
-  slot: Slot;
+  slot: RoomSlot;
   key: string;
   name: string;
   coinPrice: number | null;
@@ -21,33 +22,28 @@ export interface AvatarItem {
   equipped: boolean;
 }
 
-const SLOTS: Slot[] = ["hair", "eyes", "clothes", "hat", "accessory", "background"];
-const SLOT_LABELS: Record<Slot, string> = {
-  hair: "Hair",
-  eyes: "Eyes",
-  clothes: "Clothes",
-  hat: "Hat",
-  accessory: "Accessory",
-  background: "Background",
+const SLOTS: RoomSlot[] = ["wallpaper", "floor", "furniture"];
+const SLOT_LABELS: Record<RoomSlot, string> = {
+  wallpaper: "Wallpaper",
+  floor: "Floor",
+  furniture: "Furniture",
 };
 
-export function AvatarCustomizer({
+export function RoomCustomizer({
   items,
   coinsBalance,
+  equippedKeys,
 }: {
-  items: AvatarItem[];
+  items: RoomItem[];
   coinsBalance: number;
+  equippedKeys: AvatarEquippedKeys;
 }) {
   const router = useRouter();
-  const [activeSlot, setActiveSlot] = useState<Slot>("clothes");
+  const [activeSlot, setActiveSlot] = useState<RoomSlot>("wallpaper");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const equippedKeys = Object.fromEntries(
-    SLOTS.map((slot) => [slot, items.find((i) => i.slot === slot && i.equipped)?.key])
-  );
-
-  async function equip(item: AvatarItem) {
+  async function equip(item: RoomItem) {
     setBusyId(item.id);
     setError(null);
     try {
@@ -68,7 +64,7 @@ export function AvatarCustomizer({
     }
   }
 
-  async function purchase(item: AvatarItem) {
+  async function purchase(item: RoomItem) {
     setBusyId(item.id);
     setError(null);
     try {
@@ -94,7 +90,7 @@ export function AvatarCustomizer({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col items-center gap-2">
-        <AvatarRenderer equippedKeys={equippedKeys} size={120} />
+        <RoomScene equippedKeys={equippedKeys} avatarSize={110} className="w-full" />
         <p className="flex items-center gap-1 text-sm font-semibold text-ink/60">
           <CoinIcon size={16} /> {coinsBalance} coins
         </p>
@@ -117,16 +113,16 @@ export function AvatarCustomizer({
 
       {error && <p className="text-center text-sm font-semibold text-coral">{error}</p>}
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         {slotItems.map((item) => (
           <div
             key={item.id}
-            className={`flex flex-col items-center gap-2 rounded-2xl p-3 text-center ${
+            className={`flex flex-col items-center gap-2 rounded-2xl p-2 text-center ${
               item.equipped ? "bg-gold/20 ring-2 ring-gold" : "bg-white"
             }`}
           >
-            <div className={item.state === "locked" ? "opacity-40 grayscale" : ""}>
-              <AvatarRenderer equippedKeys={{ [item.slot]: item.key }} size={56} />
+            <div className={`w-full overflow-hidden rounded-xl ${item.state === "locked" ? "opacity-40 grayscale" : ""}`}>
+              <RoomScene equippedKeys={{ [item.slot]: item.key }} avatarSize={70} className="w-full" />
             </div>
             <p className="text-xs font-semibold">{item.name}</p>
             {item.state === "owned" && !item.equipped && (
@@ -136,11 +132,11 @@ export function AvatarCustomizer({
                 onClick={() => equip(item)}
                 disabled={busyId === item.id}
               >
-                Wear
+                Use
               </Button>
             )}
             {item.state === "owned" && item.equipped && (
-              <span className="text-xs font-bold text-gold-dark">Equipped</span>
+              <span className="text-xs font-bold text-gold-dark">In use</span>
             )}
             {item.state === "purchasable" && (
               <Button

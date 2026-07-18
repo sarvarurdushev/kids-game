@@ -157,6 +157,21 @@ async function main() {
     { slot: "background", key: "background_stars", name: "Starry Night", acquisitionMethod: "level_unlock" as const, unlockLevel: 5 },
     { slot: "background", key: "background_rainbow", name: "Rainbow", acquisitionMethod: "coin_purchase" as const, coinPrice: 40 },
     { slot: "background", key: "background_forest", name: "Forest", acquisitionMethod: "level_unlock" as const, unlockLevel: 7 },
+
+    { slot: "wallpaper", key: "wallpaper_plain", name: "Cozy Cream", acquisitionMethod: "starter" as const },
+    { slot: "wallpaper", key: "wallpaper_stripes", name: "Candy Stripes", acquisitionMethod: "coin_purchase" as const, coinPrice: 30 },
+    { slot: "wallpaper", key: "wallpaper_stars", name: "Night Sky", acquisitionMethod: "level_unlock" as const, unlockLevel: 3 },
+    { slot: "wallpaper", key: "wallpaper_dots", name: "Polka Dots", acquisitionMethod: "coin_purchase" as const, coinPrice: 35 },
+
+    { slot: "floor", key: "floor_wood", name: "Wood Floor", acquisitionMethod: "starter" as const },
+    { slot: "floor", key: "floor_rug", name: "Cozy Rug", acquisitionMethod: "coin_purchase" as const, coinPrice: 25 },
+    { slot: "floor", key: "floor_tile", name: "Checker Tile", acquisitionMethod: "level_unlock" as const, unlockLevel: 4 },
+    { slot: "floor", key: "floor_grass", name: "Grass", acquisitionMethod: "coin_purchase" as const, coinPrice: 30 },
+
+    { slot: "furniture", key: "furniture_plant", name: "Potted Plant", acquisitionMethod: "starter" as const },
+    { slot: "furniture", key: "furniture_lamp", name: "Reading Lamp", acquisitionMethod: "coin_purchase" as const, coinPrice: 20 },
+    { slot: "furniture", key: "furniture_chest", name: "Toy Chest", acquisitionMethod: "level_unlock" as const, unlockLevel: 6 },
+    { slot: "furniture", key: "furniture_bookshelf", name: "Bookshelf", acquisitionMethod: "coin_purchase" as const, coinPrice: 35 },
   ];
 
   await db
@@ -366,7 +381,15 @@ async function main() {
   }
 
   // --- Demo students -------------------------------------------------------
-  const starterItemKeys = ["hair_brown", "eyes_round", "clothes_tshirt", "background_sunny"];
+  const starterItemKeys = [
+    "hair_brown",
+    "eyes_round",
+    "clothes_tshirt",
+    "background_sunny",
+    "wallpaper_plain",
+    "floor_wood",
+    "furniture_plant",
+  ];
   const demoStudents = [
     { displayName: "Amira", enrollmentCode: "GOLD-AMIRA", pin: "1234", externalId: "demo-amira" },
     { displayName: "Jamal", enrollmentCode: "GOLD-JAMAL", pin: "4321", externalId: "demo-jamal" },
@@ -391,7 +414,9 @@ async function main() {
       })
       .returning();
 
-    const starterAssignments: Partial<Record<"hair" | "eyes" | "clothes" | "background", string>> = {};
+    const starterAssignments: Partial<
+      Record<"hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture", string>
+    > = {};
     for (const key of starterItemKeys) {
       const item = avatarItemByKey.get(key)!;
       await db.insert(studentAvatarItems).values({
@@ -399,7 +424,9 @@ async function main() {
         avatarItemId: item.id,
         acquiredVia: "starter",
       });
-      starterAssignments[item.slot as "hair" | "eyes" | "clothes" | "background"] = item.id;
+      starterAssignments[
+        item.slot as "hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture"
+      ] = item.id;
     }
     await db
       .update(students)
@@ -408,6 +435,9 @@ async function main() {
         equippedEyesId: starterAssignments.eyes,
         equippedClothesId: starterAssignments.clothes,
         equippedBackgroundId: starterAssignments.background,
+        equippedWallpaperId: starterAssignments.wallpaper,
+        equippedFloorId: starterAssignments.floor,
+        equippedFurnitureId: starterAssignments.furniture,
       })
       .where(eq(students.id, student.id));
 

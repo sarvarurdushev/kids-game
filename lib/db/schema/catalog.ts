@@ -22,6 +22,9 @@ export const avatarSlotEnum = pgEnum("avatar_slot", [
   "hat",
   "accessory",
   "background",
+  "wallpaper",
+  "floor",
+  "furniture",
 ]);
 
 export const avatarAcquisitionMethodEnum = pgEnum("avatar_acquisition_method", [
