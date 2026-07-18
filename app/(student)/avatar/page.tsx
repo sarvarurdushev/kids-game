@@ -5,7 +5,7 @@ import { getAvatarItems } from "@/lib/student/avatar";
 import { AvatarCustomizer } from "@/components/avatar/AvatarCustomizer";
 import type { AvatarItem } from "@/components/avatar/AvatarCustomizer";
 
-const CHARACTER_SLOTS = new Set<string>(["hair", "eyes", "clothes", "hat", "accessory", "background"]);
+const CHARACTER_SLOTS = new Set<string>(["species", "hair", "eyes", "clothes", "hat", "accessory", "background"]);
 
 export default async function AvatarPage() {
   const student = await requireStudent();

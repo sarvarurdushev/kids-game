@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { playCoin, playPop } from "@/lib/sound";
 import { CoinIcon } from "@/components/icons";
 
-type Slot = "hair" | "eyes" | "clothes" | "hat" | "accessory" | "background";
+type Slot = "species" | "hair" | "eyes" | "clothes" | "hat" | "accessory" | "background";
 
 export interface AvatarItem {
   id: string;
@@ -22,8 +22,9 @@ export interface AvatarItem {
   equipped: boolean;
 }
 
-const SLOTS: Slot[] = ["hair", "eyes", "clothes", "hat", "accessory", "background"];
+const SLOTS: Slot[] = ["species", "hair", "eyes", "clothes", "hat", "accessory", "background"];
 const SLOT_LABELS: Record<Slot, string> = {
+  species: "Animal",
   hair: "Fur",
   eyes: "Eyes",
   clothes: "Clothes",
@@ -40,7 +41,7 @@ export function AvatarCustomizer({
   coinsBalance: number;
 }) {
   const router = useRouter();
-  const [activeSlot, setActiveSlot] = useState<Slot>("clothes");
+  const [activeSlot, setActiveSlot] = useState<Slot>("species");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 

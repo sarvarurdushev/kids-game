@@ -13,6 +13,7 @@ const SLOT_TO_EQUIPPED_COLUMN: Record<
   AvatarItemRow["slot"],
   keyof typeof students.$inferInsert
 > = {
+  species: "equippedSpeciesId",
   hair: "equippedHairId",
   eyes: "equippedEyesId",
   clothes: "equippedClothesId",
@@ -43,6 +44,7 @@ export async function getAvatarItems(student: AuthedStudent) {
 
   const equippedIds = new Set(
     [
+      student.equippedSpeciesId,
       student.equippedHairId,
       student.equippedEyesId,
       student.equippedClothesId,
@@ -180,6 +182,7 @@ export async function equipAvatarItem(student: AuthedStudent, avatarItemId: stri
 type EquippedIdRow = Pick<
   typeof students.$inferSelect,
   | "id"
+  | "equippedSpeciesId"
   | "equippedHairId"
   | "equippedEyesId"
   | "equippedClothesId"
@@ -193,6 +196,7 @@ type EquippedIdRow = Pick<
 
 function resolveEquippedKeys(row: EquippedIdRow, keyById: Map<string, string>): AvatarEquippedKeys {
   return {
+    species: row.equippedSpeciesId ? keyById.get(row.equippedSpeciesId) : undefined,
     hair: row.equippedHairId ? keyById.get(row.equippedHairId) : undefined,
     eyes: row.equippedEyesId ? keyById.get(row.equippedEyesId) : undefined,
     clothes: row.equippedClothesId ? keyById.get(row.equippedClothesId) : undefined,
@@ -213,6 +217,7 @@ export async function getEquippedAvatarKeysForMany(
     ...new Set(
       rows
         .flatMap((r) => [
+          r.equippedSpeciesId,
           r.equippedHairId,
           r.equippedEyesId,
           r.equippedClothesId,

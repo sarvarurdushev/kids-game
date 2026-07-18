@@ -14,6 +14,7 @@ export default async function LoginPage() {
     .select({
       id: students.id,
       displayName: students.displayName,
+      equippedSpeciesId: students.equippedSpeciesId,
       equippedHairId: students.equippedHairId,
       equippedEyesId: students.equippedEyesId,
       equippedClothesId: students.equippedClothesId,

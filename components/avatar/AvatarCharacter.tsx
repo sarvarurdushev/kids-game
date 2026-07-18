@@ -320,6 +320,11 @@ const BACKGROUNDS: Record<string, () => ReactNode> = {
 };
 
 export interface AvatarEquippedKeys {
+  // Only "species_cat" has a real renderer today. The other species are
+  // seeded with active:false (scripts/seed.ts) so they can't be owned or
+  // equipped yet — this field exists so the type is ready for them once
+  // their rendering is built.
+  species?: string;
   hair?: string;
   eyes?: string;
   clothes?: string;

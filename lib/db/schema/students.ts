@@ -29,6 +29,9 @@ export const students = pgTable("students", {
   longestStreak: integer("longest_streak").notNull().default(0),
   lastClaimDate: date("last_claim_date"),
 
+  equippedSpeciesId: uuid("equipped_species_id").references(
+    () => avatarItems.id
+  ),
   equippedHairId: uuid("equipped_hair_id").references(() => avatarItems.id),
   equippedEyesId: uuid("equipped_eyes_id").references(() => avatarItems.id),
   equippedClothesId: uuid("equipped_clothes_id").references(

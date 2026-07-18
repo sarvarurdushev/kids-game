@@ -16,6 +16,7 @@ export const rarityEnum = pgEnum("rarity", [
 ]);
 
 export const avatarSlotEnum = pgEnum("avatar_slot", [
+  "species",
   "hair",
   "eyes",
   "clothes",

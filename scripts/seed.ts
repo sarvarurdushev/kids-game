@@ -130,6 +130,18 @@ async function main() {
 
   // --- Avatar items ----------------------------------------------------------
   const avatarItemSeed = [
+    // Species is the animal itself (cat/dog/rabbit/fox/bear), unlocked by
+    // level like everything else here. Only "species_cat" has a real 3D/2D
+    // renderer today (components/three/Character3D.tsx,
+    // components/avatar/AvatarCharacter.tsx are cat-specific) — the rest are
+    // seeded active:false so they can't be owned or equipped (which would
+    // otherwise render nothing) until each one gets its own rendering.
+    { slot: "species", key: "species_cat", name: "Cat", acquisitionMethod: "starter" as const },
+    { slot: "species", key: "species_dog", name: "Dog", acquisitionMethod: "level_unlock" as const, unlockLevel: 5, active: false },
+    { slot: "species", key: "species_rabbit", name: "Rabbit", acquisitionMethod: "level_unlock" as const, unlockLevel: 10, active: false },
+    { slot: "species", key: "species_fox", name: "Fox", acquisitionMethod: "level_unlock" as const, unlockLevel: 15, active: false },
+    { slot: "species", key: "species_bear", name: "Bear", acquisitionMethod: "level_unlock" as const, unlockLevel: 20, active: false },
+
     { slot: "hair", key: "hair_brown", name: "Ginger Fur", acquisitionMethod: "starter" as const },
     { slot: "hair", key: "hair_curly", name: "Fluffy Fur", acquisitionMethod: "level_unlock" as const, unlockLevel: 3 },
     { slot: "hair", key: "hair_spiky", name: "Tuxedo Fur", acquisitionMethod: "coin_purchase" as const, coinPrice: 40 },
@@ -178,12 +190,23 @@ async function main() {
     .insert(avatarItems)
     .values(
       avatarItemSeed.map((item) => ({
-        slot: item.slot as "hair" | "eyes" | "clothes" | "hat" | "accessory" | "background",
+        slot: item.slot as
+          | "species"
+          | "hair"
+          | "eyes"
+          | "clothes"
+          | "hat"
+          | "accessory"
+          | "background"
+          | "wallpaper"
+          | "floor"
+          | "furniture",
         key: item.key,
         name: item.name,
         acquisitionMethod: item.acquisitionMethod,
         unlockLevel: "unlockLevel" in item ? item.unlockLevel : null,
         coinPrice: "coinPrice" in item ? item.coinPrice : null,
+        active: "active" in item ? item.active : true,
       }))
     )
     .onConflictDoNothing();
@@ -382,6 +405,7 @@ async function main() {
 
   // --- Demo students -------------------------------------------------------
   const starterItemKeys = [
+    "species_cat",
     "hair_brown",
     "eyes_round",
     "clothes_tshirt",
@@ -415,7 +439,7 @@ async function main() {
       .returning();
 
     const starterAssignments: Partial<
-      Record<"hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture", string>
+      Record<"species" | "hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture", string>
     > = {};
     for (const key of starterItemKeys) {
       const item = avatarItemByKey.get(key)!;
@@ -425,12 +449,13 @@ async function main() {
         acquiredVia: "starter",
       });
       starterAssignments[
-        item.slot as "hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture"
+        item.slot as "species" | "hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture"
       ] = item.id;
     }
     await db
       .update(students)
       .set({
+        equippedSpeciesId: starterAssignments.species,
         equippedHairId: starterAssignments.hair,
         equippedEyesId: starterAssignments.eyes,
         equippedClothesId: starterAssignments.clothes,
