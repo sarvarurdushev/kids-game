@@ -28,22 +28,23 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
   const [revealedCount, setRevealedCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
   // Opening a pack is a real, non-idempotent mutation, not a cancellable
-  // fetch-for-display — a `cancelled` flag alone can't stop the request
-  // from having already fired once. This ref (which survives React Strict
-  // Mode's dev-only double-invoke of effects) makes sure it only ever goes
-  // out once per mounted instance.
-  const hasRequestedRef = useRef(false);
+  // fetch-for-display, so it must fire exactly once per grantId — no more
+  // (a duplicate POST) and no less (a `cancelled` flag that outlives React
+  // Strict Mode's dev-only mount/cleanup/remount cycle would discard the
+  // first, successful response and leave the UI stuck loading forever).
+  // Tracking the grantId itself survives that cycle while still allowing a
+  // genuinely new grantId (a different pack opened in the same mounted
+  // route) to fire its own request.
+  const requestedGrantIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    if (hasRequestedRef.current) return;
-    hasRequestedRef.current = true;
+    if (requestedGrantIdRef.current === grantId) return;
+    requestedGrantIdRef.current = grantId;
 
     async function open() {
       try {
         const res = await fetch(`/api/packs/${grantId}/open`, { method: "POST" });
         const data = await res.json().catch(() => ({}));
-        if (cancelled) return;
         if (!res.ok) {
           setError(data.error ?? "That pack couldn't be opened");
           setPhase("error");
@@ -52,26 +53,19 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
         setCards(data.cards);
         setPhase("shaking");
         setTimeout(() => {
-          if (!cancelled) {
-            setPhase("burst");
-            playWhoosh();
-          }
+          setPhase("burst");
+          playWhoosh();
         }, 1100);
         setTimeout(() => {
-          if (!cancelled) setPhase("revealing");
+          setPhase("revealing");
         }, 1500);
       } catch {
-        if (!cancelled) {
-          setError("Something went wrong. Try again!");
-          setPhase("error");
-        }
+        setError("Something went wrong. Try again!");
+        setPhase("error");
       }
     }
 
     open();
-    return () => {
-      cancelled = true;
-    };
   }, [grantId]);
 
   useEffect(() => {
