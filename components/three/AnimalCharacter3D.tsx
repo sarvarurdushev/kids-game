@@ -10,12 +10,12 @@ import type { AvatarEquippedKeys, AvatarMood } from "@/components/avatar/AvatarC
 
 // Real, fetched CC0/CC-BY low-poly animal packs (see
 // public/models/animals/CREDITS.md for per-model license/author), loaded
-// with drei's useGLTF instead of the cat's hand-built primitive geometry in
-// Character3D.tsx. Deliberately NOT preloaded — with 30+ species now in the
-// roster, eagerly fetching all of them the moment any avatar renders would
-// waste bandwidth on animals a given student may never own; useGLTF's
+// with drei's useGLTF. Deliberately NOT preloaded — with 30+ species now in
+// the roster, eagerly fetching all of them the moment any avatar renders
+// would waste bandwidth on animals a given student may never own; useGLTF's
 // Suspense integration fetches one on demand exactly when it's equipped.
 const MODEL_URL: Record<string, string> = {
+  species_cat: "/models/animals/cat.glb",
   species_dog: "/models/animals/dog.glb",
   species_rabbit: "/models/animals/rabbit.glb",
   species_fox: "/models/animals/fox.glb",
@@ -50,8 +50,6 @@ const MODEL_URL: Record<string, string> = {
   species_goat: "/models/animals/goat.glb",
   species_unicorn: "/models/animals/unicorn.glb",
 };
-
-export const ANIMAL_SPECIES = new Set(Object.keys(MODEL_URL));
 
 // Each model comes from a different author at a different original scale
 // and pivot, so instead of hand-tuning per-model constants every species is

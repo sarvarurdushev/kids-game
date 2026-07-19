@@ -37,6 +37,7 @@ fantasy line (Ultimate Monsters Bundle).
 
 | File | Species | Author | Source | License |
 | --- | --- | --- | --- | --- |
+| `cat.glb` | Cat | Poly by Google | poly.pizza/m/6dM1J6f6pm9 | CC-BY 3.0 |
 | `bear.glb` | Bear (Sir Bearington) | madtrollstudio | poly.pizza/m/kLLBpmcw0w | CC-BY 3.0 |
 | `giraffe.glb` | Giraffe | madtrollstudio | poly.pizza/m/jUaMl6njBh | CC-BY 3.0 |
 | `duck.glb` | Duck | madtrollstudio | poly.pizza/m/4plJcFXhim | CC-BY 3.0 |
@@ -62,7 +63,7 @@ a dead end without Blender). Per CC-BY 3.0/4.0, attribution is:
 
 - "Bear", "Giraffe", "Duck", "Penguin", "Chicken" by madtrollstudio, licensed under
   CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/), via poly.pizza.
-- "Panda", "Koala", "Tiger", "Lion", "Owl", "Raccoon", "Squirrel", "Elephant",
+- "Cat", "Panda", "Koala", "Tiger", "Lion", "Owl", "Raccoon", "Squirrel", "Elephant",
   "Monkey", "Goat", "Unicorn" by Poly by Google, licensed under CC-BY 3.0
   (https://creativecommons.org/licenses/by/3.0/), via poly.pizza.
 
