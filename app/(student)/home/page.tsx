@@ -31,7 +31,7 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <PokeableRoom equippedKeys={equippedKeys} />
+      <PokeableRoom equippedKeys={equippedKeys} baseMood={dashboard.petMood} happiness={dashboard.petHappiness} />
 
       <Card className="flex items-center gap-4">
         <LevelRing progress={ringProgress} size={92}>

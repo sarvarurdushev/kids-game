@@ -4,6 +4,7 @@ import { CreatureArt } from "@/components/creatures/CreatureArt";
 import { Avatar3D } from "@/components/three/Avatar3D";
 import { RoomScene3D } from "@/components/three/RoomScene3D";
 import { BoosterPackIcon, ChestIcon, CoinIcon, FlameIcon, StarIcon } from "@/components/icons";
+import { GameRewardSummary } from "@/components/games/GameRewardSummary";
 import type { Rarity } from "@/lib/reward-engine/types";
 
 // Internal design-review page, not linked from anywhere in the product.
@@ -151,6 +152,30 @@ export default function ShowcasePage() {
               <span className="text-sm font-semibold">{expr}</span>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="mb-10">
+        <h2 className="font-display mb-3 text-lg font-semibold">Game reward summary</h2>
+        <div className="flex flex-wrap gap-6">
+          <div className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4">
+            <GameRewardSummary
+              result={{ rewarded: true, xpAwarded: 16, coinsAwarded: 13, streakMultiplier: 1, spinBonusCoins: 0 }}
+            />
+            <span className="text-sm font-semibold">plain reward</span>
+          </div>
+          <div className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4">
+            <GameRewardSummary
+              result={{ rewarded: true, xpAwarded: 16, coinsAwarded: 24, streakMultiplier: 1.35, spinBonusCoins: 6 }}
+            />
+            <span className="text-sm font-semibold">streak + surprise chest</span>
+          </div>
+          <div className="flex flex-col items-center gap-2 rounded-2xl bg-white p-4">
+            <GameRewardSummary
+              result={{ rewarded: false, xpAwarded: 0, coinsAwarded: 0, streakMultiplier: 1, spinBonusCoins: 0 }}
+            />
+            <span className="text-sm font-semibold">practice round (cap reached)</span>
+          </div>
         </div>
       </section>
 

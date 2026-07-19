@@ -4,6 +4,8 @@ import { db } from "@/lib/db/client";
 import { packGrants } from "@/lib/db/schema";
 import { getLevelInfo } from "./levelInfo";
 import { getDailyClaimStatus } from "@/lib/reward-engine/dailyClaim";
+import { petMoodFromHappiness } from "@/lib/reward-engine/pet";
+import { currentPetHappiness } from "./pet";
 import type { AuthedStudent } from "@/lib/auth/requireStudent";
 
 export async function getDashboard(student: AuthedStudent) {
@@ -13,6 +15,7 @@ export async function getDashboard(student: AuthedStudent) {
     .from(packGrants)
     .where(and(eq(packGrants.studentId, student.id), isNull(packGrants.openedAt)));
   const dailyClaim = await getDailyClaimStatus(student.id);
+  const petHappiness = currentPetHappiness(student);
 
   return {
     displayName: student.displayName,
@@ -23,5 +26,7 @@ export async function getDashboard(student: AuthedStudent) {
     level: levelInfo,
     unopenedPackCount: Number(unopenedPackCount),
     dailyClaim,
+    petHappiness,
+    petMood: petMoodFromHappiness(petHappiness),
   };
 }

@@ -29,6 +29,13 @@ export const students = pgTable("students", {
   longestStreak: integer("longest_streak").notNull().default(0),
   lastClaimDate: date("last_claim_date"),
 
+  // Talking-Tom-style pet care: happiness decays over time since the last
+  // poke/feed (computed lazily in lib/student/pet.ts, not by a cron), and
+  // feeds back into both the equipped character's mood and a small game
+  // coin bonus — so visiting your pet has a point beyond the poke itself.
+  petHappiness: integer("pet_happiness").notNull().default(70),
+  petLastInteractionAt: timestamp("pet_last_interaction_at", { withTimezone: true }),
+
   equippedSpeciesId: uuid("equipped_species_id").references(
     () => avatarItems.id
   ),

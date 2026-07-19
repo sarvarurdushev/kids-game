@@ -6,10 +6,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { Avatar3D } from "@/components/three/Avatar3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
-import { CoinIcon, StarIcon } from "@/components/icons";
 import { playCorrect, playWrong, playGameOver, playTick, playPop } from "@/lib/sound";
 import { shuffle, wordsUpToDifficulty, type WordEntry } from "@/lib/games/wordBank";
 import { WordScrambleScene3D } from "./WordScrambleScene3D";
+import { GameRewardSummary } from "./GameRewardSummary";
 
 const TOTAL_ROUNDS = 8;
 const TIME_BASE_MS = 5000;
@@ -35,6 +35,8 @@ interface CompleteResponse {
   rewarded: boolean;
   xpAwarded: number;
   coinsAwarded: number;
+  streakMultiplier: number;
+  spinBonusCoins: number;
   levelsCrossed: number[];
   playsRemainingToday: number;
 }
@@ -235,19 +237,7 @@ export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKey
           You spelled <span className="font-bold text-ink">{correctCount}</span> of{" "}
           <span className="font-bold text-ink">{TOTAL_ROUNDS}</span> words correctly!
         </p>
-        {result && (
-          <div className="flex items-center gap-4 rounded-2xl bg-white/80 px-5 py-3 shadow-sm">
-            <span className="flex items-center gap-1 font-bold text-gold-dark">
-              <StarIcon size={18} /> +{result.xpAwarded} XP
-            </span>
-            <span className="flex items-center gap-1 font-bold text-gold-dark">
-              <CoinIcon size={18} /> +{result.coinsAwarded}
-            </span>
-          </div>
-        )}
-        {result && !result.rewarded && (
-          <p className="text-xs text-ink/50">Practice round — come back tomorrow for more rewarded rounds!</p>
-        )}
+        {result && <GameRewardSummary result={result} />}
         <div className="flex gap-3">
           <Button onClick={playAgain}>Play Again</Button>
           <Link href="/games">

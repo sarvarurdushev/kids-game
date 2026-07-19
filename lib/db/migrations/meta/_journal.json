@@ -36,6 +36,13 @@
       "when": 1784440537809,
       "tag": "0004_abandoned_the_hood",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1784443120250,
+      "tag": "0005_dry_daredevil",
+      "breakpoints": true
     }
   ]
 }
