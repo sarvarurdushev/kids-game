@@ -196,6 +196,48 @@ export function WordScrambleIcon({ size = 48, className = "" }: { size?: number;
   );
 }
 
+export function RobotSortIcon({ size = 48, className = "" }: { size?: number; className?: string }) {
+  const id = useSvgId("robotSort");
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} className={className}>
+      <defs>
+        <linearGradient id={id} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#bfe8ff" />
+          <stop offset="100%" stopColor="var(--color-teal)" />
+        </linearGradient>
+      </defs>
+      <line x1={50} y1={10} x2={50} y2={20} stroke="#2d2a26" strokeWidth={2.5} strokeLinecap="round" />
+      <circle cx={50} cy={8} r={4} fill="var(--color-gk-coral)" stroke="#2d2a26" strokeWidth={1.5} />
+      <rect x={26} y={20} width={48} height={38} rx={12} fill={`url(#${id})`} stroke="#2d2a26" strokeWidth={2} />
+      <circle cx={39} cy={38} r={5} fill="#fff" stroke="#2d2a26" strokeWidth={1.5} />
+      <circle cx={61} cy={38} r={5} fill="#fff" stroke="#2d2a26" strokeWidth={1.5} />
+      <path d="M 38 50 Q 50 56 62 50" fill="none" stroke="#2d2a26" strokeWidth={2.5} strokeLinecap="round" />
+      <rect x={14} y={72} width={30} height={20} rx={7} fill="var(--color-gk-gold)" stroke="#2d2a26" strokeWidth={2} />
+      <rect x={56} y={72} width={30} height={20} rx={7} fill="var(--color-gk-coral)" stroke="#2d2a26" strokeWidth={2} />
+      <path d="M 46 62 L 29 72" stroke="#2d2a26" strokeWidth={2} strokeLinecap="round" />
+      <path d="M 54 62 L 71 72" stroke="#2d2a26" strokeWidth={2} strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function SequenceIcon({ size = 48, className = "" }: { size?: number; className?: string }) {
+  const colors = ["var(--color-gk-gold)", "var(--color-teal)", "var(--color-gk-coral)"];
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} className={className}>
+      {[16, 42, 68].map((x, i) => (
+        <g key={x}>
+          <rect x={x} y={34} width={26} height={26} rx={8} fill={colors[i]} stroke="#2d2a26" strokeWidth={2} />
+          <text x={x + 13} y={52} textAnchor="middle" fontSize={15} fontWeight={800} fill="#2d2a26">
+            {i + 1}
+          </text>
+        </g>
+      ))}
+      <path d="M 43 47 L 40 44 M 43 47 L 40 50" stroke="#2d2a26" strokeWidth={2} strokeLinecap="round" fill="none" />
+      <path d="M 69 47 L 66 44 M 69 47 L 66 50" stroke="#2d2a26" strokeWidth={2} strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
 export function BoosterPackIcon({
   size = 64,
   className = "",

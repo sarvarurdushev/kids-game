@@ -30,4 +30,18 @@ export const GAME_CATALOG: GameMeta[] = [
     href: "/games/word-scramble",
     color: "var(--color-teal)",
   },
+  {
+    key: "train_the_robot",
+    name: "Train the Robot",
+    tagline: "Sort pictures into groups and check Sparx's guesses!",
+    href: "/ai-lab/train-the-robot",
+    color: "var(--color-teal)",
+  },
+  {
+    key: "sequence_builder",
+    name: "Sequence Builder",
+    tagline: "Put the steps of a routine in the right order!",
+    href: "/ai-lab/sequence-builder",
+    color: "var(--color-gk-coral)",
+  },
 ];
