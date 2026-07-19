@@ -5,6 +5,7 @@ import {
   text,
   integer,
   boolean,
+  jsonb,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
@@ -33,6 +34,7 @@ export const avatarAcquisitionMethodEnum = pgEnum("avatar_acquisition_method", [
   "level_unlock",
   "achievement_unlock",
   "coin_purchase",
+  "case_unlock",
 ]);
 
 export const universes = pgTable("universes", {
@@ -113,7 +115,36 @@ export const avatarItems = pgTable("avatar_items", {
   unlockLevel: integer("unlock_level"),
   coinPrice: integer("coin_price"),
   active: boolean("active").notNull().default(true),
+  // Other avatar_items.key values to grant + auto-equip alongside this one —
+  // a "character" that comes with its own outfit (e.g. species_fox bundling
+  // hat_wizard) rather than a bare, uncostumed unlock. Only meaningful on
+  // slot="species" rows today.
+  bundledItemKeys: jsonb("bundled_item_keys").$type<string[]>(),
 }, (table) => [uniqueIndex("avatar_items_key_idx").on(table.key)]).enableRLS();
+
+export const avatarCaseTypes = pgTable("avatar_case_types", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  key: text("key").notNull(),
+  name: text("name").notNull(),
+  slot: avatarSlotEnum("slot").notNull().default("species"),
+  coinCost: integer("coin_cost").notNull(),
+  iconUrl: text("icon_url"),
+  active: boolean("active").notNull().default(true),
+}, (table) => [uniqueIndex("avatar_case_types_key_idx").on(table.key)]).enableRLS();
+
+export const avatarCaseRarityOdds = pgTable("avatar_case_rarity_odds", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  caseTypeId: uuid("case_type_id")
+    .notNull()
+    .references(() => avatarCaseTypes.id, { onDelete: "cascade" }),
+  rarity: rarityEnum("rarity").notNull(),
+  weight: integer("weight").notNull().default(1),
+}, (table) => [
+  uniqueIndex("avatar_case_rarity_odds_case_rarity_idx").on(
+    table.caseTypeId,
+    table.rarity
+  ),
+]).enableRLS();
 
 export const rewardRuleTriggerEnum = pgEnum("reward_rule_trigger", [
   "boolean_field",

@@ -162,15 +162,134 @@ const SPECIES_EARS: Record<string, (furColor: string, innerColor: string) => Rea
       <circle cx={140} cy={54} r={9} fill={innerColor} />
     </>
   ),
+  // Small ears sitting close to the head — cattle/equines/camelids.
+  species_small_ears: (furColor, innerColor) => (
+    <>
+      <path d="M 60 58 Q 52 44 60 34 Q 70 42 68 58 Z" fill={furColor} />
+      <path d="M 61 56 Q 56 46 61 40 Q 66 46 64 56 Z" fill={innerColor} />
+      <path d="M 140 58 Q 148 44 140 34 Q 130 42 132 58 Z" fill={furColor} />
+      <path d="M 139 56 Q 144 46 139 40 Q 134 46 136 56 Z" fill={innerColor} />
+    </>
+  ),
+  species_deer: (furColor, innerColor) => (
+    <>
+      <path d="M 66 58 Q 58 46 64 36 Q 72 44 70 58 Z" fill={furColor} />
+      <path d="M 134 58 Q 142 46 136 36 Q 128 44 130 58 Z" fill={furColor} />
+      {[-1, 1].map((side) => (
+        <g key={side}>
+          <path
+            d={`M ${100 + side * 14} 44 Q ${100 + side * 20} 20 ${100 + side * 10} 6`}
+            stroke={innerColor}
+            strokeWidth={4}
+            fill="none"
+            strokeLinecap="round"
+          />
+          <path
+            d={`M ${100 + side * 17} 26 Q ${100 + side * 28} 20 ${100 + side * 26} 10`}
+            stroke={innerColor}
+            strokeWidth={3}
+            fill="none"
+            strokeLinecap="round"
+          />
+        </g>
+      ))}
+    </>
+  ),
+  species_elephant: (furColor, innerColor) => (
+    <>
+      <path d="M 66 70 Q 30 60 26 100 Q 30 132 68 118 Q 78 96 66 70 Z" fill={furColor} />
+      <path d="M 64 78 Q 42 72 40 98 Q 42 116 64 108 Z" fill={innerColor} />
+      <path d="M 134 70 Q 170 60 174 100 Q 170 132 132 118 Q 122 96 134 70 Z" fill={furColor} />
+      <path d="M 136 78 Q 158 72 160 98 Q 158 116 136 108 Z" fill={innerColor} />
+    </>
+  ),
+  species_giraffe: (furColor, innerColor) => (
+    <>
+      <path d="M 68 58 Q 62 48 68 40 Q 76 46 74 58 Z" fill={furColor} />
+      <path d="M 132 58 Q 138 48 132 40 Q 124 46 126 58 Z" fill={furColor} />
+      {[-1, 1].map((side) => (
+        <g key={side}>
+          <path d={`M ${100 + side * 9} 40 L ${100 + side * 9} 10`} stroke={furColor} strokeWidth={6} strokeLinecap="round" />
+          <circle cx={100 + side * 9} cy={8} r={6} fill={innerColor} />
+        </g>
+      ))}
+    </>
+  ),
+  species_dragon: (furColor, innerColor) => (
+    <>
+      <path d="M 62 60 L 42 12 L 82 44 Z" fill={furColor} />
+      <path d="M 58 52 L 48 24 L 76 44 Z" fill={innerColor} />
+      <path d="M 138 60 L 158 12 L 118 44 Z" fill={furColor} />
+      <path d="M 142 52 L 152 24 L 124 44 Z" fill={innerColor} />
+      {[[-14, 44, 16], [0, 40, 20], [14, 44, 16]].map(([x, y, h], i) => (
+        <path key={i} d={`M ${100 + x - 6} ${y} L ${100 + x} ${y - h} L ${100 + x + 6} ${y} Z`} fill={furColor} />
+      ))}
+    </>
+  ),
+  species_unicorn: (furColor, innerColor) => (
+    <>
+      <path d="M 66 60 Q 58 44 66 32 Q 76 42 74 60 Z" fill={furColor} />
+      <path d="M 134 60 Q 142 44 134 32 Q 124 42 126 60 Z" fill={furColor} />
+      <path d="M 100 44 L 93 4 L 107 4 Z" fill="#ffe8a3" stroke="#e0a800" strokeWidth={1.5} />
+      <path d="M 95 34 L 105 34 M 96 24 L 104 24 M 97 14 L 103 14" stroke="#e0a800" strokeWidth={1.2} />
+      <path d="M 100 40 Q 90 34 88 44" stroke={innerColor} strokeWidth={3} fill="none" strokeLinecap="round" />
+      <path d="M 100 40 Q 110 34 112 44" stroke={innerColor} strokeWidth={3} fill="none" strokeLinecap="round" />
+    </>
+  ),
+  species_owl: (furColor, innerColor) => (
+    <>
+      <path d="M 76 52 Q 70 28 84 18 Q 92 34 86 54 Z" fill={furColor} />
+      <path d="M 124 52 Q 130 28 116 18 Q 108 34 114 54 Z" fill={furColor} />
+      <path d="M 79 48 Q 76 34 84 26" stroke={innerColor} strokeWidth={2.5} fill="none" strokeLinecap="round" />
+      <path d="M 121 48 Q 124 34 116 26" stroke={innerColor} strokeWidth={2.5} fill="none" strokeLinecap="round" />
+    </>
+  ),
+  // Beak-faced birds have no visible ears.
+  species_bird: () => null,
 };
+
+const FOX_LIKE = ["species_husky", "species_wolf", "species_zebra"];
+const DOG_LIKE = ["species_donkey", "species_pig", "species_sheep"];
+const BEAR_LIKE = ["species_lion", "species_tiger", "species_panda", "species_koala", "species_monkey", "species_raccoon", "species_squirrel"];
+const SMALL_EARS_LIKE = ["species_alpaca", "species_bull", "species_cow", "species_white_horse", "species_horse", "species_goat"];
+const DEER_LIKE = ["species_stag"];
+const BIRD_LIKE = ["species_duck", "species_chicken", "species_penguin"];
+
+for (const key of FOX_LIKE) SPECIES_EARS[key] = SPECIES_EARS.species_fox;
+for (const key of DOG_LIKE) SPECIES_EARS[key] = SPECIES_EARS.species_dog;
+for (const key of BEAR_LIKE) SPECIES_EARS[key] = SPECIES_EARS.species_bear;
+for (const key of SMALL_EARS_LIKE) SPECIES_EARS[key] = SPECIES_EARS.species_small_ears;
+for (const key of DEER_LIKE) SPECIES_EARS[key] = SPECIES_EARS.species_deer;
+for (const key of BIRD_LIKE) SPECIES_EARS[key] = SPECIES_EARS.species_bird;
+
+const DARK_NOSE = "#3d3530";
+const BEAK_NOSE = "#f0a324";
 
 const SPECIES_NOSE: Record<string, string> = {
   species_cat: "#f4869a",
-  species_dog: "#3d3530",
+  species_dog: DARK_NOSE,
   species_rabbit: "#f4869a",
   species_fox: "#2d2a26",
-  species_bear: "#3d3530",
+  species_bear: DARK_NOSE,
+  species_dragon: "#2d2a26",
+  species_unicorn: "#f4869a",
+  species_owl: BEAK_NOSE,
+  species_duck: BEAK_NOSE,
+  species_chicken: BEAK_NOSE,
+  species_penguin: BEAK_NOSE,
 };
+for (const key of [
+  ...FOX_LIKE,
+  ...DOG_LIKE,
+  ...BEAR_LIKE,
+  ...SMALL_EARS_LIKE,
+  ...DEER_LIKE,
+  "species_deer",
+  "species_elephant",
+  "species_giraffe",
+]) {
+  SPECIES_NOSE[key] = DARK_NOSE;
+}
 
 // "Fur" (the old human-hair slot, reused as-is so no schema/economy change was
 // needed) — matches the 3D character's coat colors/patterns so the shop
@@ -419,7 +538,7 @@ export function AvatarCharacter({
   const hatKey = equippedKeys.hat;
   const accessoryKey = equippedKeys.accessory;
 
-  const noseColor = SPECIES_NOSE[speciesKey] ?? SPECIES_NOSE.species_cat;
+  const noseColor = SPECIES_NOSE[speciesKey] ?? DARK_NOSE;
   const fur = FUR[furKey] ?? FUR[DEFAULTS.hair];
   const renderEyes = EYES[eyesKey] ?? EYES[DEFAULTS.eyes];
   const renderClothes = CLOTHES[clothesKey] ?? CLOTHES[DEFAULTS.clothes];

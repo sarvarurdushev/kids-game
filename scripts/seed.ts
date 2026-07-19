@@ -4,6 +4,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   achievements,
+  avatarCaseRarityOdds,
+  avatarCaseTypes,
   avatarItems,
   characters,
   dailyRewardCurve,
@@ -130,17 +132,78 @@ async function main() {
 
   // --- Avatar items ----------------------------------------------------------
   const avatarItemSeed = [
-    // Species is the animal itself (cat/dog/rabbit/fox/bear), unlocked by
-    // level like everything else here. All five now have real 3D/2D
-    // renderers (components/three/Character3D.tsx dispatches cat vs.
-    // components/three/AnimalCharacter3D.tsx for the rest;
-    // components/avatar/AvatarCharacter.tsx draws all five in 2D), so all
-    // are active and equippable once unlocked.
+    // Species is the animal itself (cat/dog/rabbit/fox/bear/...), drawn by
+    // components/three/Character3D.tsx (dispatches cat vs.
+    // components/three/AnimalCharacter3D.tsx for the rest) and
+    // components/avatar/AvatarCharacter.tsx in 2D. Every species past the
+    // cat starter is case_unlock — Subway-Surfers-style mystery cases
+    // (scripts/seed.ts's avatarCaseTypeSeed below), not a level gate — so
+    // growing the roster is just adding rows here, no new unlock tier.
     { slot: "species", key: "species_cat", name: "Cat", acquisitionMethod: "starter" as const },
-    { slot: "species", key: "species_dog", name: "Dog", acquisitionMethod: "level_unlock" as const, unlockLevel: 5 },
-    { slot: "species", key: "species_rabbit", name: "Rabbit", acquisitionMethod: "level_unlock" as const, unlockLevel: 10 },
-    { slot: "species", key: "species_fox", name: "Fox", acquisitionMethod: "level_unlock" as const, unlockLevel: 15 },
-    { slot: "species", key: "species_bear", name: "Bear", acquisitionMethod: "level_unlock" as const, unlockLevel: 20 },
+    { slot: "species", key: "species_dog", name: "Dog", acquisitionMethod: "case_unlock" as const, rarity: "common" as const },
+    { slot: "species", key: "species_rabbit", name: "Rabbit", acquisitionMethod: "case_unlock" as const, rarity: "common" as const },
+    { slot: "species", key: "species_fox", name: "Fox", acquisitionMethod: "case_unlock" as const, rarity: "rare" as const },
+    {
+      slot: "species",
+      key: "species_bear",
+      name: "Sir Bearington",
+      acquisitionMethod: "case_unlock" as const,
+      rarity: "epic" as const,
+      // A character that comes with its outfit already on — equipping the
+      // species auto-equips these too (lib/student/avatar.ts).
+      bundledItemKeys: ["hat_crown"],
+    },
+    // The rest of the roster — real fetched glTF models (some CC0
+    // Quaternius, some CC-BY; see public/models/animals/CREDITS.md),
+    // normalized by components/three/AnimalCharacter3D.tsx from each
+    // model's own bounding box, so adding a species is just a URL + a rarity
+    // here, no per-model tuning.
+    { slot: "species", key: "species_cow", name: "Cow", acquisitionMethod: "case_unlock" as const, rarity: "common" as const },
+    { slot: "species", key: "species_donkey", name: "Donkey", acquisitionMethod: "case_unlock" as const, rarity: "common" as const },
+    { slot: "species", key: "species_bull", name: "Bull", acquisitionMethod: "case_unlock" as const, rarity: "common" as const },
+    { slot: "species", key: "species_husky", name: "Husky", acquisitionMethod: "case_unlock" as const, rarity: "common" as const },
+    { slot: "species", key: "species_horse", name: "Horse", acquisitionMethod: "case_unlock" as const, rarity: "common" as const },
+    { slot: "species", key: "species_pig", name: "Pig", acquisitionMethod: "case_unlock" as const, rarity: "common" as const },
+    { slot: "species", key: "species_sheep", name: "Sheep", acquisitionMethod: "case_unlock" as const, rarity: "common" as const },
+    { slot: "species", key: "species_duck", name: "Duck", acquisitionMethod: "case_unlock" as const, rarity: "common" as const },
+    { slot: "species", key: "species_chicken", name: "Chicken", acquisitionMethod: "case_unlock" as const, rarity: "common" as const },
+    { slot: "species", key: "species_goat", name: "Goat", acquisitionMethod: "case_unlock" as const, rarity: "common" as const },
+
+    { slot: "species", key: "species_deer", name: "Deer", acquisitionMethod: "case_unlock" as const, rarity: "rare" as const },
+    { slot: "species", key: "species_alpaca", name: "Alpaca", acquisitionMethod: "case_unlock" as const, rarity: "rare" as const },
+    { slot: "species", key: "species_wolf", name: "Wolf", acquisitionMethod: "case_unlock" as const, rarity: "rare" as const },
+    { slot: "species", key: "species_owl", name: "Owl", acquisitionMethod: "case_unlock" as const, rarity: "rare" as const },
+    { slot: "species", key: "species_raccoon", name: "Raccoon", acquisitionMethod: "case_unlock" as const, rarity: "rare" as const },
+    { slot: "species", key: "species_squirrel", name: "Squirrel", acquisitionMethod: "case_unlock" as const, rarity: "rare" as const },
+
+    { slot: "species", key: "species_stag", name: "Stag", acquisitionMethod: "case_unlock" as const, rarity: "epic" as const },
+    { slot: "species", key: "species_white_horse", name: "White Horse", acquisitionMethod: "case_unlock" as const, rarity: "epic" as const },
+    { slot: "species", key: "species_zebra", name: "Zebra", acquisitionMethod: "case_unlock" as const, rarity: "epic" as const },
+    { slot: "species", key: "species_giraffe", name: "Giraffe", acquisitionMethod: "case_unlock" as const, rarity: "epic" as const },
+    { slot: "species", key: "species_penguin", name: "Penguin", acquisitionMethod: "case_unlock" as const, rarity: "epic" as const },
+    { slot: "species", key: "species_panda", name: "Panda", acquisitionMethod: "case_unlock" as const, rarity: "epic" as const },
+    { slot: "species", key: "species_koala", name: "Koala", acquisitionMethod: "case_unlock" as const, rarity: "epic" as const },
+    { slot: "species", key: "species_tiger", name: "Tiger", acquisitionMethod: "case_unlock" as const, rarity: "epic" as const },
+    { slot: "species", key: "species_elephant", name: "Elephant", acquisitionMethod: "case_unlock" as const, rarity: "epic" as const },
+    { slot: "species", key: "species_monkey", name: "Monkey", acquisitionMethod: "case_unlock" as const, rarity: "epic" as const },
+    {
+      slot: "species",
+      key: "species_lion",
+      name: "King Leo",
+      acquisitionMethod: "case_unlock" as const,
+      rarity: "epic" as const,
+      bundledItemKeys: ["hat_crown"],
+    },
+
+    {
+      slot: "species",
+      key: "species_dragon",
+      name: "Archmage Dragon",
+      acquisitionMethod: "case_unlock" as const,
+      rarity: "legendary" as const,
+      bundledItemKeys: ["hat_wizard"],
+    },
+    { slot: "species", key: "species_unicorn", name: "Unicorn", acquisitionMethod: "case_unlock" as const, rarity: "legendary" as const },
 
     { slot: "hair", key: "hair_brown", name: "Ginger Fur", acquisitionMethod: "starter" as const },
     { slot: "hair", key: "hair_curly", name: "Fluffy Fur", acquisitionMethod: "level_unlock" as const, unlockLevel: 3 },
@@ -206,6 +269,8 @@ async function main() {
         acquisitionMethod: item.acquisitionMethod,
         unlockLevel: "unlockLevel" in item ? item.unlockLevel : null,
         coinPrice: "coinPrice" in item ? item.coinPrice : null,
+        rarity: "rarity" in item ? item.rarity : ("common" as const),
+        bundledItemKeys: "bundledItemKeys" in item ? item.bundledItemKeys : null,
         active: true,
       }))
     )
@@ -213,6 +278,22 @@ async function main() {
   const avatarItemRows = await db.select().from(avatarItems);
   const avatarItemByKey = new Map(avatarItemRows.map((a) => [a.key, a]));
   console.log(`  avatar items: ${avatarItemRows.length} total`);
+
+  // --- Avatar cases (Subway-Surfers-style mystery unlocks) ------------------
+  const avatarCaseTypeSeed = [
+    { key: "case_species", name: "Character Case", slot: "species" as const, coinCost: 100 },
+  ];
+  await db.insert(avatarCaseTypes).values(avatarCaseTypeSeed).onConflictDoNothing();
+  const avatarCaseTypeRows = await db.select().from(avatarCaseTypes);
+  console.log(`  avatar case types: ${avatarCaseTypeRows.length} total`);
+
+  const caseRarityOddsSeed = avatarCaseTypeRows.flatMap((caseType) => [
+    { caseTypeId: caseType.id, rarity: "common" as const, weight: 60 },
+    { caseTypeId: caseType.id, rarity: "rare" as const, weight: 25 },
+    { caseTypeId: caseType.id, rarity: "epic" as const, weight: 10 },
+    { caseTypeId: caseType.id, rarity: "legendary" as const, weight: 5 },
+  ]);
+  await db.insert(avatarCaseRarityOdds).values(caseRarityOddsSeed).onConflictDoNothing();
 
   // --- Reward rules ----------------------------------------------------------
   const rewardRuleRows = await db

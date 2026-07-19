@@ -22,3 +22,7 @@ export const purchaseAvatarItemSchema = z.object({
 export const purchasePackSchema = z.object({
   packTypeId: z.string().uuid(),
 });
+
+export const purchaseCaseSchema = z.object({
+  caseTypeId: z.string().uuid(),
+});

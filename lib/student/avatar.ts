@@ -70,6 +70,9 @@ export async function getAvatarItems(student: AuthedStudent) {
       } else if (item.acquisitionMethod === "level_unlock") {
         state = "locked";
         reason = `Reach level ${item.unlockLevel}`;
+      } else if (item.acquisitionMethod === "case_unlock") {
+        state = "locked";
+        reason = "Open a case to find this!";
       } else {
         state = "locked";
         reason = "Unlock the linked achievement first";
@@ -158,22 +161,34 @@ export async function equipAvatarItem(student: AuthedStudent, avatarItemId: stri
   const owned = await db
     .select()
     .from(studentAvatarItems)
-    .where(
-      and(
-        eq(studentAvatarItems.studentId, student.id),
-        eq(studentAvatarItems.avatarItemId, avatarItemId)
-      )
-    )
-    .limit(1);
+    .where(eq(studentAvatarItems.studentId, student.id));
+  const ownedIds = new Set(owned.map((o) => o.avatarItemId));
   const { level } = await getLevelInfo(student.xpTotal);
-  if (!isOwned(item, new Set(owned.map((o) => o.avatarItemId)), level)) {
+  if (!isOwned(item, ownedIds, level)) {
     throw new ServiceError("Item is not unlocked yet", 403);
   }
 
-  const column = SLOT_TO_EQUIPPED_COLUMN[item.slot];
+  const updates: Record<string, string | Date> = { updatedAt: new Date() };
+  updates[SLOT_TO_EQUIPPED_COLUMN[item.slot]] = item.id;
+
+  // A character bundled with an outfit (avatarItems.bundledItemKeys) auto-
+  // equips that outfit alongside it, so picking e.g. "Ninja Fox" doesn't
+  // leave you wearing whatever hat you had on before.
+  if (item.bundledItemKeys && item.bundledItemKeys.length > 0) {
+    const bundled = await db
+      .select()
+      .from(avatarItems)
+      .where(inArray(avatarItems.key, item.bundledItemKeys));
+    for (const b of bundled) {
+      if (b.active && ownedIds.has(b.id)) {
+        updates[SLOT_TO_EQUIPPED_COLUMN[b.slot]] = b.id;
+      }
+    }
+  }
+
   await db
     .update(students)
-    .set({ [column]: item.id, updatedAt: new Date() } as Partial<typeof students.$inferInsert>)
+    .set(updates as Partial<typeof students.$inferInsert>)
     .where(eq(students.id, student.id));
 
   return { slot: item.slot, avatarItemId: item.id };

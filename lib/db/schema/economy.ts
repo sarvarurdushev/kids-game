@@ -11,7 +11,7 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { students } from "./students";
-import { characters, packTypes, avatarItems, achievements } from "./catalog";
+import { characters, packTypes, avatarItems, avatarCaseTypes, achievements } from "./catalog";
 
 export const studentCards = pgTable("student_cards", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -69,6 +69,27 @@ export const studentAvatarItems = pgTable("student_avatar_items", {
   uniqueIndex("student_avatar_items_student_item_idx").on(
     table.studentId,
     table.avatarItemId
+  ),
+]).enableRLS();
+
+export const avatarCaseGrants = pgTable("avatar_case_grants", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: uuid("student_id")
+    .notNull()
+    .references(() => students.id, { onDelete: "cascade" }),
+  caseTypeId: uuid("case_type_id")
+    .notNull()
+    .references(() => avatarCaseTypes.id),
+  source: text("source").notNull(),
+  grantedAt: timestamp("granted_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  openedAt: timestamp("opened_at", { withTimezone: true }),
+  openedResult: jsonb("opened_result"),
+}, (table) => [
+  index("avatar_case_grants_student_unopened_idx").on(
+    table.studentId,
+    table.openedAt
   ),
 ]).enableRLS();
 

@@ -19,9 +19,14 @@ export default async function AvatarPage() {
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-bold">Your Avatar</h1>
-        <Link href="/room" className="text-sm font-semibold text-teal underline-offset-2 hover:underline">
-          Decorate room →
-        </Link>
+        <div className="flex flex-col items-end gap-0.5">
+          <Link href="/cases" className="text-sm font-semibold text-coral underline-offset-2 hover:underline">
+            Open a case →
+          </Link>
+          <Link href="/room" className="text-sm font-semibold text-teal underline-offset-2 hover:underline">
+            Decorate room →
+          </Link>
+        </div>
       </div>
       <AvatarCustomizer items={items} coinsBalance={student.coinsBalance} />
     </div>
