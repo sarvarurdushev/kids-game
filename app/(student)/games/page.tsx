@@ -4,20 +4,12 @@ import { requireStudent } from "@/lib/auth/requireStudent";
 import { getGamePlaysRemainingToday } from "@/lib/reward-engine/gameSession";
 import { GAME_CATALOG } from "@/lib/games/catalog";
 import { Card } from "@/components/ui/Card";
-import {
-  WordCatchIcon,
-  MemoryMatchIcon,
-  WordScrambleIcon,
-  RobotSortIcon,
-  SequenceIcon,
-} from "@/components/icons";
+import { WordCatchIcon, MemoryMatchIcon, WordScrambleIcon } from "@/components/icons";
 
 const GAME_ICONS = {
   word_catch: WordCatchIcon,
   memory_match: MemoryMatchIcon,
   word_scramble: WordScrambleIcon,
-  train_the_robot: RobotSortIcon,
-  sequence_builder: SequenceIcon,
 };
 
 export default async function GamesPage() {

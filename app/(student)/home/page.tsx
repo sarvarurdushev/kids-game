@@ -62,15 +62,6 @@ export default async function HomePage() {
         nextReward={dashboard.dailyClaim.nextReward}
       />
 
-      <Link
-        href="/ai-lab"
-        className="gk-pop-in flex items-center gap-3 rounded-2xl bg-gradient-to-br from-teal to-[#1c6a78] px-4 py-3 font-display font-semibold text-white shadow-md"
-      >
-        <span className="text-3xl">🤖</span>
-        <span className="flex-1">New! Visit the AI Lab and teach Sparx to think.</span>
-        <span>→</span>
-      </Link>
-
       {dashboard.unopenedPackCount > 0 && (
         <Link
           href="/packs"
