@@ -43,10 +43,10 @@ function Mouth({ mood }: { mood: AvatarMood }) {
   );
 }
 
-function FaceDetails() {
+function FaceDetails({ noseColor = "#f4869a" }: { noseColor?: string }) {
   return (
     <>
-      <path d="M 100 96 L 94 103 L 106 103 Z" fill="#f4869a" />
+      <path d="M 100 96 L 94 103 L 106 103 Z" fill={noseColor} />
       {[-1, 1].map((side) =>
         [0, 1].map((i) => (
           <line
@@ -113,27 +113,75 @@ const EYES: Record<string, () => ReactNode> = {
   },
 };
 
-function Ears({ furColor, innerColor }: { furColor: string; innerColor: string }) {
-  return (
+// Ear silhouette varies by species (dog/rabbit/fox/bear get their own
+// shape); the two colors passed in still come from whichever "fur" is
+// equipped, so a dog can be drawn in any fur color/pattern, just with
+// dog-shaped ears. Drawn behind the head circle (painted afterwards in
+// AvatarCharacter), so only each shape's tip needs to clear the head disk —
+// bases don't need to line up precisely.
+const SPECIES_EARS: Record<string, (furColor: string, innerColor: string) => ReactNode> = {
+  species_cat: (furColor, innerColor) => (
     <>
       <path d="M 60 60 L 46 18 L 82 48 Z" fill={furColor} />
       <path d="M 65 54 L 55 28 L 76 46 Z" fill={innerColor} />
       <path d="M 140 60 L 154 18 L 118 48 Z" fill={furColor} />
       <path d="M 135 54 L 145 28 L 124 46 Z" fill={innerColor} />
     </>
-  );
-}
+  ),
+  species_dog: (furColor, innerColor) => (
+    <>
+      <path d="M 56 58 Q 34 78 42 112 Q 54 122 66 104 Q 70 80 64 60 Z" fill={furColor} />
+      <path d="M 58 68 Q 46 82 50 104 Q 57 110 62 98 Q 64 82 60 70 Z" fill={innerColor} />
+      <path d="M 144 58 Q 166 78 158 112 Q 146 122 134 104 Q 130 80 136 60 Z" fill={furColor} />
+      <path d="M 142 68 Q 154 82 150 104 Q 143 110 138 98 Q 136 82 140 70 Z" fill={innerColor} />
+    </>
+  ),
+  species_rabbit: (furColor, innerColor) => (
+    <>
+      <path d="M 74 66 Q 64 34 78 8 Q 92 34 84 66 Z" fill={furColor} />
+      <path d="M 77 62 Q 71 36 79 16 Q 87 36 82 62 Z" fill={innerColor} />
+      <path d="M 126 66 Q 136 34 122 8 Q 108 34 116 66 Z" fill={furColor} />
+      <path d="M 123 62 Q 129 36 121 16 Q 113 36 118 62 Z" fill={innerColor} />
+    </>
+  ),
+  species_fox: (furColor, innerColor) => (
+    <>
+      <path d="M 56 62 L 38 30 L 80 46 Z" fill={furColor} />
+      <path d="M 54 56 L 44 36 L 74 46 Z" fill={innerColor} />
+      <path d="M 44 36 L 38 30 L 50 40 Z" fill={INK} opacity={0.7} />
+      <path d="M 144 62 L 162 30 L 120 46 Z" fill={furColor} />
+      <path d="M 146 56 L 156 36 L 126 46 Z" fill={innerColor} />
+      <path d="M 156 36 L 162 30 L 150 40 Z" fill={INK} opacity={0.7} />
+    </>
+  ),
+  species_bear: (furColor, innerColor) => (
+    <>
+      <circle cx={58} cy={52} r={16} fill={furColor} />
+      <circle cx={60} cy={54} r={9} fill={innerColor} />
+      <circle cx={142} cy={52} r={16} fill={furColor} />
+      <circle cx={140} cy={54} r={9} fill={innerColor} />
+    </>
+  ),
+};
+
+const SPECIES_NOSE: Record<string, string> = {
+  species_cat: "#f4869a",
+  species_dog: "#3d3530",
+  species_rabbit: "#f4869a",
+  species_fox: "#2d2a26",
+  species_bear: "#3d3530",
+};
 
 // "Fur" (the old human-hair slot, reused as-is so no schema/economy change was
 // needed) — matches the 3D character's coat colors/patterns so the shop
 // thumbnails and login picker don't show a different-looking character than
 // the live 3D view.
-const FUR: Record<string, { color: string; render: () => ReactNode }> = {
+const FUR: Record<string, { color: string; render: (species: string) => ReactNode }> = {
   hair_brown: {
     color: "#e8935a",
-    render: () => (
+    render: (species) => (
       <>
-        <Ears furColor="#e8935a" innerColor="#f4b8c4" />
+        {(SPECIES_EARS[species] ?? SPECIES_EARS.species_cat)("#e8935a", "#f4b8c4")}
         {[[78, 56], [100, 50], [122, 56]].map(([x, y], i) => (
           <path key={i} d={`M ${x - 8} ${y} Q ${x} ${y - 6} ${x + 8} ${y}`} stroke="#c46a34" strokeWidth={3} fill="none" strokeLinecap="round" />
         ))}
@@ -142,9 +190,9 @@ const FUR: Record<string, { color: string; render: () => ReactNode }> = {
   },
   hair_curly: {
     color: "#cdc6d8",
-    render: () => (
+    render: (species) => (
       <>
-        <Ears furColor="#cdc6d8" innerColor="#f4b8c4" />
+        {(SPECIES_EARS[species] ?? SPECIES_EARS.species_cat)("#cdc6d8", "#f4b8c4")}
         {[[62, 66, 12], [138, 66, 12], [100, 44, 14], [78, 48, 10], [122, 48, 10]].map(([cx, cy, r], i) => (
           <circle key={i} cx={cx} cy={cy} r={r} fill="#cdc6d8" />
         ))}
@@ -153,9 +201,9 @@ const FUR: Record<string, { color: string; render: () => ReactNode }> = {
   },
   hair_spiky: {
     color: "#33302e",
-    render: () => (
+    render: (species) => (
       <>
-        <Ears furColor="#33302e" innerColor="#4a4644" />
+        {(SPECIES_EARS[species] ?? SPECIES_EARS.species_cat)("#33302e", "#4a4644")}
         <ellipse cx={100} cy={108} rx={26} ry={20} fill="#f5efe4" />
       </>
     ),
@@ -363,6 +411,7 @@ export function AvatarCharacter({
 }: AvatarCharacterProps) {
   const clipId = useSvgId("avatar-clip");
 
+  const speciesKey = equippedKeys.species ?? "species_cat";
   const furKey = equippedKeys.hair ?? DEFAULTS.hair;
   const eyesKey = equippedKeys.eyes ?? DEFAULTS.eyes;
   const clothesKey = equippedKeys.clothes ?? DEFAULTS.clothes;
@@ -370,6 +419,7 @@ export function AvatarCharacter({
   const hatKey = equippedKeys.hat;
   const accessoryKey = equippedKeys.accessory;
 
+  const noseColor = SPECIES_NOSE[speciesKey] ?? SPECIES_NOSE.species_cat;
   const fur = FUR[furKey] ?? FUR[DEFAULTS.hair];
   const renderEyes = EYES[eyesKey] ?? EYES[DEFAULTS.eyes];
   const renderClothes = CLOTHES[clothesKey] ?? CLOTHES[DEFAULTS.clothes];
@@ -406,10 +456,10 @@ export function AvatarCharacter({
         <Wrapper {...wrapperProps}>
           {renderClothes()}
           <ellipse cx={100} cy={126} rx={16} ry={13} fill={fur.color} />
-          {fur.render()}
+          {fur.render(speciesKey)}
           <circle cx={100} cy={88} r={40} fill={fur.color} />
           {renderEyes()}
-          <FaceDetails />
+          <FaceDetails noseColor={noseColor} />
           <Mouth mood={mood} />
           {renderAccessory?.()}
           {renderHat?.()}

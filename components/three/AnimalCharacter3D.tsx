@@ -1,0 +1,155 @@
+"use client";
+
+import { useEffect, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { useGLTF, useAnimations } from "@react-three/drei";
+import { SkeletonUtils } from "three-stdlib";
+import { Box3, Group, Mesh, Vector3, type Object3D } from "three";
+import { HATS } from "./hats3d";
+import type { AvatarEquippedKeys, AvatarMood } from "@/components/avatar/AvatarCharacter";
+
+// Real, fetched CC0 low-poly animal packs (bear is CC-BY — see
+// public/models/animals/CREDITS.md), loaded with drei's useGLTF instead of
+// the cat's hand-built primitive geometry in Character3D.tsx.
+const MODEL_URL: Record<string, string> = {
+  species_dog: "/models/animals/dog.glb",
+  species_rabbit: "/models/animals/rabbit.glb",
+  species_fox: "/models/animals/fox.glb",
+  species_bear: "/models/animals/bear.glb",
+};
+
+export const ANIMAL_SPECIES = new Set(Object.keys(MODEL_URL));
+
+for (const url of Object.values(MODEL_URL)) {
+  useGLTF.preload(url);
+}
+
+// Each model comes from a different author at a different original scale
+// and pivot, so instead of hand-tuning per-model constants every species is
+// normalized at load time — from its own bounding box — to the same
+// standing height/foot-line the procedural cat occupies (Character3D's
+// HEAD_Y/BODY_Y), so switching species doesn't jump the character around
+// the scene or clash with the shared camera framing.
+const TARGET_HEIGHT = 1.22;
+const FOOT_Y = -0.62;
+const HAT_CLEARANCE = 0.03;
+
+const CORNER_SIGNS: Array<[number, number, number]> = [
+  [-1, -1, -1], [1, -1, -1], [-1, 1, -1], [1, 1, -1],
+  [-1, -1, 1], [1, -1, 1], [-1, 1, 1], [1, 1, 1],
+];
+
+// Box3().setFromObject() is unusable here: three's SkinnedMesh overrides
+// computeBoundingBox() to bake in *live* bone-skinning deformation, and
+// that's read before the skeleton has ever been posed by the renderer —
+// bone matrices are still zeroed, so it comes back with a garbage,
+// wildly-oversized box (observed ~400 units tall for a model that's really
+// ~3 units tall). What we actually want is the rest/bind-pose extent, which
+// is exactly the *unskinned* local geometry transformed by each mesh's own
+// (unposed) matrixWorld — so this walks meshes directly and reads
+// `geometry.boundingBox`, never the mesh-level skinned override.
+function computeRestBoundingBox(root: Object3D): Box3 {
+  root.updateWorldMatrix(true, true);
+  const result = new Box3();
+  const point = new Vector3();
+  root.traverse((obj) => {
+    if (!(obj instanceof Mesh)) return;
+    const geometry = obj.geometry;
+    if (!geometry.boundingBox) geometry.computeBoundingBox();
+    const bb = geometry.boundingBox!;
+    for (const [sx, sy, sz] of CORNER_SIGNS) {
+      point
+        .set(sx > 0 ? bb.max.x : bb.min.x, sy > 0 ? bb.max.y : bb.min.y, sz > 0 ? bb.max.z : bb.min.z)
+        .applyMatrix4(obj.matrixWorld);
+      result.expandByPoint(point);
+    }
+  });
+  return result;
+}
+
+function pickIdleClip(names: string[]): string | null {
+  if (names.includes("Idle")) return "Idle";
+  const suffixed = names.find((n) => n.endsWith("|Idle"));
+  if (suffixed) return suffixed;
+  const anyIdle = names.find((n) => /idle/i.test(n) && !/hitreact/i.test(n));
+  return anyIdle ?? names[0] ?? null;
+}
+
+interface AnimalCharacter3DProps {
+  species: string;
+  equippedKeys: AvatarEquippedKeys;
+  mood: AvatarMood;
+}
+
+export function AnimalCharacter3D({ species, equippedKeys, mood }: AnimalCharacter3DProps) {
+  const groupRef = useRef<Group>(null);
+  const t = useRef(0);
+
+  const { scene, animations } = useGLTF(MODEL_URL[species]);
+  // Every mount gets its own skeleton — useGLTF caches (and shares) the
+  // parsed source, so without cloning, two students equipping the same
+  // species would fight over one shared skinned mesh/armature.
+  const cloned = useMemo(() => SkeletonUtils.clone(scene) as Group, [scene]);
+
+  const { scale, offset, hatAnchor } = useMemo(() => {
+    const box = computeRestBoundingBox(cloned);
+    const size = new Vector3();
+    box.getSize(size);
+    const center = new Vector3();
+    box.getCenter(center);
+    const s = size.y > 0 ? TARGET_HEIGHT / size.y : 1;
+    const offsetVec = new Vector3(-center.x * s, FOOT_Y - box.min.y * s, -center.z * s);
+
+    // A named "Head" bone (present on the rigged dog/rabbit/fox) gives a far
+    // more reliable *height* than "top of bounding box" — a raised tail or
+    // ears can be the tallest point in the bind pose. The bear has no
+    // armature, so it falls back to the bounding-box top. Only the height
+    // (world Y) is used, not the bone's full 3D position: a quadruped's
+    // head bone sits forward of the body's centerline (along its neck), and
+    // placing a hat that far toward the camera reads as floating in front
+    // of the face rather than sitting on top of the head.
+    const headBone = cloned.getObjectByName("Head");
+    const anchorY = headBone ? headBone.getWorldPosition(new Vector3()).y : box.max.y;
+
+    const hatAnchor = new Vector3(0, anchorY * s + offsetVec.y + HAT_CLEARANCE, offsetVec.z);
+    return { scale: s, offset: offsetVec, hatAnchor };
+  }, [cloned]);
+
+  const { actions, names } = useAnimations(animations, cloned);
+  useEffect(() => {
+    const idle = pickIdleClip(names);
+    const action = idle ? actions[idle] : null;
+    action?.reset().fadeIn(0.3).play();
+    return () => {
+      action?.fadeOut(0.3);
+    };
+  }, [actions, names]);
+
+  useFrame((_, delta) => {
+    t.current += delta;
+    const group = groupRef.current;
+    if (!group) return;
+    if (mood === "happy") {
+      group.position.y = Math.sin(t.current * 7) * 0.06;
+      group.rotation.z = Math.sin(t.current * 6) * 0.05;
+    } else if (mood === "sad") {
+      group.position.y = -0.03 + Math.sin(t.current * 2) * 0.015;
+      group.rotation.z = Math.sin(t.current * 1.5) * 0.02;
+    } else {
+      group.position.y = Math.sin(t.current * 1.6) * 0.025;
+      group.rotation.z = Math.sin(t.current * 1.2) * 0.015;
+    }
+  });
+
+  const hatKey = equippedKeys.hat;
+  const renderHat = hatKey ? HATS[hatKey] : null;
+
+  return (
+    <group ref={groupRef}>
+      <group scale={scale} position={offset}>
+        <primitive object={cloned} />
+      </group>
+      {renderHat && <group position={hatAnchor}>{renderHat()}</group>}
+    </group>
+  );
+}

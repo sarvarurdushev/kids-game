@@ -18,7 +18,7 @@ export default async function AvatarPage() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold">Your Cat</h1>
+        <h1 className="font-display text-2xl font-bold">Your Avatar</h1>
         <Link href="/room" className="text-sm font-semibold text-teal underline-offset-2 hover:underline">
           Decorate room →
         </Link>

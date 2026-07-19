@@ -131,16 +131,16 @@ async function main() {
   // --- Avatar items ----------------------------------------------------------
   const avatarItemSeed = [
     // Species is the animal itself (cat/dog/rabbit/fox/bear), unlocked by
-    // level like everything else here. Only "species_cat" has a real 3D/2D
-    // renderer today (components/three/Character3D.tsx,
-    // components/avatar/AvatarCharacter.tsx are cat-specific) — the rest are
-    // seeded active:false so they can't be owned or equipped (which would
-    // otherwise render nothing) until each one gets its own rendering.
+    // level like everything else here. All five now have real 3D/2D
+    // renderers (components/three/Character3D.tsx dispatches cat vs.
+    // components/three/AnimalCharacter3D.tsx for the rest;
+    // components/avatar/AvatarCharacter.tsx draws all five in 2D), so all
+    // are active and equippable once unlocked.
     { slot: "species", key: "species_cat", name: "Cat", acquisitionMethod: "starter" as const },
-    { slot: "species", key: "species_dog", name: "Dog", acquisitionMethod: "level_unlock" as const, unlockLevel: 5, active: false },
-    { slot: "species", key: "species_rabbit", name: "Rabbit", acquisitionMethod: "level_unlock" as const, unlockLevel: 10, active: false },
-    { slot: "species", key: "species_fox", name: "Fox", acquisitionMethod: "level_unlock" as const, unlockLevel: 15, active: false },
-    { slot: "species", key: "species_bear", name: "Bear", acquisitionMethod: "level_unlock" as const, unlockLevel: 20, active: false },
+    { slot: "species", key: "species_dog", name: "Dog", acquisitionMethod: "level_unlock" as const, unlockLevel: 5 },
+    { slot: "species", key: "species_rabbit", name: "Rabbit", acquisitionMethod: "level_unlock" as const, unlockLevel: 10 },
+    { slot: "species", key: "species_fox", name: "Fox", acquisitionMethod: "level_unlock" as const, unlockLevel: 15 },
+    { slot: "species", key: "species_bear", name: "Bear", acquisitionMethod: "level_unlock" as const, unlockLevel: 20 },
 
     { slot: "hair", key: "hair_brown", name: "Ginger Fur", acquisitionMethod: "starter" as const },
     { slot: "hair", key: "hair_curly", name: "Fluffy Fur", acquisitionMethod: "level_unlock" as const, unlockLevel: 3 },
@@ -206,7 +206,7 @@ async function main() {
         acquisitionMethod: item.acquisitionMethod,
         unlockLevel: "unlockLevel" in item ? item.unlockLevel : null,
         coinPrice: "coinPrice" in item ? item.coinPrice : null,
-        active: "active" in item ? item.active : true,
+        active: true,
       }))
     )
     .onConflictDoNothing();
