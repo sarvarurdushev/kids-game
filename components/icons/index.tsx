@@ -196,6 +196,28 @@ export function WordScrambleIcon({ size = 48, className = "" }: { size?: number;
   );
 }
 
+export function EmojiQuizIcon({ size = 48, className = "" }: { size?: number; className?: string }) {
+  const id = useSvgId("emojiQuiz");
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} className={className}>
+      <defs>
+        <linearGradient id={id} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#ffb3c6" />
+          <stop offset="100%" stopColor="var(--color-gk-coral)" />
+        </linearGradient>
+      </defs>
+      <circle cx={38} cy={40} r={26} fill={`url(#${id})`} stroke="#2d2a26" strokeWidth={2} />
+      <circle cx={30} cy={34} r={3.5} fill="#2d2a26" />
+      <circle cx={46} cy={34} r={3.5} fill="#2d2a26" />
+      <path d="M 27 48 Q 38 58 49 48" fill="none" stroke="#2d2a26" strokeWidth={3} strokeLinecap="round" />
+      <circle cx={74} cy={64} r={18} fill="#fff8ec" stroke="#2d2a26" strokeWidth={2} />
+      <text x={74} y={72} textAnchor="middle" fontSize={22} fontWeight={800} fill="var(--color-gk-gold-dark)">
+        ?
+      </text>
+    </svg>
+  );
+}
+
 export function BoosterPackIcon({
   size = 64,
   className = "",

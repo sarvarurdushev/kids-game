@@ -5,7 +5,7 @@ import { gameSessions, levelCurve, packGrants, students } from "@/lib/db/schema"
 import { levelsCrossed } from "./levels";
 import { getEffectivePetHappiness, petHappinessCoinMultiplier } from "./pet";
 
-export const GAME_KEYS = ["word_catch", "memory_match", "word_scramble"] as const;
+export const GAME_KEYS = ["word_catch", "memory_match", "word_scramble", "emoji_quiz"] as const;
 export type GameKey = (typeof GAME_KEYS)[number];
 
 // Games award modest XP/coins on top of the classroom-driven economy, not a

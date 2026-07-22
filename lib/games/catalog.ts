@@ -6,6 +6,10 @@ export interface GameMeta {
   tagline: string;
   href: string;
   color: string;
+  // Coin cost to unlock (lib/reward-engine/gameUnlocks.ts). Absent/0 = free,
+  // no unlock row needed at all — the three original games stay free so a
+  // brand-new student always has something to play immediately.
+  coinCost?: number;
 }
 
 export const GAME_CATALOG: GameMeta[] = [
@@ -29,5 +33,13 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "Unscramble the letters before time runs out!",
     href: "/games/word-scramble",
     color: "var(--color-teal)",
+  },
+  {
+    key: "emoji_quiz",
+    name: "Emoji Quiz",
+    tagline: "Pick the word that matches the picture!",
+    href: "/games/emoji-quiz",
+    color: "var(--color-gk-coral)",
+    coinCost: 60,
   },
 ];

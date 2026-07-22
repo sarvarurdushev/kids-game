@@ -145,6 +145,27 @@ export const dailyClaims = pgTable("daily_claims", {
   ),
 ]).enableRLS();
 
+// Games are a static, code-defined catalog (lib/games/catalog.ts), not a
+// DB-driven one like avatarItems — a new game ships with code anyway, so
+// there's no separate admin-editable catalog table for it. This just tracks
+// which locked (coinCost > 0) games a given student has bought their way
+// into; free games need no row here at all.
+export const studentGameUnlocks = pgTable("student_game_unlocks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: uuid("student_id")
+    .notNull()
+    .references(() => students.id, { onDelete: "cascade" }),
+  gameKey: text("game_key").notNull(),
+  unlockedAt: timestamp("unlocked_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+}, (table) => [
+  uniqueIndex("student_game_unlocks_student_game_idx").on(
+    table.studentId,
+    table.gameKey
+  ),
+]).enableRLS();
+
 export const gameSessions = pgTable("game_sessions", {
   id: uuid("id").primaryKey().defaultRandom(),
   studentId: uuid("student_id")

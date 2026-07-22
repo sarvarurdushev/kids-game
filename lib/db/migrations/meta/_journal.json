@@ -43,6 +43,13 @@
       "when": 1784443120250,
       "tag": "0005_dry_daredevil",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784731518618,
+      "tag": "0006_flaky_joseph",
+      "breakpoints": true
     }
   ]
 }
