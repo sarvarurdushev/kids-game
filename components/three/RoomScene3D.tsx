@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { Scene3D } from "./Scene3D";
 import { Character3D } from "./Character3D";
+import { Prop3D } from "./Prop3D";
 import type { AvatarEquippedKeys, AvatarMood } from "@/components/avatar/AvatarCharacter";
 
 const FLOOR_Y = -0.85;
@@ -119,70 +120,29 @@ const FLOORS: Record<string, () => ReactNode> = {
   ),
 };
 
-const FURNITURE: Record<string, () => ReactNode> = {
-  furniture_plant: () => (
-    <group position={[-1.5, FLOOR_Y, -0.2]}>
-      <mesh position={[0, 0.15, 0]}>
-        <cylinderGeometry args={[0.16, 0.13, 0.3, 8]} />
-        <meshStandardMaterial color="#c8925c" flatShading />
-      </mesh>
-      <mesh position={[0, 0.45, 0]}>
-        <icosahedronGeometry args={[0.24, 0]} />
-        <meshStandardMaterial color="#5f9e46" flatShading />
-      </mesh>
-      <mesh position={[-0.15, 0.35, 0.1]}>
-        <icosahedronGeometry args={[0.15, 0]} />
-        <meshStandardMaterial color="#6fae54" flatShading />
-      </mesh>
-    </group>
-  ),
-  furniture_lamp: () => (
-    <group position={[-1.5, FLOOR_Y, -0.2]}>
-      <mesh position={[0, 0.02, 0]}>
-        <cylinderGeometry args={[0.16, 0.16, 0.04, 10]} />
-        <meshStandardMaterial color="#8a6a45" flatShading />
-      </mesh>
-      <mesh position={[0, 0.4, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, 0.75, 6]} />
-        <meshStandardMaterial color="#8a6a45" flatShading />
-      </mesh>
-      <mesh position={[0, 0.82, 0]}>
-        <coneGeometry args={[0.22, 0.28, 8, 1, true]} />
-        <meshStandardMaterial color="#ffd76a" flatShading side={2} emissive="#ffd76a" emissiveIntensity={0.25} />
-      </mesh>
-    </group>
-  ),
-  furniture_chest: () => (
-    <group position={[-1.5, FLOOR_Y, -0.2]}>
-      <mesh position={[0, 0.16, 0]}>
-        <boxGeometry args={[0.5, 0.32, 0.34]} />
-        <meshStandardMaterial color="#c8925c" flatShading />
-      </mesh>
-      <mesh position={[0, 0.36, 0]} rotation={[-0.25, 0, 0]}>
-        <boxGeometry args={[0.52, 0.08, 0.36]} />
-        <meshStandardMaterial color="#d9a672" flatShading />
-      </mesh>
-      <mesh position={[0, 0.2, 0.18]}>
-        <sphereGeometry args={[0.03, 6, 6]} />
-        <meshStandardMaterial color="#e0a800" flatShading />
-      </mesh>
-    </group>
-  ),
-  furniture_bookshelf: () => (
-    <group position={[-1.5, FLOOR_Y, -0.2]}>
-      <mesh position={[0, 0.5, 0]}>
-        <boxGeometry args={[0.5, 1, 0.28]} />
-        <meshStandardMaterial color="#8a6a45" flatShading />
-      </mesh>
-      {["#e63946", "#4fb3d9", "#ffd23f", "#e8607f", "#2a7d8c"].map((color, i) => (
-        <mesh key={i} position={[-0.17 + i * 0.09, 0.3, 0.1]}>
-          <boxGeometry args={[0.07, 0.4, 0.18]} />
-          <meshStandardMaterial color={color} flatShading />
-        </mesh>
-      ))}
-    </group>
-  ),
+// x/z placement only — Prop3D's own floorY math already rests the model's
+// bottom at the right height, so this must NOT also carry FLOOR_Y as its y
+// (that would apply the floor offset twice and sink the prop through the floor).
+const FURNITURE_POSITION: [number, number, number] = [-1.5, 0, -0.2];
+
+// Real Tripo3D-generated props (see public/models/furniture/CREDITS.md).
+// Each is normalized from its own bounding box to a per-item target height —
+// unlike standing characters, furniture pieces don't share a common height
+// (a bookshelf and a treasure chest are wildly different proportions), so
+// Prop3D takes that height as a prop rather than assuming one constant.
+const FURNITURE_MODEL: Record<string, { url: string; height: number }> = {
+  furniture_plant: { url: "/models/furniture/plant.glb", height: 0.55 },
+  furniture_lamp: { url: "/models/furniture/lamp.glb", height: 0.9 },
+  furniture_chest: { url: "/models/furniture/chest.glb", height: 0.4 },
+  furniture_bookshelf: { url: "/models/furniture/bookshelf.glb", height: 0.95 },
 };
+
+const FURNITURE: Record<string, () => ReactNode> = Object.fromEntries(
+  Object.entries(FURNITURE_MODEL).map(([key, { url, height }]) => [
+    key,
+    () => <Prop3D url={url} targetHeight={height} floorY={FLOOR_Y} position={FURNITURE_POSITION} />,
+  ])
+);
 
 const DEFAULTS = {
   wallpaper: "wallpaper_plain",
