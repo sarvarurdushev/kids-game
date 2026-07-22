@@ -11,7 +11,6 @@ their `Idle`-equivalent animation clip; static models render a fixed pose
 | --- | --- | --- | --- | --- |
 | `dog.glb` | Dog (Shiba Inu) | Quaternius | poly.pizza/m/y4wdQpg767 | Yes |
 | `rabbit.glb` | Rabbit (Bunny) | Quaternius | poly.pizza/m/irZjWFARyl | Yes |
-| `fox.glb` | Fox | Quaternius | poly.pizza/m/Bc97C66HKi | Yes |
 | `cow.glb` | Cow | Quaternius | poly.pizza/m/26zM1outCr | Yes |
 | `donkey.glb` | Donkey | Quaternius | poly.pizza/m/qmX6nhnvp7 | Yes |
 | `deer.glb` | Deer | Quaternius | poly.pizza/m/T6Cs7tmMHJ | Yes |
@@ -70,3 +69,18 @@ a dead end without Blender). Per CC-BY 3.0/4.0, attribution is:
 These are all static (unrigged) meshes — `AnimalCharacter3D.tsx` renders
 them in a fixed pose and anchors hats from the model's bounding-box top
 (no `Head` bone to anchor from, unlike the rigged CC0 models above).
+
+## AI-generated (Tripo3D, commercial license via paid plan)
+
+| File | Species | Source | Notes |
+| --- | --- | --- | --- |
+| `fox.glb` | Fox | Tripo3D (text→image→3D, v3.1) | Anthropomorphic/upright style — the new target look for the whole roster, replacing the earlier Quaternius quadruped fox |
+
+Generated via account-holder's paid Tripo3D plan (private models, commercial
+use license) — not third-party CC-licensed content, so no attribution
+required, but also not freely redistributable outside this project the way
+the CC0/CC-BY entries are. Raw exports come out around 50k triangles with
+2-4K textures; re-exported here after retopology (~3,500 tris) and texture
+recompression (4096/2048px source images downscaled to 512-1024px, ~1MB
+total) to stay within the same size/performance budget as the rest of the
+roster — see `scripts/optimize-glb.py`.
