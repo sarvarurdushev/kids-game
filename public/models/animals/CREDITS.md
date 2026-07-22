@@ -15,14 +15,13 @@ their `Idle`-equivalent animation clip; static models render a fixed pose
 | `husky.glb` | Husky | Quaternius | poly.pizza/m/wcWiuEqwzq | Yes |
 | `white_horse.glb` | White Horse | Quaternius | poly.pizza/m/bEdE4rmZy9 | Yes |
 | `horse.glb` | Horse | Quaternius | poly.pizza/m/qvTrSG9pZF | Yes |
-| `pig.glb` | Pig | Quaternius (Farm Animal Pack) | poly.pizza/m/TNvG3QUFlp | Yes |
 | `sheep.glb` | Sheep | Quaternius (Farm Animal Pack) | poly.pizza/m/C39AUXUUes | Yes |
 | `zebra.glb` | Zebra | Quaternius (Farm Animal Pack) | poly.pizza/m/iclPBR6SBZ | Yes |
 | `dragon.glb` | Dragon (Archmage Dragon) | Quaternius (Ultimate Monsters Bundle) | poly.pizza/m/LlwD0QNUPj | Yes |
 
 Alpaca through horse above are all from the same Quaternius
 "Ultimate Animated Animal Pack" bundle — guaranteed identical rig/art style.
-Pig/sheep/zebra are Quaternius CC0 too, from a different pack (Farm Animal
+Sheep/zebra are Quaternius CC0 too, from a different pack (Farm Animal
 Pack), with a slightly more angular look. Dragon is from Quaternius's
 fantasy line (Ultimate Monsters Bundle).
 
@@ -75,6 +74,7 @@ them in a fixed pose and anchors hats from the model's bounding-box top
 | `deer.glb` | Deer | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped deer |
 | `wolf.glb` | Wolf | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped wolf |
 | `unicorn.glb` | Unicorn | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google static unicorn. Only quadruped exception in the new roster — the AI defaulted to a natural pony pose here instead of upright/anthropomorphic, kept deliberately rather than forced |
+| `pig.glb` | Pig | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped pig |
 
 Generated via account-holder's paid Tripo3D plan (private models, commercial
 use license) — not third-party CC-licensed content, so no attribution
