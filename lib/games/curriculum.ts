@@ -51,27 +51,37 @@ export function getCurrentCurriculum(date: Date = new Date()): CurrentCurriculum
   return { ...topic, weekIndex, monthKey };
 }
 
-// Below this, a brand-new topic's first week or two wouldn't have enough
-// distinct words for a 4-5 choice game round, so it's topped up with the
-// evergreen pool rather than ever leaving a game short of choices.
+// Below this, very early in the curriculum year (e.g. week 1 of January,
+// before any other month has unlocked) there might not be enough distinct
+// words for a 4-5 choice game round, so it's topped up with the evergreen,
+// non-curriculum categories rather than ever leaving a game short of choices.
 const MIN_CURRICULUM_POOL = 8;
 
-/** Same shape as wordsUpToDifficulty, but scoped to the current month's
- * curriculum topic (cumulative through the current week), so a game's
- * vocabulary follows what's actually being taught right now. */
+const CURRICULUM_KEYS = new Set(CURRICULUM.map((c) => c.key));
+
+/** Same shape as wordsUpToDifficulty, but scoped to what's actually been
+ * taught so far: the current month's topic (cumulative through the current
+ * week) plus every *past* month's topic this calendar year, in full — so
+ * vocabulary keeps building on what a student already learned instead of
+ * vanishing the moment the topic changes. Future months never appear, even
+ * as filler (that was the bug: a generic "top up with anything" fallback
+ * could surface e.g. Halloween words in July). */
 export function curriculumWordsUpToDifficulty(maxDifficulty: 1 | 2 | 3, date: Date = new Date()): WordEntry[] {
-  const { key, weekIndex } = getCurrentCurriculum(date);
-  const curriculumPool = WORD_BANK.filter(
-    (w) => w.category === key && (w.week ?? 1) <= weekIndex && w.difficulty <= maxDifficulty
-  );
+  const { month, key, weekIndex } = getCurrentCurriculum(date);
+  const unlockedTopicKeys = new Set(CURRICULUM.filter((c) => c.month <= month).map((c) => c.key));
+
+  const curriculumPool = WORD_BANK.filter((w) => {
+    if (w.difficulty > maxDifficulty) return false;
+    if (!unlockedTopicKeys.has(w.category)) return false;
+    if (w.category === key) return (w.week ?? 1) <= weekIndex;
+    return true; // a past month's topic — fully unlocked, no week ceiling
+  });
   if (curriculumPool.length >= MIN_CURRICULUM_POOL) return curriculumPool;
 
-  // wordsUpToDifficulty has no concept of "week," so on its own it would leak
-  // this same topic's not-yet-reached words (e.g. week 3's "storm" appearing
-  // during week 2) — excluded here; they'll join the pool once their week
-  // arrives. Other categories' words are fair game as generic filler.
-  const isSameTopicButFuture = (w: WordEntry) => w.category === key && (w.week ?? 1) > weekIndex;
-  const fallback = wordsUpToDifficulty(maxDifficulty).filter((w) => !isSameTopicButFuture(w));
+  // Never dip into curriculum topics as filler (that would just reintroduce
+  // the future-month leak) — only the categories that were never part of
+  // the monthly rotation in the first place (colors, numbers, food, etc).
+  const evergreen = wordsUpToDifficulty(maxDifficulty).filter((w) => !CURRICULUM_KEYS.has(w.category));
   const seen = new Set(curriculumPool.map((w) => w.word));
-  return [...curriculumPool, ...fallback.filter((w) => !seen.has(w.word))];
+  return [...curriculumPool, ...evergreen.filter((w) => !seen.has(w.word))];
 }

@@ -5,7 +5,7 @@ import {
   getCurrentCurriculum,
   getCurriculumWeekIndex,
 } from "@/lib/games/curriculum";
-import { WORD_BANK } from "@/lib/games/wordBank";
+import { WORD_BANK, type WordCategory } from "@/lib/games/wordBank";
 
 describe("getCurriculumWeekIndex", () => {
   it("maps days 1-7 to week 1", () => {
@@ -58,28 +58,43 @@ describe("getCurrentCurriculum", () => {
 });
 
 describe("curriculumWordsUpToDifficulty", () => {
-  it("returns only this month's topic once enough weeks have accumulated", () => {
-    // Late in the month, Weather (July) has accumulated all 11 words at
-    // difficulty <= 3, comfortably above the fallback threshold.
-    const words = curriculumWordsUpToDifficulty(3, new Date(2026, 6, 22));
-    expect(words.length).toBeGreaterThanOrEqual(8);
-    expect(words.every((w) => w.category === "weather")).toBe(true);
+  it("never includes a future month's topic, even as fallback filler (the Halloween-in-July bug)", () => {
+    const words = curriculumWordsUpToDifficulty(3, new Date(2026, 6, 8)); // July, week 2
+    const futureTopics = new Set(["travel", "body", "halloween", "emotions", "christmas"]);
+    expect(words.some((w) => futureTopics.has(w.category))).toBe(false);
   });
 
-  it("never includes this month's own topic beyond the current week, even as fallback filler", () => {
-    const words = curriculumWordsUpToDifficulty(3, new Date(2026, 6, 8)); // week 2 of Weather
+  it("includes every past month's topic in full, not just the current month's", () => {
+    const words = curriculumWordsUpToDifficulty(3, new Date(2026, 6, 22)); // July, week 4
+    const categoriesSeen = new Set(words.map((w) => w.category));
+    const pastKeys: WordCategory[] = ["space", "culture", "friends", "environment", "family", "animals"];
+    for (const pastKey of pastKeys) {
+      expect(categoriesSeen.has(pastKey), pastKey).toBe(true);
+    }
+  });
+
+  it("caps the current month's own topic to weeks reached so far, but not past months", () => {
+    const words = curriculumWordsUpToDifficulty(3, new Date(2026, 6, 8)); // July, week 2
     const weatherWords = words.filter((w) => w.category === "weather");
     expect(weatherWords.every((w) => (w.week ?? 1) <= 2)).toBe(true);
+    // Family (a past month) has week-3/4 words that should still show up
+    // in full, unlike Weather's own not-yet-reached weeks.
+    const familyWords = words.filter((w) => w.category === "family");
+    expect(familyWords.some((w) => (w.week ?? 1) > 2)).toBe(true);
   });
 
-  it("blends in the evergreen pool when the topic alone is too thin", () => {
-    // First week of Space (January) — only 4 words exist at week 1, below
-    // the fallback threshold, so non-space words must be blended in.
+  it("blends in only evergreen (non-curriculum) categories when nothing has unlocked enough yet", () => {
+    // First week of January — Space is the only unlocked topic, and only 4
+    // words exist at week 1, below the fallback threshold.
     const words = curriculumWordsUpToDifficulty(1, new Date(2026, 0, 3));
     const spaceWords = words.filter((w) => w.category === "space");
     const otherWords = words.filter((w) => w.category !== "space");
     expect(spaceWords.length).toBeGreaterThan(0);
     expect(otherWords.length).toBeGreaterThan(0);
+    // The fallback must never be another curriculum topic (that's exactly
+    // how future months leaked in before) — only genuinely evergreen ones.
+    const curriculumKeys = new Set(CURRICULUM.map((c) => c.key));
+    expect(otherWords.every((w) => !curriculumKeys.has(w.category))).toBe(true);
   });
 
   it("never returns duplicate words when blending in the fallback pool", () => {

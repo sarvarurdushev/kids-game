@@ -121,14 +121,30 @@ export function AnimalCharacter3D({ species, equippedKeys, mood }: AnimalCharact
     };
   }, [actions, names]);
 
-  // Non-verbal "voice" reaction — only on an actual transition INTO happy or
-  // sad (never on mount, and never on the reverse transition back to
-  // neutral), so a species chirps once per emotional beat instead of on
-  // every render or every time a game screen happens to land on "happy".
+  // Reaction to a mood transition (never on mount, never on the reverse trip
+  // back to neutral): a non-verbal voice chirp plus a brief, decaying
+  // hop-or-droop impulse. This replaced a continuous per-frame sine bob that
+  // rode the *entire* rigid body up/down and tilted it every frame forever —
+  // with no legs bending and no floor contact, it read as the character
+  // floating/flying rather than standing, especially layered on top of
+  // whatever idle motion the GLTF's own Idle clip already provides. Now the
+  // character is perfectly still (grounded, trusting the model's own Idle
+  // clip) except for a short celebratory hop or droop right when a round
+  // resolves, which settles back to rest within a second.
   const prevMoodRef = useRef(mood);
+  const bounceEnergyRef = useRef(0);
+  const bounceDirRef = useRef<1 | -1>(1);
   useEffect(() => {
-    if (mood !== prevMoodRef.current && (mood === "happy" || mood === "sad")) {
-      playCreatureVoice(species, mood);
+    if (mood !== prevMoodRef.current) {
+      if (mood === "happy") {
+        playCreatureVoice(species, "happy");
+        bounceEnergyRef.current = 1;
+        bounceDirRef.current = 1;
+      } else if (mood === "sad") {
+        playCreatureVoice(species, "sad");
+        bounceEnergyRef.current = 1;
+        bounceDirRef.current = -1;
+      }
     }
     prevMoodRef.current = mood;
   }, [mood, species]);
@@ -137,15 +153,19 @@ export function AnimalCharacter3D({ species, equippedKeys, mood }: AnimalCharact
     t.current += delta;
     const group = groupRef.current;
     if (!group) return;
-    if (mood === "happy") {
-      group.position.y = Math.sin(t.current * 7) * 0.06;
-      group.rotation.z = Math.sin(t.current * 6) * 0.05;
-    } else if (mood === "sad") {
-      group.position.y = -0.03 + Math.sin(t.current * 2) * 0.015;
-      group.rotation.z = Math.sin(t.current * 1.5) * 0.02;
+
+    if (bounceEnergyRef.current > 0) {
+      bounceEnergyRef.current = Math.max(0, bounceEnergyRef.current - delta * 1.8);
+    }
+    const energy = bounceEnergyRef.current;
+    if (energy <= 0) {
+      group.position.y = 0;
+    } else if (bounceDirRef.current === 1) {
+      // Happy: a couple of quick decaying hops, never dipping below the floor.
+      group.position.y = Math.abs(Math.sin(t.current * 12)) * energy * 0.05;
     } else {
-      group.position.y = Math.sin(t.current * 1.6) * 0.025;
-      group.rotation.z = Math.sin(t.current * 1.2) * 0.015;
+      // Sad: a gentle decaying droop, never lifting above the floor.
+      group.position.y = -Math.abs(Math.sin(t.current * 4)) * energy * 0.03;
     }
   });
 

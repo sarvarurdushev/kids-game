@@ -33,13 +33,9 @@ export function CardTile({
         className="flex h-20 w-20 items-center justify-center rounded-full"
         style={{ backgroundColor: `color-mix(in srgb, ${color} 16%, white)` }}
       >
-        {owned ? (
-          <CreatureArt characterKey={characterKey} rarity={rarity} size={72} />
-        ) : (
-          <span className="text-3xl opacity-40">🔒</span>
-        )}
+        <CreatureArt characterKey={characterKey} rarity={rarity} size={72} />
       </div>
-      <p className="font-display text-sm font-semibold">{owned ? name : "???"}</p>
+      <p className="font-display text-sm font-semibold">{name}</p>
       <span
         className="rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase"
         style={{ backgroundColor: color }}
