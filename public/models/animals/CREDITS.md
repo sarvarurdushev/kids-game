@@ -34,7 +34,6 @@ fantasy line (Ultimate Monsters Bundle).
 
 | File | Species | Author | Source | License |
 | --- | --- | --- | --- | --- |
-| `bear.glb` | Bear (Sir Bearington) | madtrollstudio | poly.pizza/m/kLLBpmcw0w | CC-BY 3.0 |
 | `giraffe.glb` | Giraffe | madtrollstudio | poly.pizza/m/jUaMl6njBh | CC-BY 3.0 |
 | `duck.glb` | Duck | madtrollstudio | poly.pizza/m/4plJcFXhim | CC-BY 3.0 |
 | `penguin.glb` | Penguin | madtrollstudio | poly.pizza/m/kvZRSJBz70 | CC-BY 3.0 |
@@ -57,7 +56,7 @@ CC0 collection — the only CC0 candidates found for several of these,
 e.g. tiger/squirrel, are Blender-file-only with no glTF/FBX/OBJ export,
 a dead end without Blender). Per CC-BY 3.0/4.0, attribution is:
 
-- "Bear", "Giraffe", "Duck", "Penguin", "Chicken" by madtrollstudio, licensed under
+- "Giraffe", "Duck", "Penguin", "Chicken" by madtrollstudio, licensed under
   CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/), via poly.pizza.
 - "Panda", "Koala", "Tiger", "Lion", "Owl", "Raccoon", "Squirrel", "Elephant",
   "Monkey", "Goat", "Unicorn" by Poly by Google, licensed under CC-BY 3.0
@@ -75,6 +74,7 @@ them in a fixed pose and anchors hats from the model's bounding-box top
 | `dog.glb` | Dog | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped dog |
 | `cat.glb` | Cat | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google quadruped cat |
 | `rabbit.glb` | Rabbit | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped rabbit |
+| `bear.glb` | Bear | Tripo3D (text→image→3D, v3.1) | Replaces the earlier madtrollstudio (CC-BY) static bear |
 
 Generated via account-holder's paid Tripo3D plan (private models, commercial
 use license) — not third-party CC-licensed content, so no attribution
