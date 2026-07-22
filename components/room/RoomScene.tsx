@@ -167,16 +167,24 @@ export function RoomScene({
         {renderFloor()}
         {renderFurniture()}
       </svg>
-      <button
-        type="button"
-        onClick={onTapAvatar}
-        disabled={!onTapAvatar}
-        aria-label="Poke your avatar"
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-2"
-        style={{ width: avatarSize, height: avatarSize }}
-      >
-        <AvatarCharacter equippedKeys={equippedKeys} size={avatarSize} mood={mood} animated={animated} />
-      </button>
+      {onTapAvatar ? (
+        <button
+          type="button"
+          onClick={onTapAvatar}
+          aria-label="Poke your avatar"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-2"
+          style={{ width: avatarSize, height: avatarSize }}
+        >
+          <AvatarCharacter equippedKeys={equippedKeys} size={avatarSize} mood={mood} animated={animated} />
+        </button>
+      ) : (
+        <div
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-2"
+          style={{ width: avatarSize, height: avatarSize }}
+        >
+          <AvatarCharacter equippedKeys={equippedKeys} size={avatarSize} mood={mood} animated={animated} />
+        </div>
+      )}
     </div>
   );
 }

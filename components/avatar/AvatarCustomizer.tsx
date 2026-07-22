@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AvatarRenderer } from "./AvatarRenderer";
 import { Avatar3D } from "@/components/three/Avatar3D";
 import { Button } from "@/components/ui/Button";
+import { ItemPreviewModal } from "@/components/ui/ItemPreviewModal";
 import { playCoin, playPop } from "@/lib/sound";
 import { CoinIcon } from "@/components/icons";
 
@@ -15,12 +16,18 @@ export interface AvatarItem {
   slot: Slot;
   key: string;
   name: string;
+  rarity: string;
   coinPrice: number | null;
   state: "owned" | "purchasable" | "locked";
   reason: string | null;
   affordable: boolean;
   equipped: boolean;
 }
+
+// 3D rendering only exists for the species+hat slots today (AnimalCharacter3D);
+// the rest (hair/eyes/clothes/accessory/background) only render in the 2D
+// AvatarCharacter SVG, so the preview modal picks whichever one applies.
+const RENDERS_IN_3D = new Set<Slot>(["species", "hat"]);
 
 const SLOTS: Slot[] = ["species", "hair", "eyes", "clothes", "hat", "accessory", "background"];
 const SLOT_LABELS: Record<Slot, string> = {
@@ -44,6 +51,7 @@ export function AvatarCustomizer({
   const [activeSlot, setActiveSlot] = useState<Slot>("species");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [previewItem, setPreviewItem] = useState<AvatarItem | null>(null);
 
   const equippedKeys = Object.fromEntries(
     SLOTS.map((slot) => [slot, items.find((i) => i.slot === slot && i.equipped)?.key])
@@ -127,10 +135,12 @@ export function AvatarCustomizer({
               item.equipped ? "bg-gold/20 ring-2 ring-gold" : "bg-white"
             }`}
           >
-            <div className={item.state === "locked" ? "opacity-40 grayscale" : ""}>
-              <AvatarRenderer equippedKeys={{ [item.slot]: item.key }} size={56} />
-            </div>
-            <p className="text-xs font-semibold">{item.name}</p>
+            <button type="button" onClick={() => setPreviewItem(item)} className="flex flex-col items-center gap-2">
+              <div className={item.state === "locked" ? "opacity-40 grayscale" : ""}>
+                <AvatarRenderer equippedKeys={{ [item.slot]: item.key }} size={56} />
+              </div>
+              <p className="text-xs font-semibold">{item.name}</p>
+            </button>
             {item.state === "owned" && !item.equipped && (
               <Button
                 variant="ghost"
@@ -164,6 +174,56 @@ export function AvatarCustomizer({
           </div>
         ))}
       </div>
+
+      <ItemPreviewModal
+        open={previewItem !== null}
+        onClose={() => setPreviewItem(null)}
+        name={previewItem?.name ?? ""}
+        rarity={previewItem?.rarity}
+        reason={previewItem?.state === "locked" ? previewItem.reason : null}
+        preview={
+          previewItem &&
+          (RENDERS_IN_3D.has(previewItem.slot) ? (
+            <Avatar3D equippedKeys={{ ...equippedKeys, [previewItem.slot]: previewItem.key }} size={180} />
+          ) : (
+            <AvatarRenderer equippedKeys={{ ...equippedKeys, [previewItem.slot]: previewItem.key }} size={140} />
+          ))
+        }
+        action={
+          previewItem &&
+          (previewItem.state === "owned" && !previewItem.equipped ? (
+            <Button
+              onClick={() => {
+                void equip(previewItem);
+                setPreviewItem(null);
+              }}
+              disabled={busyId === previewItem.id}
+            >
+              Wear
+            </Button>
+          ) : previewItem.state === "owned" && previewItem.equipped ? (
+            <span className="text-xs font-bold text-gold-dark">Equipped</span>
+          ) : previewItem.state === "purchasable" ? (
+            <Button
+              variant="secondary"
+              className="!flex !items-center !gap-1"
+              onClick={() => {
+                void purchase(previewItem);
+                setPreviewItem(null);
+              }}
+              disabled={busyId === previewItem.id || !previewItem.affordable}
+            >
+              {previewItem.affordable ? (
+                <>
+                  <CoinIcon size={14} /> {previewItem.coinPrice}
+                </>
+              ) : (
+                "Not enough coins"
+              )}
+            </Button>
+          ) : null)
+        }
+      />
     </div>
   );
 }

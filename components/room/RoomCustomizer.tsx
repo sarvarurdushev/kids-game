@@ -6,6 +6,7 @@ import { RoomScene } from "./RoomScene";
 import { RoomScene3D } from "@/components/three/RoomScene3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
+import { ItemPreviewModal } from "@/components/ui/ItemPreviewModal";
 import { playCoin, playPop } from "@/lib/sound";
 import { CoinIcon } from "@/components/icons";
 
@@ -16,6 +17,7 @@ export interface RoomItem {
   slot: RoomSlot;
   key: string;
   name: string;
+  rarity: string;
   coinPrice: number | null;
   state: "owned" | "purchasable" | "locked";
   reason: string | null;
@@ -43,6 +45,7 @@ export function RoomCustomizer({
   const [activeSlot, setActiveSlot] = useState<RoomSlot>("wallpaper");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [previewItem, setPreviewItem] = useState<RoomItem | null>(null);
 
   async function equip(item: RoomItem) {
     setBusyId(item.id);
@@ -122,10 +125,12 @@ export function RoomCustomizer({
               item.equipped ? "bg-gold/20 ring-2 ring-gold" : "bg-white"
             }`}
           >
-            <div className={`w-full overflow-hidden rounded-xl ${item.state === "locked" ? "opacity-40 grayscale" : ""}`}>
-              <RoomScene equippedKeys={{ [item.slot]: item.key }} avatarSize={70} className="w-full" />
-            </div>
-            <p className="text-xs font-semibold">{item.name}</p>
+            <button type="button" onClick={() => setPreviewItem(item)} className="flex w-full flex-col items-center gap-2">
+              <div className={`w-full overflow-hidden rounded-xl ${item.state === "locked" ? "opacity-40 grayscale" : ""}`}>
+                <RoomScene equippedKeys={{ [item.slot]: item.key }} avatarSize={70} className="w-full" />
+              </div>
+              <p className="text-xs font-semibold">{item.name}</p>
+            </button>
             {item.state === "owned" && !item.equipped && (
               <Button
                 variant="ghost"
@@ -159,6 +164,56 @@ export function RoomCustomizer({
           </div>
         ))}
       </div>
+
+      <ItemPreviewModal
+        open={previewItem !== null}
+        onClose={() => setPreviewItem(null)}
+        name={previewItem?.name ?? ""}
+        rarity={previewItem?.rarity}
+        reason={previewItem?.state === "locked" ? previewItem.reason : null}
+        preview={
+          previewItem && (
+            <RoomScene3D
+              equippedKeys={{ ...equippedKeys, [previewItem.slot]: previewItem.key }}
+              className="w-full"
+            />
+          )
+        }
+        action={
+          previewItem &&
+          (previewItem.state === "owned" && !previewItem.equipped ? (
+            <Button
+              onClick={() => {
+                void equip(previewItem);
+                setPreviewItem(null);
+              }}
+              disabled={busyId === previewItem.id}
+            >
+              Use
+            </Button>
+          ) : previewItem.state === "owned" && previewItem.equipped ? (
+            <span className="text-xs font-bold text-gold-dark">In use</span>
+          ) : previewItem.state === "purchasable" ? (
+            <Button
+              variant="secondary"
+              className="!flex !items-center !gap-1"
+              onClick={() => {
+                void purchase(previewItem);
+                setPreviewItem(null);
+              }}
+              disabled={busyId === previewItem.id || !previewItem.affordable}
+            >
+              {previewItem.affordable ? (
+                <>
+                  <CoinIcon size={14} /> {previewItem.coinPrice}
+                </>
+              ) : (
+                "Not enough coins"
+              )}
+            </Button>
+          ) : null)
+        }
+      />
     </div>
   );
 }
