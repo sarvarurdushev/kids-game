@@ -13,7 +13,6 @@ their `Idle`-equivalent animation clip; static models render a fixed pose
 | `bull.glb` | Bull | Quaternius | poly.pizza/m/a8PIIYwF7r | Yes |
 | `stag.glb` | Stag | Quaternius | poly.pizza/m/tQdzbZ1Cmw | Yes |
 | `husky.glb` | Husky | Quaternius | poly.pizza/m/wcWiuEqwzq | Yes |
-| `wolf.glb` | Wolf | Quaternius | poly.pizza/m/P1gU3Qkr9r | Yes |
 | `white_horse.glb` | White Horse | Quaternius | poly.pizza/m/bEdE4rmZy9 | Yes |
 | `horse.glb` | Horse | Quaternius | poly.pizza/m/qvTrSG9pZF | Yes |
 | `pig.glb` | Pig | Quaternius (Farm Animal Pack) | poly.pizza/m/TNvG3QUFlp | Yes |
@@ -75,6 +74,7 @@ them in a fixed pose and anchors hats from the model's bounding-box top
 | `cow.glb` | Cow | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped cow |
 | `donkey.glb` | Donkey | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped donkey |
 | `deer.glb` | Deer | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped deer |
+| `wolf.glb` | Wolf | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped wolf |
 
 Generated via account-holder's paid Tripo3D plan (private models, commercial
 use license) — not third-party CC-licensed content, so no attribution
