@@ -9,7 +9,6 @@ their `Idle`-equivalent animation clip; static models render a fixed pose
 
 | File | Species | Author | Source | Rigged/animated? |
 | --- | --- | --- | --- | --- |
-| `rabbit.glb` | Rabbit (Bunny) | Quaternius | poly.pizza/m/irZjWFARyl | Yes |
 | `cow.glb` | Cow | Quaternius | poly.pizza/m/26zM1outCr | Yes |
 | `donkey.glb` | Donkey | Quaternius | poly.pizza/m/qmX6nhnvp7 | Yes |
 | `deer.glb` | Deer | Quaternius | poly.pizza/m/T6Cs7tmMHJ | Yes |
@@ -25,7 +24,7 @@ their `Idle`-equivalent animation clip; static models render a fixed pose
 | `zebra.glb` | Zebra | Quaternius (Farm Animal Pack) | poly.pizza/m/iclPBR6SBZ | Yes |
 | `dragon.glb` | Dragon (Archmage Dragon) | Quaternius (Ultimate Monsters Bundle) | poly.pizza/m/LlwD0QNUPj | Yes |
 
-Rabbit through horse above are all from the same Quaternius
+Cow through horse above are all from the same Quaternius
 "Ultimate Animated Animal Pack" bundle — guaranteed identical rig/art style.
 Pig/sheep/zebra are Quaternius CC0 too, from a different pack (Farm Animal
 Pack), with a slightly more angular look. Dragon is from Quaternius's
@@ -75,6 +74,7 @@ them in a fixed pose and anchors hats from the model's bounding-box top
 | `fox.glb` | Fox | Tripo3D (text→image→3D, v3.1) | Anthropomorphic/upright style — the new target look for the whole roster, replacing the earlier Quaternius quadruped fox |
 | `dog.glb` | Dog | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped dog |
 | `cat.glb` | Cat | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google quadruped cat |
+| `rabbit.glb` | Rabbit | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped rabbit |
 
 Generated via account-holder's paid Tripo3D plan (private models, commercial
 use license) — not third-party CC-licensed content, so no attribution
