@@ -25,7 +25,6 @@ Alpaca through horse above are all from the same Quaternius
 | --- | --- | --- | --- | --- |
 | `duck.glb` | Duck | madtrollstudio | poly.pizza/m/4plJcFXhim | CC-BY 3.0 |
 | `chicken.glb` | Chicken | madtrollstudio | poly.pizza/m/oHmIgi4boa | CC-BY 3.0 |
-| `panda.glb` | Panda | Poly by Google | poly.pizza/m/q1uJ28Hs8T-alt (see note) | CC-BY 3.0 |
 | `koala.glb` | Koala | Poly by Google | poly.pizza search "koala" | CC-BY 3.0 |
 | `owl.glb` | Owl | Poly by Google | poly.pizza search "owl" | CC-BY 3.0 |
 | `raccoon.glb` | Raccoon | Poly by Google | poly.pizza search "raccoon" | CC-BY 3.0 |
@@ -40,7 +39,7 @@ a dead end without Blender). Per CC-BY 3.0/4.0, attribution is:
 
 - "Duck", "Chicken" by madtrollstudio, licensed under
   CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/), via poly.pizza.
-- "Panda", "Koala", "Owl", "Raccoon", "Squirrel", "Goat" by Poly by Google,
+- "Koala", "Owl", "Raccoon", "Squirrel", "Goat" by Poly by Google,
   licensed under CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/),
   via poly.pizza.
 
@@ -72,6 +71,7 @@ them in a fixed pose and anchors hats from the model's bounding-box top
 | `lion.glb` | Lion | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google static lion |
 | `tiger.glb` | Tiger | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google static tiger |
 | `monkey.glb` | Monkey | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google static monkey |
+| `panda.glb` | Panda | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google static panda |
 
 Generated via account-holder's paid Tripo3D plan (private models, commercial
 use license) — not third-party CC-licensed content, so no attribution
