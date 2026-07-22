@@ -44,7 +44,6 @@ fantasy line (Ultimate Monsters Bundle).
 | `elephant.glb` | Elephant | Poly by Google | poly.pizza search "elephant" | CC-BY 3.0 |
 | `monkey.glb` | Monkey | Poly by Google | poly.pizza search "monkey" | CC-BY 3.0 |
 | `goat.glb` | Goat | Poly by Google | poly.pizza search "goat" | CC-BY 3.0 |
-| `unicorn.glb` | Unicorn | Poly by Google | poly.pizza search "unicorn" | CC-BY 3.0 |
 
 No CC0 model exists in a matching style for any of the CC-BY entries above
 (checked against Quaternius's full catalog, poly.pizza, and OpenGameArt's
@@ -55,7 +54,7 @@ a dead end without Blender). Per CC-BY 3.0/4.0, attribution is:
 - "Giraffe", "Duck", "Penguin", "Chicken" by madtrollstudio, licensed under
   CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/), via poly.pizza.
 - "Panda", "Koala", "Tiger", "Lion", "Owl", "Raccoon", "Squirrel", "Elephant",
-  "Monkey", "Goat", "Unicorn" by Poly by Google, licensed under CC-BY 3.0
+  "Monkey", "Goat" by Poly by Google, licensed under CC-BY 3.0
   (https://creativecommons.org/licenses/by/3.0/), via poly.pizza.
 
 These are all static (unrigged) meshes — `AnimalCharacter3D.tsx` renders
@@ -75,6 +74,7 @@ them in a fixed pose and anchors hats from the model's bounding-box top
 | `donkey.glb` | Donkey | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped donkey |
 | `deer.glb` | Deer | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped deer |
 | `wolf.glb` | Wolf | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped wolf |
+| `unicorn.glb` | Unicorn | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google static unicorn. Only quadruped exception in the new roster — the AI defaulted to a natural pony pose here instead of upright/anthropomorphic, kept deliberately rather than forced |
 
 Generated via account-holder's paid Tripo3D plan (private models, commercial
 use license) — not third-party CC-licensed content, so no attribution
