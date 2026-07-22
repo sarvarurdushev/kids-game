@@ -35,7 +35,6 @@ fantasy line (Ultimate Monsters Bundle).
 
 | File | Species | Author | Source | License |
 | --- | --- | --- | --- | --- |
-| `cat.glb` | Cat | Poly by Google | poly.pizza/m/6dM1J6f6pm9 | CC-BY 3.0 |
 | `bear.glb` | Bear (Sir Bearington) | madtrollstudio | poly.pizza/m/kLLBpmcw0w | CC-BY 3.0 |
 | `giraffe.glb` | Giraffe | madtrollstudio | poly.pizza/m/jUaMl6njBh | CC-BY 3.0 |
 | `duck.glb` | Duck | madtrollstudio | poly.pizza/m/4plJcFXhim | CC-BY 3.0 |
@@ -61,7 +60,7 @@ a dead end without Blender). Per CC-BY 3.0/4.0, attribution is:
 
 - "Bear", "Giraffe", "Duck", "Penguin", "Chicken" by madtrollstudio, licensed under
   CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/), via poly.pizza.
-- "Cat", "Panda", "Koala", "Tiger", "Lion", "Owl", "Raccoon", "Squirrel", "Elephant",
+- "Panda", "Koala", "Tiger", "Lion", "Owl", "Raccoon", "Squirrel", "Elephant",
   "Monkey", "Goat", "Unicorn" by Poly by Google, licensed under CC-BY 3.0
   (https://creativecommons.org/licenses/by/3.0/), via poly.pizza.
 
@@ -75,6 +74,7 @@ them in a fixed pose and anchors hats from the model's bounding-box top
 | --- | --- | --- | --- |
 | `fox.glb` | Fox | Tripo3D (text→image→3D, v3.1) | Anthropomorphic/upright style — the new target look for the whole roster, replacing the earlier Quaternius quadruped fox |
 | `dog.glb` | Dog | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped dog |
+| `cat.glb` | Cat | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google quadruped cat |
 
 Generated via account-holder's paid Tripo3D plan (private models, commercial
 use license) — not third-party CC-licensed content, so no attribution
