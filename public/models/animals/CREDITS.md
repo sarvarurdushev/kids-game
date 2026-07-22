@@ -27,13 +27,9 @@ Alpaca through horse above are all from the same Quaternius
 | `chicken.glb` | Chicken | madtrollstudio | poly.pizza/m/oHmIgi4boa | CC-BY 3.0 |
 | `panda.glb` | Panda | Poly by Google | poly.pizza/m/q1uJ28Hs8T-alt (see note) | CC-BY 3.0 |
 | `koala.glb` | Koala | Poly by Google | poly.pizza search "koala" | CC-BY 3.0 |
-| `tiger.glb` | Tiger | Poly by Google | poly.pizza search "tiger" | CC-BY 3.0 |
-| `lion.glb` | Lion (King Leo) | Poly by Google | poly.pizza search "lion" | CC-BY 3.0 |
 | `owl.glb` | Owl | Poly by Google | poly.pizza search "owl" | CC-BY 3.0 |
 | `raccoon.glb` | Raccoon | Poly by Google | poly.pizza search "raccoon" | CC-BY 3.0 |
 | `squirrel.glb` | Squirrel | Poly by Google | poly.pizza search "squirrel" | CC-BY 3.0 |
-| `elephant.glb` | Elephant | Poly by Google | poly.pizza search "elephant" | CC-BY 3.0 |
-| `monkey.glb` | Monkey | Poly by Google | poly.pizza search "monkey" | CC-BY 3.0 |
 | `goat.glb` | Goat | Poly by Google | poly.pizza search "goat" | CC-BY 3.0 |
 
 No CC0 model exists in a matching style for any of the CC-BY entries above
@@ -44,9 +40,9 @@ a dead end without Blender). Per CC-BY 3.0/4.0, attribution is:
 
 - "Duck", "Chicken" by madtrollstudio, licensed under
   CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/), via poly.pizza.
-- "Panda", "Koala", "Tiger", "Lion", "Owl", "Raccoon", "Squirrel", "Elephant",
-  "Monkey", "Goat" by Poly by Google, licensed under CC-BY 3.0
-  (https://creativecommons.org/licenses/by/3.0/), via poly.pizza.
+- "Panda", "Koala", "Owl", "Raccoon", "Squirrel", "Goat" by Poly by Google,
+  licensed under CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/),
+  via poly.pizza.
 
 These are all static (unrigged) meshes — `AnimalCharacter3D.tsx` renders
 them in a fixed pose and anchors hats from the model's bounding-box top
@@ -72,6 +68,10 @@ them in a fixed pose and anchors hats from the model's bounding-box top
 | `giraffe.glb` | Giraffe | Tripo3D (text→image→3D, v3.1) | Replaces the earlier madtrollstudio (CC-BY) static giraffe |
 | `dragon.glb` | Dragon | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped dragon |
 | `penguin.glb` | Penguin | Tripo3D (text→image→3D, v3.1) | Replaces the earlier madtrollstudio (CC-BY) static penguin |
+| `elephant.glb` | Elephant | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google static elephant |
+| `lion.glb` | Lion | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google static lion |
+| `tiger.glb` | Tiger | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google static tiger |
+| `monkey.glb` | Monkey | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google static monkey |
 
 Generated via account-holder's paid Tripo3D plan (private models, commercial
 use license) — not third-party CC-licensed content, so no attribution
