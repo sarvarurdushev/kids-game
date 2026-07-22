@@ -6,13 +6,40 @@ import { isGameUnlocked } from "@/lib/reward-engine/gameUnlocks";
 import { GAME_CATALOG } from "@/lib/games/catalog";
 import { Card } from "@/components/ui/Card";
 import { UnlockGameButton } from "@/components/games/UnlockGameButton";
-import { WordCatchIcon, MemoryMatchIcon, WordScrambleIcon, EmojiQuizIcon } from "@/components/icons";
+import {
+  WordCatchIcon,
+  MemoryMatchIcon,
+  WordScrambleIcon,
+  EmojiQuizIcon,
+  PicturePickIcon,
+  TrueOrFalseIcon,
+  OddOneOutIcon,
+  CategorySortIcon,
+  CountingQuizIcon,
+  MissingLetterIcon,
+  SequenceMemoryIcon,
+  BalloonPopIcon,
+  FastPicksIcon,
+  WordRushIcon,
+  CategoryBlitzIcon,
+} from "@/components/icons";
 
 const GAME_ICONS = {
   word_catch: WordCatchIcon,
   memory_match: MemoryMatchIcon,
   word_scramble: WordScrambleIcon,
   emoji_quiz: EmojiQuizIcon,
+  picture_pick: PicturePickIcon,
+  true_or_false: TrueOrFalseIcon,
+  odd_one_out: OddOneOutIcon,
+  category_sort: CategorySortIcon,
+  counting_quiz: CountingQuizIcon,
+  missing_letter: MissingLetterIcon,
+  sequence_memory: SequenceMemoryIcon,
+  balloon_pop: BalloonPopIcon,
+  fast_picks: FastPicksIcon,
+  word_rush: WordRushIcon,
+  category_blitz: CategoryBlitzIcon,
 };
 
 export default async function GamesPage() {
