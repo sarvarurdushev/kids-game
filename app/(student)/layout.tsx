@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { requireStudent } from "@/lib/auth/requireStudent";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { SoundToggle } from "@/components/ui/SoundToggle";
+import { CurriculumAnnouncement } from "@/components/curriculum/CurriculumAnnouncement";
 
 export default async function StudentLayout({
   children,
@@ -16,6 +17,7 @@ export default async function StudentLayout({
       <div className="pointer-events-none absolute -top-16 -left-16 h-56 w-56 rounded-full bg-teal/15 blur-3xl" />
       <div className="pointer-events-none absolute top-40 -right-20 h-64 w-64 rounded-full bg-coral/15 blur-3xl" />
       <SoundToggle className="fixed top-4 right-4 z-20" />
+      <CurriculumAnnouncement studentId={student.id} />
       <main className="relative z-10 mx-auto w-full max-w-md flex-1 px-4 pt-6 pb-24">{children}</main>
       <BottomNav />
     </div>

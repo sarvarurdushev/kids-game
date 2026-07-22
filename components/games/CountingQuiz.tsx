@@ -7,7 +7,8 @@ import { Avatar3D } from "@/components/three/Avatar3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
 import { playCorrect, playWrong, playGameOver } from "@/lib/sound";
-import { shuffle, wordsUpToDifficulty, type WordEntry } from "@/lib/games/wordBank";
+import { shuffle, type WordEntry } from "@/lib/games/wordBank";
+import { curriculumWordsUpToDifficulty } from "@/lib/games/curriculum";
 import { GameRewardSummary } from "./GameRewardSummary";
 
 const TOTAL_ROUNDS = 10;
@@ -33,7 +34,7 @@ interface CompleteResponse {
 }
 
 function buildRound(): RoundData {
-  const pool = wordsUpToDifficulty(1).filter((w) => w.category !== "numbers");
+  const pool = curriculumWordsUpToDifficulty(1).filter((w) => w.category !== "numbers");
   const item = shuffle(pool)[0];
   const count = 1 + Math.floor(Math.random() * 5);
   const decoys = shuffle([1, 2, 3, 4, 5].filter((n) => n !== count)).slice(0, 3);

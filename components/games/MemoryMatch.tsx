@@ -7,7 +7,8 @@ import { Avatar3D } from "@/components/three/Avatar3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
 import { playCorrect, playWrong, playGameOver, playPop } from "@/lib/sound";
-import { shuffle, wordsUpToDifficulty, type WordEntry } from "@/lib/games/wordBank";
+import { shuffle, type WordEntry } from "@/lib/games/wordBank";
+import { curriculumWordsUpToDifficulty } from "@/lib/games/curriculum";
 import { MemoryMatchScene3D } from "./MemoryMatchScene3D";
 import { GameRewardSummary } from "./GameRewardSummary";
 
@@ -36,7 +37,7 @@ interface CompleteResponse {
 }
 
 function buildDeck(): MatchCard[] {
-  const words: WordEntry[] = shuffle(wordsUpToDifficulty(2)).slice(0, PAIR_COUNT);
+  const words: WordEntry[] = shuffle(curriculumWordsUpToDifficulty(2)).slice(0, PAIR_COUNT);
   const cards: MatchCard[] = words.flatMap((w) => [
     { id: `${w.word}-emoji`, pairId: w.word, kind: "emoji" as const, value: w.emoji },
     { id: `${w.word}-word`, pairId: w.word, kind: "word" as const, value: w.word },

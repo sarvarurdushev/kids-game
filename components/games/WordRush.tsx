@@ -7,7 +7,8 @@ import { Avatar3D } from "@/components/three/Avatar3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
 import { playCorrect, playWrong, playGameOver } from "@/lib/sound";
-import { randomWords, shuffle, wordsUpToDifficulty, type WordEntry } from "@/lib/games/wordBank";
+import { randomWords, shuffle, type WordEntry } from "@/lib/games/wordBank";
+import { curriculumWordsUpToDifficulty } from "@/lib/games/curriculum";
 import { GameRewardSummary } from "./GameRewardSummary";
 
 const GLOBAL_TIME_MS = 30000;
@@ -32,7 +33,7 @@ interface CompleteResponse {
 }
 
 function buildRound(usedWords: Set<string>): RoundData {
-  const pool = wordsUpToDifficulty(3);
+  const pool = curriculumWordsUpToDifficulty(3);
   const fresh = pool.filter((w) => !usedWords.has(w.word));
   const candidates = fresh.length > 0 ? fresh : pool;
   if (fresh.length === 0) usedWords.clear();

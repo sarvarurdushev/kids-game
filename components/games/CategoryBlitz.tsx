@@ -7,7 +7,8 @@ import { Avatar3D } from "@/components/three/Avatar3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
 import { playCorrect, playWrong, playGameOver } from "@/lib/sound";
-import { shuffle, wordsUpToDifficulty, type WordCategory, type WordEntry } from "@/lib/games/wordBank";
+import { shuffle, type WordCategory, type WordEntry } from "@/lib/games/wordBank";
+import { curriculumWordsUpToDifficulty } from "@/lib/games/curriculum";
 import { GameRewardSummary } from "./GameRewardSummary";
 
 const GLOBAL_TIME_MS = 30000;
@@ -23,6 +24,15 @@ const CATEGORY_LABELS: Record<WordCategory, string> = {
   family: "Family",
   actions: "Actions",
   school: "School",
+  space: "Space",
+  culture: "Culture",
+  friends: "Friends",
+  environment: "Environment",
+  travel: "Travel",
+  body: "My Body",
+  halloween: "Halloween",
+  emotions: "Emotions",
+  christmas: "Christmas",
 };
 
 type Phase = "ready" | "playing" | "result" | "submitting" | "gameover";
@@ -44,7 +54,7 @@ interface CompleteResponse {
 }
 
 function buildRound(): RoundData {
-  const pool = wordsUpToDifficulty(3);
+  const pool = curriculumWordsUpToDifficulty(3);
   const categories = Array.from(new Set(pool.map((w) => w.category)));
   const [categoryA, categoryB] = shuffle(categories).slice(0, 2);
   const target = shuffle(pool.filter((w) => w.category === categoryA || w.category === categoryB))[0];

@@ -7,7 +7,8 @@ import { Avatar3D } from "@/components/three/Avatar3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
 import { playCorrect, playWrong, playGameOver, playPop } from "@/lib/sound";
-import { shuffle, WORD_BANK, type WordEntry } from "@/lib/games/wordBank";
+import { shuffle, type WordEntry } from "@/lib/games/wordBank";
+import { curriculumWordsUpToDifficulty } from "@/lib/games/curriculum";
 import { GameRewardSummary } from "./GameRewardSummary";
 
 const TOTAL_ROUNDS = 6;
@@ -34,7 +35,7 @@ interface CompleteResponse {
 }
 
 function buildPads(): WordEntry[] {
-  return shuffle(WORD_BANK).slice(0, PAD_COUNT);
+  return shuffle(curriculumWordsUpToDifficulty(3)).slice(0, PAD_COUNT);
 }
 
 function buildRound(roundIndex: number): RoundData {

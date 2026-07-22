@@ -7,7 +7,8 @@ import { Avatar3D } from "@/components/three/Avatar3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
 import { playCorrect, playWrong, playGameOver, playTick, playPop } from "@/lib/sound";
-import { shuffle, wordsUpToDifficulty, type WordEntry } from "@/lib/games/wordBank";
+import { shuffle, type WordEntry } from "@/lib/games/wordBank";
+import { curriculumWordsUpToDifficulty } from "@/lib/games/curriculum";
 import { WordScrambleScene3D } from "./WordScrambleScene3D";
 import { GameRewardSummary } from "./GameRewardSummary";
 
@@ -52,7 +53,7 @@ function maxDifficultyFor(roundIndex: number): 1 | 2 | 3 {
 }
 
 function buildRound(roundIndex: number, usedWords: Set<string>): RoundData {
-  const pool = wordsUpToDifficulty(maxDifficultyFor(roundIndex));
+  const pool = curriculumWordsUpToDifficulty(maxDifficultyFor(roundIndex));
   const fresh = pool.filter((w) => !usedWords.has(w.word));
   const candidates = fresh.length > 0 ? fresh : pool;
   const target = shuffle(candidates)[0];

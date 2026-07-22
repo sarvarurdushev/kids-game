@@ -7,7 +7,8 @@ import { Avatar3D } from "@/components/three/Avatar3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { Button } from "@/components/ui/Button";
 import { playCorrect, playWrong, playGameOver } from "@/lib/sound";
-import { shuffle, wordsUpToDifficulty, type WordEntry } from "@/lib/games/wordBank";
+import { shuffle, type WordEntry } from "@/lib/games/wordBank";
+import { curriculumWordsUpToDifficulty } from "@/lib/games/curriculum";
 import { GameRewardSummary } from "./GameRewardSummary";
 
 const TOTAL_ROUNDS = 10;
@@ -37,7 +38,7 @@ function maxDifficultyFor(roundIndex: number): 1 | 2 | 3 {
 }
 
 function buildRound(roundIndex: number): RoundData {
-  const pool = wordsUpToDifficulty(maxDifficultyFor(roundIndex));
+  const pool = curriculumWordsUpToDifficulty(maxDifficultyFor(roundIndex));
   const categories = Array.from(new Set(pool.map((w) => w.category)));
   const mainCategory = shuffle(categories)[0];
   const otherCategory = shuffle(categories.filter((c) => c !== mainCategory))[0];
