@@ -15,23 +15,15 @@ their `Idle`-equivalent animation clip; static models render a fixed pose
 | `husky.glb` | Husky | Quaternius | poly.pizza/m/wcWiuEqwzq | Yes |
 | `white_horse.glb` | White Horse | Quaternius | poly.pizza/m/bEdE4rmZy9 | Yes |
 | `horse.glb` | Horse | Quaternius | poly.pizza/m/qvTrSG9pZF | Yes |
-| `sheep.glb` | Sheep | Quaternius (Farm Animal Pack) | poly.pizza/m/C39AUXUUes | Yes |
-| `zebra.glb` | Zebra | Quaternius (Farm Animal Pack) | poly.pizza/m/iclPBR6SBZ | Yes |
-| `dragon.glb` | Dragon (Archmage Dragon) | Quaternius (Ultimate Monsters Bundle) | poly.pizza/m/LlwD0QNUPj | Yes |
 
 Alpaca through horse above are all from the same Quaternius
 "Ultimate Animated Animal Pack" bundle — guaranteed identical rig/art style.
-Sheep/zebra are Quaternius CC0 too, from a different pack (Farm Animal
-Pack), with a slightly more angular look. Dragon is from Quaternius's
-fantasy line (Ultimate Monsters Bundle).
 
 ## CC-BY (attribution required per license)
 
 | File | Species | Author | Source | License |
 | --- | --- | --- | --- | --- |
-| `giraffe.glb` | Giraffe | madtrollstudio | poly.pizza/m/jUaMl6njBh | CC-BY 3.0 |
 | `duck.glb` | Duck | madtrollstudio | poly.pizza/m/4plJcFXhim | CC-BY 3.0 |
-| `penguin.glb` | Penguin | madtrollstudio | poly.pizza/m/kvZRSJBz70 | CC-BY 3.0 |
 | `chicken.glb` | Chicken | madtrollstudio | poly.pizza/m/oHmIgi4boa | CC-BY 3.0 |
 | `panda.glb` | Panda | Poly by Google | poly.pizza/m/q1uJ28Hs8T-alt (see note) | CC-BY 3.0 |
 | `koala.glb` | Koala | Poly by Google | poly.pizza search "koala" | CC-BY 3.0 |
@@ -50,7 +42,7 @@ CC0 collection — the only CC0 candidates found for several of these,
 e.g. tiger/squirrel, are Blender-file-only with no glTF/FBX/OBJ export,
 a dead end without Blender). Per CC-BY 3.0/4.0, attribution is:
 
-- "Giraffe", "Duck", "Penguin", "Chicken" by madtrollstudio, licensed under
+- "Duck", "Chicken" by madtrollstudio, licensed under
   CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/), via poly.pizza.
 - "Panda", "Koala", "Tiger", "Lion", "Owl", "Raccoon", "Squirrel", "Elephant",
   "Monkey", "Goat" by Poly by Google, licensed under CC-BY 3.0
@@ -75,6 +67,11 @@ them in a fixed pose and anchors hats from the model's bounding-box top
 | `wolf.glb` | Wolf | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped wolf |
 | `unicorn.glb` | Unicorn | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Poly by Google static unicorn. Only quadruped exception in the new roster — the AI defaulted to a natural pony pose here instead of upright/anthropomorphic, kept deliberately rather than forced |
 | `pig.glb` | Pig | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped pig |
+| `sheep.glb` | Sheep | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped sheep |
+| `zebra.glb` | Zebra | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped zebra |
+| `giraffe.glb` | Giraffe | Tripo3D (text→image→3D, v3.1) | Replaces the earlier madtrollstudio (CC-BY) static giraffe |
+| `dragon.glb` | Dragon | Tripo3D (text→image→3D, v3.1) | Replaces the earlier Quaternius quadruped dragon |
+| `penguin.glb` | Penguin | Tripo3D (text→image→3D, v3.1) | Replaces the earlier madtrollstudio (CC-BY) static penguin |
 
 Generated via account-holder's paid Tripo3D plan (private models, commercial
 use license) — not third-party CC-licensed content, so no attribution
