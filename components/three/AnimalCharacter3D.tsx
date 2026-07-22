@@ -7,6 +7,7 @@ import { SkeletonUtils } from "three-stdlib";
 import { Group, Vector3 } from "three";
 import { HATS } from "./hats3d";
 import { computeRestBoundingBox } from "./glbGeometry";
+import { playCreatureVoice } from "@/lib/sound";
 import type { AvatarEquippedKeys, AvatarMood } from "@/components/avatar/AvatarCharacter";
 
 // Real, fetched CC0/CC-BY low-poly animal packs (see
@@ -119,6 +120,18 @@ export function AnimalCharacter3D({ species, equippedKeys, mood }: AnimalCharact
       action?.fadeOut(0.3);
     };
   }, [actions, names]);
+
+  // Non-verbal "voice" reaction — only on an actual transition INTO happy or
+  // sad (never on mount, and never on the reverse transition back to
+  // neutral), so a species chirps once per emotional beat instead of on
+  // every render or every time a game screen happens to land on "happy".
+  const prevMoodRef = useRef(mood);
+  useEffect(() => {
+    if (mood !== prevMoodRef.current && (mood === "happy" || mood === "sad")) {
+      playCreatureVoice(species, mood);
+    }
+    prevMoodRef.current = mood;
+  }, [mood, species]);
 
   useFrame((_, delta) => {
     t.current += delta;

@@ -149,3 +149,82 @@ export function playGiggle(): void {
     });
   });
 }
+
+// Animal-Crossing-"Animalese" style non-verbal creature voice: a short burst
+// of pitched blips, not real animal sounds or speech. Each species belongs to
+// a size/timbre archetype (mirroring the ear-shape families already used by
+// the 2D avatar's SPECIES_EARS grouping) so 21 species need only ~5 tunings,
+// and each mood reshapes the same archetype into a distinct little "phrase."
+interface VoiceArchetype {
+  basePitch: number;
+  type: OscillatorType;
+}
+
+const VOICE_ARCHETYPES = {
+  tiny: { basePitch: 780, type: "sine" },
+  small: { basePitch: 560, type: "sine" },
+  medium: { basePitch: 400, type: "triangle" },
+  large: { basePitch: 220, type: "sawtooth" },
+  fantasy: { basePitch: 520, type: "triangle" },
+} satisfies Record<string, VoiceArchetype>;
+
+type VoiceArchetypeKey = keyof typeof VOICE_ARCHETYPES;
+
+const SPECIES_VOICE: Record<string, VoiceArchetypeKey> = {
+  species_rabbit: "tiny",
+  species_fox: "tiny",
+  species_monkey: "tiny",
+  species_penguin: "tiny",
+  species_cat: "small",
+  species_dog: "small",
+  species_sheep: "small",
+  species_pig: "small",
+  species_deer: "medium",
+  species_donkey: "medium",
+  species_cow: "medium",
+  species_zebra: "medium",
+  species_wolf: "medium",
+  species_giraffe: "medium",
+  species_bear: "large",
+  species_lion: "large",
+  species_tiger: "large",
+  species_elephant: "large",
+  species_panda: "large",
+  species_dragon: "fantasy",
+  species_unicorn: "fantasy",
+};
+
+interface MoodContour {
+  pitchMul: number;
+  inflect: number;
+  blipCount: number;
+  blipMs: number;
+  gapMs: number;
+}
+
+const MOOD_CONTOUR: Record<"happy" | "sad" | "neutral", MoodContour> = {
+  happy: { pitchMul: 1.2, inflect: 1.35, blipCount: 4, blipMs: 0.09, gapMs: 0.06 },
+  sad: { pitchMul: 0.8, inflect: 0.7, blipCount: 3, blipMs: 0.16, gapMs: 0.1 },
+  neutral: { pitchMul: 1, inflect: 1.05, blipCount: 3, blipMs: 0.1, gapMs: 0.08 },
+};
+
+export function playCreatureVoice(species: string, mood: "happy" | "sad" | "neutral" = "neutral"): void {
+  const archetype = VOICE_ARCHETYPES[SPECIES_VOICE[species] ?? "small"];
+  const contour = MOOD_CONTOUR[mood];
+  play((ctx, now) => {
+    let start = now;
+    for (let i = 0; i < contour.blipCount; i++) {
+      const jitter = 0.9 + Math.random() * 0.2;
+      const freq = archetype.basePitch * contour.pitchMul * jitter;
+      tone(ctx, {
+        freq,
+        endFreq: freq * contour.inflect,
+        start,
+        duration: contour.blipMs,
+        type: archetype.type,
+        peakGain: 0.08,
+      });
+      start += contour.blipMs + contour.gapMs;
+    }
+  });
+}
