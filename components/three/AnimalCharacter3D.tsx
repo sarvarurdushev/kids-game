@@ -5,7 +5,6 @@ import { useFrame } from "@react-three/fiber";
 import { useGLTF, useAnimations } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { Group, Object3D, Vector3 } from "three";
-import { HATS } from "./hats3d";
 import { computeRestBoundingBox } from "./glbGeometry";
 import { playCreatureVoice } from "@/lib/sound";
 import { getSpeciesArchetype, type SpeciesArchetype } from "@/lib/games/speciesArchetype";
@@ -62,7 +61,6 @@ const MODEL_URL: Record<string, string> = {
 // the scene or clash with the shared camera framing.
 const TARGET_HEIGHT = 1.22;
 const FOOT_Y = -0.62;
-const HAT_CLEARANCE = 0.03;
 
 function pickIdleClip(names: string[]): string | null {
   if (names.includes("Idle")) return "Idle";
@@ -103,7 +101,7 @@ interface AnimalCharacter3DProps {
   dancing?: boolean;
 }
 
-export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false }: AnimalCharacter3DProps) {
+export function AnimalCharacter3D({ species, mood, dancing = false }: AnimalCharacter3DProps) {
   const groupRef = useRef<Group>(null);
   const t = useRef(0);
 
@@ -113,13 +111,15 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
   // species would fight over one shared skinned mesh/armature.
   const cloned = useMemo(() => SkeletonUtils.clone(scene) as Group, [scene]);
 
-  // Kept across frames (not just inside the memo below) so useFrame can nod
-  // it during the idle "perk" pulse — null on models without a named Head
-  // bone (e.g. the bear, which has no armature at all), which just skips
-  // the nod entirely rather than erroring.
+  // Kept for a future rigged model to use (nodded during the idle "perk"
+  // pulse below) — every model in the current roster is an unrigged,
+  // single-mesh Tripo3D export with no skeleton at all, so this is null in
+  // practice today and the nod never fires. Left in place rather than
+  // ripped out: it's a no-op, not a bug, and needs zero changes if a rigged
+  // model is ever added to the roster.
   const headBoneRef = useRef<Object3D | null>(null);
 
-  const { scale, offset, hatAnchor } = useMemo(() => {
+  const { scale, offset } = useMemo(() => {
     const box = computeRestBoundingBox(cloned);
     const size = new Vector3();
     box.getSize(size);
@@ -127,20 +127,7 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
     box.getCenter(center);
     const s = size.y > 0 ? TARGET_HEIGHT / size.y : 1;
     const offsetVec = new Vector3(-center.x * s, FOOT_Y - box.min.y * s, -center.z * s);
-
-    // A named "Head" bone (present on the rigged dog/rabbit/fox) gives a far
-    // more reliable *height* than "top of bounding box" — a raised tail or
-    // ears can be the tallest point in the bind pose. The bear has no
-    // armature, so it falls back to the bounding-box top. Only the height
-    // (world Y) is used, not the bone's full 3D position: a quadruped's
-    // head bone sits forward of the body's centerline (along its neck), and
-    // placing a hat that far toward the camera reads as floating in front
-    // of the face rather than sitting on top of the head.
-    const headBone = cloned.getObjectByName("Head");
-    const anchorY = headBone ? headBone.getWorldPosition(new Vector3()).y : box.max.y;
-
-    const hatAnchor = new Vector3(0, anchorY * s + offsetVec.y + HAT_CLEARANCE, offsetVec.z);
-    return { scale: s, offset: offsetVec, hatAnchor };
+    return { scale: s, offset: offsetVec };
   }, [cloned]);
 
   // Ref mutation belongs in an effect, not the memo above (which runs during
@@ -259,15 +246,11 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
     }
   });
 
-  const hatKey = equippedKeys.hat;
-  const renderHat = hatKey ? HATS[hatKey] : null;
-
   return (
     <group ref={groupRef}>
       <group scale={scale} position={offset}>
         <primitive object={cloned} />
       </group>
-      {renderHat && <group position={hatAnchor}>{renderHat()}</group>}
     </group>
   );
 }

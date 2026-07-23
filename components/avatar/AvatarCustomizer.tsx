@@ -11,19 +11,21 @@ import { CoinIcon } from "@/components/icons";
 
 const DANCE_DURATION_MS = 4000;
 
-// Every other slot (hair/eyes/clothes, then accessory/background) used to
-// live here too, but none of them ever showed up on the real 3D model
-// everyone actually sees - only species+hat do (AnimalCharacter3D) -
-// switching tabs kept feeling broken ("some work some don't"). They now all
-// live in the Styles collection (components/cards/StyleCollectionGrid.tsx)
-// as ownable cards instead of pretending to be 3D-equippable cosmetics.
-// What's left here is genuinely just "the 3D avatar," so there's no more
-// 2D-vs-3D preview branching to speak of.
-type Slot = "species" | "hat";
-
+// Hair/eyes/clothes/accessory/background/hat all used to live here too, but
+// none of them ever showed up reliably on the real 3D model everyone
+// actually sees: hair/eyes/clothes/accessory/background can't be draped
+// onto an arbitrary animal GLB procedurally, and hat's "anchor to the head
+// bone" approach turned out to have nothing to anchor to — every model in
+// the roster is an unrigged, single-mesh Tripo3D export with no skeleton at
+// all, so hats floated at ear/horn/antler height instead of sitting on the
+// head. All of that now lives in the Styles collection
+// (components/cards/StyleCollectionGrid.tsx) as ownable cards instead of
+// pretending to be 3D-equippable cosmetics. What's left here — species — is
+// the one thing that genuinely renders on the 3D avatar, so there's no more
+// slot-picker or 2D-vs-3D preview branching to speak of.
 export interface AvatarItem {
   id: string;
-  slot: Slot;
+  slot: "species";
   key: string;
   name: string;
   rarity: string;
@@ -33,12 +35,6 @@ export interface AvatarItem {
   affordable: boolean;
   equipped: boolean;
 }
-
-const SLOTS: Slot[] = ["species", "hat"];
-const SLOT_LABELS: Record<Slot, string> = {
-  species: "Animal",
-  hat: "Hat",
-};
 
 export function AvatarCustomizer({
   items,
@@ -52,7 +48,6 @@ export function AvatarCustomizer({
   danceCost: number;
 }) {
   const router = useRouter();
-  const [activeSlot, setActiveSlot] = useState<Slot>("species");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [previewItem, setPreviewItem] = useState<AvatarItem | null>(null);
@@ -83,9 +78,8 @@ export function AvatarCustomizer({
     }
   }
 
-  const equippedKeys = Object.fromEntries(
-    SLOTS.map((slot) => [slot, items.find((i) => i.slot === slot && i.equipped)?.key])
-  );
+  const equippedSpeciesKey = items.find((i) => i.equipped)?.key;
+  const equippedKeys = { species: equippedSpeciesKey };
 
   async function equip(item: AvatarItem) {
     setBusyId(item.id);
@@ -129,8 +123,6 @@ export function AvatarCustomizer({
     }
   }
 
-  const slotItems = items.filter((i) => i.slot === activeSlot);
-
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col items-center gap-2">
@@ -158,25 +150,10 @@ export function AvatarCustomizer({
         )}
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {SLOTS.map((slot) => (
-          <button
-            key={slot}
-            type="button"
-            onClick={() => setActiveSlot(slot)}
-            className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${
-              activeSlot === slot ? "bg-gold text-ink" : "bg-white text-ink/60"
-            }`}
-          >
-            {SLOT_LABELS[slot]}
-          </button>
-        ))}
-      </div>
-
       {error && <p className="text-center text-sm font-semibold text-coral">{error}</p>}
 
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-        {slotItems.map((item) => (
+        {items.map((item) => (
           <div
             key={item.id}
             className={`flex flex-col items-center gap-2 rounded-2xl p-3 text-center ${
@@ -185,7 +162,7 @@ export function AvatarCustomizer({
           >
             <button type="button" onClick={() => setPreviewItem(item)} className="flex flex-col items-center gap-2">
               <div className={item.state === "locked" ? "opacity-40 grayscale" : ""}>
-                <AvatarRenderer equippedKeys={{ [item.slot]: item.key }} size={56} />
+                <AvatarRenderer equippedKeys={{ species: item.key }} size={56} />
               </div>
               <p className="text-xs font-semibold">{item.name}</p>
             </button>
@@ -232,11 +209,7 @@ export function AvatarCustomizer({
         preview={
           previewItem && (
             <div className="w-40 sm:w-56 lg:w-64">
-              <Avatar3D
-                equippedKeys={{ ...equippedKeys, [previewItem.slot]: previewItem.key }}
-                size={280}
-                responsive
-              />
+              <Avatar3D equippedKeys={{ species: previewItem.key }} size={280} responsive />
             </div>
           )
         }

@@ -13,7 +13,7 @@ import type { Rarity } from "@/lib/reward-engine/types";
 
 export interface StyleItem {
   id: string;
-  slot: "hair" | "eyes" | "clothes" | "accessory" | "background";
+  slot: "hair" | "eyes" | "clothes" | "accessory" | "background" | "hat";
   key: string;
   name: string;
   rarity: Rarity;
