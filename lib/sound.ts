@@ -5,6 +5,8 @@
 // default (a kids' app making noise without being asked is disruptive); a
 // student has to opt in via the mute toggle.
 
+import { getSpeciesArchetype, type SpeciesArchetype } from "./games/speciesArchetype";
+
 const MUTE_KEY = "gk_sound_muted";
 const MUTE_EVENT = "gk-sound-mute-change";
 
@@ -152,9 +154,9 @@ export function playGiggle(): void {
 
 // Animal-Crossing-"Animalese" style non-verbal creature voice: a short burst
 // of pitched blips, not real animal sounds or speech. Each species belongs to
-// a size/timbre archetype (mirroring the ear-shape families already used by
-// the 2D avatar's SPECIES_EARS grouping) so 21 species need only ~5 tunings,
-// and each mood reshapes the same archetype into a distinct little "phrase."
+// a size/timbre archetype (SPECIES_ARCHETYPE, shared with the dance
+// animation in AnimalCharacter3D) so 21 species need only ~5 tunings, and
+// each mood reshapes the same archetype into a distinct little "phrase."
 interface VoiceArchetype {
   basePitch: number;
   type: OscillatorType;
@@ -166,33 +168,7 @@ const VOICE_ARCHETYPES = {
   medium: { basePitch: 400, type: "triangle" },
   large: { basePitch: 220, type: "sawtooth" },
   fantasy: { basePitch: 520, type: "triangle" },
-} satisfies Record<string, VoiceArchetype>;
-
-type VoiceArchetypeKey = keyof typeof VOICE_ARCHETYPES;
-
-const SPECIES_VOICE: Record<string, VoiceArchetypeKey> = {
-  species_rabbit: "tiny",
-  species_fox: "tiny",
-  species_monkey: "tiny",
-  species_penguin: "tiny",
-  species_cat: "small",
-  species_dog: "small",
-  species_sheep: "small",
-  species_pig: "small",
-  species_deer: "medium",
-  species_donkey: "medium",
-  species_cow: "medium",
-  species_zebra: "medium",
-  species_wolf: "medium",
-  species_giraffe: "medium",
-  species_bear: "large",
-  species_lion: "large",
-  species_tiger: "large",
-  species_elephant: "large",
-  species_panda: "large",
-  species_dragon: "fantasy",
-  species_unicorn: "fantasy",
-};
+} satisfies Record<SpeciesArchetype, VoiceArchetype>;
 
 interface MoodContour {
   pitchMul: number;
@@ -209,7 +185,7 @@ const MOOD_CONTOUR: Record<"happy" | "sad" | "neutral", MoodContour> = {
 };
 
 export function playCreatureVoice(species: string, mood: "happy" | "sad" | "neutral" = "neutral"): void {
-  const archetype = VOICE_ARCHETYPES[SPECIES_VOICE[species] ?? "small"];
+  const archetype = VOICE_ARCHETYPES[getSpeciesArchetype(species)];
   const contour = MOOD_CONTOUR[mood];
   play((ctx, now) => {
     let start = now;

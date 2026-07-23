@@ -7,17 +7,18 @@ import { AnimalCharacter3D } from "./AnimalCharacter3D";
 interface Character3DProps {
   equippedKeys: AvatarEquippedKeys;
   mood?: AvatarMood;
+  dancing?: boolean;
 }
 
 // Every species (including the cat) now renders from a real fetched glTF
 // model via AnimalCharacter3D — see public/models/animals/CREDITS.md for
 // what each model is and its license. This wrapper just supplies the
 // Suspense boundary and the species_cat default for an unequipped avatar.
-export function Character3D({ equippedKeys, mood = "neutral" }: Character3DProps) {
+export function Character3D({ equippedKeys, mood = "neutral", dancing = false }: Character3DProps) {
   const species = equippedKeys.species ?? "species_cat";
   return (
     <Suspense fallback={null}>
-      <AnimalCharacter3D species={species} equippedKeys={equippedKeys} mood={mood} />
+      <AnimalCharacter3D species={species} equippedKeys={equippedKeys} mood={mood} dancing={dancing} />
     </Suspense>
   );
 }

@@ -6,8 +6,10 @@ import { AvatarRenderer } from "./AvatarRenderer";
 import { Avatar3D } from "@/components/three/Avatar3D";
 import { Button } from "@/components/ui/Button";
 import { ItemPreviewModal } from "@/components/ui/ItemPreviewModal";
-import { playCoin, playPop } from "@/lib/sound";
+import { playCoin, playPop, playFanfare } from "@/lib/sound";
 import { CoinIcon } from "@/components/icons";
+
+const DANCE_DURATION_MS = 4000;
 
 type Slot = "species" | "hair" | "eyes" | "clothes" | "hat" | "accessory" | "background";
 
@@ -43,15 +45,45 @@ const SLOT_LABELS: Record<Slot, string> = {
 export function AvatarCustomizer({
   items,
   coinsBalance,
+  danceUnlocked,
+  danceCost,
 }: {
   items: AvatarItem[];
   coinsBalance: number;
+  danceUnlocked: boolean;
+  danceCost: number;
 }) {
   const router = useRouter();
   const [activeSlot, setActiveSlot] = useState<Slot>("species");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [previewItem, setPreviewItem] = useState<AvatarItem | null>(null);
+  const [dancing, setDancing] = useState(false);
+  const [unlockingDance, setUnlockingDance] = useState(false);
+
+  function danceNow() {
+    if (dancing) return;
+    playFanfare();
+    setDancing(true);
+    setTimeout(() => setDancing(false), DANCE_DURATION_MS);
+  }
+
+  async function purchaseDance() {
+    setUnlockingDance(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/avatar/unlock-dance", { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "Couldn't unlock that");
+        return;
+      }
+      playCoin();
+      router.refresh();
+    } finally {
+      setUnlockingDance(false);
+    }
+  }
 
   const equippedKeys = Object.fromEntries(
     SLOTS.map((slot) => [slot, items.find((i) => i.slot === slot && i.equipped)?.key])
@@ -104,10 +136,24 @@ export function AvatarCustomizer({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col items-center gap-2">
-        <Avatar3D equippedKeys={equippedKeys} size={160} />
+        <Avatar3D equippedKeys={equippedKeys} size={160} dancing={dancing} />
         <p className="flex items-center gap-1 text-sm font-semibold text-ink/60">
           <CoinIcon size={16} /> {coinsBalance} coins
         </p>
+        {danceUnlocked ? (
+          <Button variant="secondary" onClick={danceNow} disabled={dancing} className="!px-4 !py-1.5 !text-sm">
+            {dancing ? "Dancing! 🎉" : "Dance!"}
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            onClick={purchaseDance}
+            disabled={unlockingDance || coinsBalance < danceCost}
+            className="!flex !items-center !gap-1 !px-4 !py-1.5 !text-sm"
+          >
+            🎉 Unlock Dance Party — <CoinIcon size={14} /> {danceCost}
+          </Button>
+        )}
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-1">

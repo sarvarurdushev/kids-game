@@ -8,6 +8,7 @@ import { Group, Vector3 } from "three";
 import { HATS } from "./hats3d";
 import { computeRestBoundingBox } from "./glbGeometry";
 import { playCreatureVoice } from "@/lib/sound";
+import { getSpeciesArchetype, type SpeciesArchetype } from "@/lib/games/speciesArchetype";
 import type { AvatarEquippedKeys, AvatarMood } from "@/components/avatar/AvatarCharacter";
 
 // Real, fetched CC0/CC-BY low-poly animal packs (see
@@ -71,13 +72,36 @@ function pickIdleClip(names: string[]): string | null {
   return anyIdle ?? names[0] ?? null;
 }
 
+// Coin-unlockable dance (lib/student/dance.ts) — a distinct, sustained
+// performance per species archetype, reusing the same tiny/small/medium/
+// large/fantasy grouping as the voice synth so a species' size/energy
+// "personality" shows up consistently in both its sound and its moves.
+// No GLB in the roster ships a dedicated dance clip (just Idle), so this is
+// procedural: a bounce + sway, with a spin for the archetypes that suit it.
+interface DanceStyle {
+  bounceAmp: number;
+  bounceFreq: number;
+  swayAmp: number;
+  swayFreq: number;
+  spinSpeed: number; // 0 = no spin, just a gentle head-turn wag instead
+}
+
+const DANCE_STYLES: Record<SpeciesArchetype, DanceStyle> = {
+  tiny: { bounceAmp: 0.09, bounceFreq: 6, swayAmp: 0.12, swayFreq: 5, spinSpeed: 4 },
+  small: { bounceAmp: 0.07, bounceFreq: 4, swayAmp: 0.18, swayFreq: 3, spinSpeed: 0 },
+  medium: { bounceAmp: 0.05, bounceFreq: 2.5, swayAmp: 0.14, swayFreq: 2, spinSpeed: 0 },
+  large: { bounceAmp: 0.04, bounceFreq: 1.6, swayAmp: 0.2, swayFreq: 1.3, spinSpeed: 0 },
+  fantasy: { bounceAmp: 0.08, bounceFreq: 3, swayAmp: 0.05, swayFreq: 3, spinSpeed: 3 },
+};
+
 interface AnimalCharacter3DProps {
   species: string;
   equippedKeys: AvatarEquippedKeys;
   mood: AvatarMood;
+  dancing?: boolean;
 }
 
-export function AnimalCharacter3D({ species, equippedKeys, mood }: AnimalCharacter3DProps) {
+export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false }: AnimalCharacter3DProps) {
   const groupRef = useRef<Group>(null);
   const t = useRef(0);
 
@@ -154,12 +178,23 @@ export function AnimalCharacter3D({ species, equippedKeys, mood }: AnimalCharact
     const group = groupRef.current;
     if (!group) return;
 
+    if (dancing) {
+      const style = DANCE_STYLES[getSpeciesArchetype(species)];
+      group.position.y = Math.abs(Math.sin(t.current * style.bounceFreq)) * style.bounceAmp;
+      group.rotation.z = Math.sin(t.current * style.swayFreq) * style.swayAmp;
+      group.rotation.y =
+        style.spinSpeed > 0 ? t.current * style.spinSpeed : Math.sin(t.current * style.swayFreq * 0.5) * 0.15;
+      return;
+    }
+    group.rotation.y = 0;
+
     if (bounceEnergyRef.current > 0) {
       bounceEnergyRef.current = Math.max(0, bounceEnergyRef.current - delta * 1.8);
     }
     const energy = bounceEnergyRef.current;
     if (energy <= 0) {
       group.position.y = 0;
+      group.rotation.z = 0;
     } else if (bounceDirRef.current === 1) {
       // Happy: a couple of quick decaying hops, never dipping below the floor.
       group.position.y = Math.abs(Math.sin(t.current * 12)) * energy * 0.05;

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireStudent } from "@/lib/auth/requireStudent";
 import { getAvatarItems } from "@/lib/student/avatar";
+import { isDanceUnlocked, DANCE_UNLOCK_COST } from "@/lib/student/dance";
 import { AvatarCustomizer } from "@/components/avatar/AvatarCustomizer";
 import type { AvatarItem } from "@/components/avatar/AvatarCustomizer";
 
@@ -14,6 +15,7 @@ export default async function AvatarPage() {
   const items = (await getAvatarItems(student)).filter((item) =>
     CHARACTER_SLOTS.has(item.slot)
   ) as AvatarItem[];
+  const danceUnlocked = await isDanceUnlocked(student.id);
 
   return (
     <div className="flex flex-col gap-5">
@@ -28,7 +30,12 @@ export default async function AvatarPage() {
           </Link>
         </div>
       </div>
-      <AvatarCustomizer items={items} coinsBalance={student.coinsBalance} />
+      <AvatarCustomizer
+        items={items}
+        coinsBalance={student.coinsBalance}
+        danceUnlocked={danceUnlocked}
+        danceCost={DANCE_UNLOCK_COST}
+      />
     </div>
   );
 }

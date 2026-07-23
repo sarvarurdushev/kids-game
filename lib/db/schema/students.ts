@@ -36,6 +36,12 @@ export const students = pgTable("students", {
   petHappiness: integer("pet_happiness").notNull().default(70),
   petLastInteractionAt: timestamp("pet_last_interaction_at", { withTimezone: true }),
 
+  // One-time coin purchase (lib/student/dance.ts) that lets a student trigger
+  // their equipped character's dance animation. Not per-species — each
+  // species already dances differently on its own (its size/energy
+  // archetype, shared with the voice synth), so one unlock covers all of them.
+  danceUnlockedAt: timestamp("dance_unlocked_at", { withTimezone: true }),
+
   equippedSpeciesId: uuid("equipped_species_id").references(
     () => avatarItems.id
   ),

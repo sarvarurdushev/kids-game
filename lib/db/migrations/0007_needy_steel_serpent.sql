@@ -1,0 +1,1 @@
+ALTER TABLE "students" ADD COLUMN "dance_unlocked_at" timestamp with time zone;

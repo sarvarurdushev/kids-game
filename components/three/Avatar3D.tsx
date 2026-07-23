@@ -8,15 +8,16 @@ import type { AvatarEquippedKeys, AvatarMood } from "@/components/avatar/AvatarC
 interface Avatar3DProps {
   equippedKeys: AvatarEquippedKeys;
   mood?: AvatarMood;
+  dancing?: boolean;
   size?: number;
   className?: string;
 }
 
-export function Avatar3D({ equippedKeys, mood = "neutral", size = 120, className = "" }: Avatar3DProps) {
+export function Avatar3D({ equippedKeys, mood = "neutral", dancing = false, size = 120, className = "" }: Avatar3DProps) {
   return (
     <div style={{ width: size, height: size }} className={className}>
       <Scene3D camera={{ position: [0, 0.31, 4.4], fov: 32 }}>
-        <Character3D equippedKeys={equippedKeys} mood={mood} />
+        <Character3D equippedKeys={equippedKeys} mood={mood} dancing={dancing} />
         <ContactShadows position={[0, -0.72, 0]} opacity={0.35} scale={2.4} blur={2.2} far={1} />
       </Scene3D>
     </div>
