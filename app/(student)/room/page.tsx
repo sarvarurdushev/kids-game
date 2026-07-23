@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireStudent } from "@/lib/auth/requireStudent";
 import { getAvatarItems, getEquippedAvatarKeys } from "@/lib/student/avatar";
+import { getRoomSetShop } from "@/lib/student/roomSets";
 import { RoomCustomizer } from "@/components/room/RoomCustomizer";
 import type { RoomItem } from "@/components/room/RoomCustomizer";
 
@@ -15,6 +16,7 @@ export default async function RoomPage() {
     ROOM_SLOTS.has(item.slot)
   ) as RoomItem[];
   const equippedKeys = await getEquippedAvatarKeys(student);
+  const roomSets = await getRoomSetShop(student.id);
 
   return (
     <div className="flex flex-col gap-5">
@@ -24,7 +26,7 @@ export default async function RoomPage() {
           Edit avatar →
         </Link>
       </div>
-      <RoomCustomizer items={items} coinsBalance={student.coinsBalance} equippedKeys={equippedKeys} />
+      <RoomCustomizer items={items} roomSets={roomSets} coinsBalance={student.coinsBalance} equippedKeys={equippedKeys} />
     </div>
   );
 }

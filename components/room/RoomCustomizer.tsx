@@ -25,6 +25,18 @@ export interface RoomItem {
   equipped: boolean;
 }
 
+export interface RoomSetItem {
+  id: string;
+  key: string;
+  name: string;
+  coinPrice: number;
+  wallpaperKey: string | null;
+  floorKey: string | null;
+  furnitureKey: string | null;
+  owned: boolean;
+  affordable: boolean;
+}
+
 const SLOTS: RoomSlot[] = ["wallpaper", "floor", "furniture"];
 const SLOT_LABELS: Record<RoomSlot, string> = {
   wallpaper: "Wallpaper",
@@ -34,10 +46,12 @@ const SLOT_LABELS: Record<RoomSlot, string> = {
 
 export function RoomCustomizer({
   items,
+  roomSets,
   coinsBalance,
   equippedKeys,
 }: {
   items: RoomItem[];
+  roomSets: RoomSetItem[];
   coinsBalance: number;
   equippedKeys: AvatarEquippedKeys;
 }) {
@@ -46,6 +60,28 @@ export function RoomCustomizer({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [previewItem, setPreviewItem] = useState<RoomItem | null>(null);
+  const [busySetId, setBusySetId] = useState<string | null>(null);
+
+  async function purchaseSet(set: RoomSetItem) {
+    setBusySetId(set.id);
+    setError(null);
+    try {
+      const res = await fetch("/api/room/purchase-set", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomSetId: set.id }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "Couldn't buy that room set");
+        return;
+      }
+      playCoin();
+      router.refresh();
+    } finally {
+      setBusySetId(null);
+    }
+  }
 
   async function equip(item: RoomItem) {
     setBusyId(item.id);
@@ -117,7 +153,47 @@ export function RoomCustomizer({
 
       {error && <p className="text-center text-sm font-semibold text-coral">{error}</p>}
 
-      <div className="grid grid-cols-2 gap-3">
+      {roomSets.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <h2 className="font-display text-lg font-semibold">Room sets</h2>
+          <p className="text-xs text-ink/50">
+            Buy a whole coordinated wallpaper + floor + furniture set in one tap — cheaper than buying each piece.
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {roomSets.map((set) => (
+              <div key={set.id} className="flex flex-col items-center gap-2 rounded-2xl bg-white p-3 text-center">
+                <div className="w-full overflow-hidden rounded-xl">
+                  <RoomScene3D
+                    equippedKeys={{ wallpaper: set.wallpaperKey ?? undefined, floor: set.floorKey ?? undefined, furniture: set.furnitureKey ?? undefined }}
+                    className="w-full"
+                  />
+                </div>
+                <p className="font-display text-sm font-semibold">{set.name}</p>
+                {set.owned ? (
+                  <span className="text-xs font-bold text-gold-dark">Owned</span>
+                ) : (
+                  <Button
+                    variant="secondary"
+                    className="!flex !items-center !gap-1 !px-3 !py-1.5 !text-xs"
+                    onClick={() => purchaseSet(set)}
+                    disabled={busySetId === set.id || !set.affordable}
+                  >
+                    {set.affordable ? (
+                      <>
+                        <CoinIcon size={13} /> {set.coinPrice}
+                      </>
+                    ) : (
+                      "Not enough coins"
+                    )}
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {slotItems.map((item) => (
           <div
             key={item.id}

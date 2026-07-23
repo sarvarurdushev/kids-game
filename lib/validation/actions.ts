@@ -26,3 +26,7 @@ export const purchasePackSchema = z.object({
 export const purchaseCaseSchema = z.object({
   caseTypeId: z.string().uuid(),
 });
+
+export const purchaseRoomSetSchema = z.object({
+  roomSetId: z.string().uuid(),
+});

@@ -13,6 +13,7 @@ import {
   packTypePool,
   packTypes,
   rewardRules,
+  roomSets,
   studentAvatarItems,
   studentExternalRefs,
   students,
@@ -76,11 +77,12 @@ async function main() {
   console.log(`  universes: ${universeInserted.length} new (${universeRows.length} total)`);
 
   // --- Characters ------------------------------------------------------------
-  // 5 cards per month (common/common/rare/epic/legendary), each reusing a
-  // word+emoji already authored for that month's vocabulary (lib/games/wordBank.ts)
-  // — imageUrl holds the emoji directly (the placeholder visual system
-  // documented in lib/visuals.ts), since these are new topics with no
-  // hand-illustrated art the way the old 21 fantasy creatures had.
+  // 10 cards per month (common x3/rare x3/epic x2/legendary x2), each reusing
+  // a word+emoji already authored for that month's vocabulary
+  // (lib/games/wordBank.ts) — imageUrl holds the emoji directly (the
+  // placeholder visual system documented in lib/visuals.ts), since these are
+  // new topics with no hand-illustrated art the way the old 21 fantasy
+  // creatures had.
   const characterSeed: Array<{
     universe: string;
     key: string;
@@ -93,72 +95,132 @@ async function main() {
     { universe: "space", key: "astronaut", name: "Astronaut", emoji: "👨‍🚀", rarity: "rare" },
     { universe: "space", key: "galaxy", name: "Galaxy", emoji: "🌌", rarity: "epic" },
     { universe: "space", key: "cosmos", name: "Cosmos", emoji: "✨", rarity: "legendary" },
+    { universe: "space", key: "star", name: "Star", emoji: "⭐", rarity: "common" },
+    { universe: "space", key: "planet", name: "Planet", emoji: "🪐", rarity: "rare" },
+    { universe: "space", key: "alien", name: "Alien", emoji: "👽", rarity: "rare" },
+    { universe: "space", key: "telescope", name: "Telescope", emoji: "🔭", rarity: "epic" },
+    { universe: "space", key: "universe", name: "Universe", emoji: "🌠", rarity: "legendary" },
 
     { universe: "culture", key: "flag", name: "Flag", emoji: "🚩", rarity: "common" },
     { universe: "culture", key: "song", name: "Song", emoji: "🎶", rarity: "common" },
     { universe: "culture", key: "festival", name: "Festival", emoji: "🎉", rarity: "rare" },
     { universe: "culture", key: "instrument", name: "Instrument", emoji: "🪘", rarity: "epic" },
     { universe: "culture", key: "celebrate", name: "Celebrate", emoji: "🎇", rarity: "legendary" },
+    { universe: "culture", key: "music", name: "Music", emoji: "🎵", rarity: "common" },
+    { universe: "culture", key: "drum", name: "Drum", emoji: "🥁", rarity: "rare" },
+    { universe: "culture", key: "parade", name: "Parade", emoji: "🎊", rarity: "rare" },
+    { universe: "culture", key: "guitar", name: "Guitar", emoji: "🎸", rarity: "epic" },
+    { universe: "culture", key: "violin", name: "Violin", emoji: "🎻", rarity: "legendary" },
 
     { universe: "friends", key: "friend", name: "Friend", emoji: "👫", rarity: "common" },
     { universe: "friends", key: "smile", name: "Smile", emoji: "😊", rarity: "common" },
     { universe: "friends", key: "birthday", name: "Birthday", emoji: "🎈", rarity: "rare" },
     { universe: "friends", key: "trust", name: "Trust", emoji: "🤞", rarity: "epic" },
     { universe: "friends", key: "cheerful", name: "Cheerful", emoji: "😃", rarity: "legendary" },
+    { universe: "friends", key: "share", name: "Share", emoji: "🤝", rarity: "common" },
+    { universe: "friends", key: "hug", name: "Hug", emoji: "🤗", rarity: "rare" },
+    { universe: "friends", key: "party", name: "Party", emoji: "🥳", rarity: "rare" },
+    { universe: "friends", key: "laugh", name: "Laugh", emoji: "😂", rarity: "epic" },
+    { universe: "friends", key: "together", name: "Together", emoji: "👬", rarity: "legendary" },
 
     { universe: "environment", key: "tree", name: "Tree", emoji: "🌳", rarity: "common" },
     { universe: "environment", key: "flower", name: "Flower", emoji: "🌸", rarity: "common" },
     { universe: "environment", key: "forest", name: "Forest", emoji: "🌲", rarity: "rare" },
     { universe: "environment", key: "ocean", name: "Ocean", emoji: "🌊", rarity: "epic" },
     { universe: "environment", key: "protect", name: "Protect", emoji: "🛡️", rarity: "legendary" },
+    { universe: "environment", key: "leaf", name: "Leaf", emoji: "🍃", rarity: "common" },
+    { universe: "environment", key: "river", name: "River", emoji: "🏞️", rarity: "rare" },
+    { universe: "environment", key: "mountain", name: "Mountain", emoji: "⛰️", rarity: "rare" },
+    { universe: "environment", key: "recycle", name: "Recycle", emoji: "♻️", rarity: "epic" },
+    { universe: "environment", key: "nature", name: "Nature", emoji: "🍀", rarity: "legendary" },
 
     { universe: "family", key: "family_mom", name: "Mom", emoji: "👩", rarity: "common" },
     { universe: "family", key: "family_dad", name: "Dad", emoji: "👨", rarity: "common" },
     { universe: "family", key: "family_grandma", name: "Grandma", emoji: "👵", rarity: "rare" },
     { universe: "family", key: "family_cousin", name: "Cousin", emoji: "🧒", rarity: "epic" },
     { universe: "family", key: "family_together", name: "Family", emoji: "👪", rarity: "legendary" },
+    { universe: "family", key: "family_baby", name: "Baby", emoji: "👶", rarity: "common" },
+    { universe: "family", key: "family_sister", name: "Sister", emoji: "👧", rarity: "rare" },
+    { universe: "family", key: "family_brother", name: "Brother", emoji: "👦", rarity: "rare" },
+    { universe: "family", key: "family_aunt", name: "Aunt", emoji: "👩", rarity: "epic" },
+    { universe: "family", key: "family_uncle", name: "Uncle", emoji: "👨", rarity: "legendary" },
 
     { universe: "animals", key: "card_cat", name: "Cat", emoji: "🐱", rarity: "common" },
     { universe: "animals", key: "card_dog", name: "Dog", emoji: "🐶", rarity: "common" },
     { universe: "animals", key: "card_lion", name: "Lion", emoji: "🦁", rarity: "rare" },
     { universe: "animals", key: "card_elephant", name: "Elephant", emoji: "🐘", rarity: "epic" },
     { universe: "animals", key: "card_giraffe", name: "Giraffe", emoji: "🦒", rarity: "legendary" },
+    { universe: "animals", key: "card_fish", name: "Fish", emoji: "🐟", rarity: "common" },
+    { universe: "animals", key: "card_rabbit", name: "Rabbit", emoji: "🐰", rarity: "rare" },
+    { universe: "animals", key: "card_tiger", name: "Tiger", emoji: "🐯", rarity: "rare" },
+    { universe: "animals", key: "card_zebra", name: "Zebra", emoji: "🦓", rarity: "epic" },
+    { universe: "animals", key: "card_penguin", name: "Penguin", emoji: "🐧", rarity: "legendary" },
 
     { universe: "weather", key: "card_sun", name: "Sun", emoji: "☀️", rarity: "common" },
     { universe: "weather", key: "card_rain", name: "Rain", emoji: "🌧️", rarity: "common" },
     { universe: "weather", key: "card_storm", name: "Storm", emoji: "⛈️", rarity: "rare" },
     { universe: "weather", key: "card_rainbow", name: "Rainbow", emoji: "🌈", rarity: "epic" },
     { universe: "weather", key: "card_thunder", name: "Thunder", emoji: "⚡", rarity: "legendary" },
+    { universe: "weather", key: "card_snow", name: "Snow", emoji: "❄️", rarity: "common" },
+    { universe: "weather", key: "card_cloud", name: "Cloud", emoji: "☁️", rarity: "rare" },
+    { universe: "weather", key: "card_wind", name: "Wind", emoji: "💨", rarity: "rare" },
+    { universe: "weather", key: "card_foggy", name: "Foggy", emoji: "🌫️", rarity: "epic" },
+    { universe: "weather", key: "card_cold", name: "Cold", emoji: "🥶", rarity: "legendary" },
 
     { universe: "travel", key: "card_car", name: "Car", emoji: "🚗", rarity: "common" },
     { universe: "travel", key: "card_boat", name: "Boat", emoji: "⛵", rarity: "common" },
     { universe: "travel", key: "card_airplane", name: "Airplane", emoji: "✈️", rarity: "rare" },
     { universe: "travel", key: "card_passport", name: "Passport", emoji: "🛂", rarity: "epic" },
     { universe: "travel", key: "card_adventure", name: "Adventure", emoji: "🧭", rarity: "legendary" },
+    { universe: "travel", key: "card_bus", name: "Bus", emoji: "🚌", rarity: "common" },
+    { universe: "travel", key: "card_train", name: "Train", emoji: "🚂", rarity: "rare" },
+    { universe: "travel", key: "card_map", name: "Map", emoji: "🗺️", rarity: "rare" },
+    { universe: "travel", key: "card_island", name: "Island", emoji: "🏝️", rarity: "epic" },
+    { universe: "travel", key: "card_journey", name: "Journey", emoji: "🚶", rarity: "legendary" },
 
     { universe: "body", key: "card_eye", name: "Eye", emoji: "👁️", rarity: "common" },
     { universe: "body", key: "card_hand", name: "Hand", emoji: "✋", rarity: "common" },
     { universe: "body", key: "card_head", name: "Head", emoji: "🧑", rarity: "rare" },
     { universe: "body", key: "card_finger", name: "Finger", emoji: "👆", rarity: "epic" },
     { universe: "body", key: "card_shoulder", name: "Shoulder", emoji: "🤷", rarity: "legendary" },
+    { universe: "body", key: "card_ear", name: "Ear", emoji: "👂", rarity: "common" },
+    { universe: "body", key: "card_nose", name: "Nose", emoji: "👃", rarity: "rare" },
+    { universe: "body", key: "card_mouth", name: "Mouth", emoji: "👄", rarity: "rare" },
+    { universe: "body", key: "card_tooth", name: "Tooth", emoji: "🦷", rarity: "epic" },
+    { universe: "body", key: "card_knee", name: "Knee", emoji: "🦵", rarity: "legendary" },
 
     { universe: "halloween", key: "card_pumpkin", name: "Pumpkin", emoji: "🎃", rarity: "common" },
     { universe: "halloween", key: "card_ghost", name: "Ghost", emoji: "👻", rarity: "common" },
     { universe: "halloween", key: "card_witch", name: "Witch", emoji: "🧙", rarity: "rare" },
     { universe: "halloween", key: "card_vampire", name: "Vampire", emoji: "🧛", rarity: "epic" },
     { universe: "halloween", key: "card_haunted", name: "Haunted House", emoji: "🏚️", rarity: "legendary" },
+    { universe: "halloween", key: "card_bat", name: "Bat", emoji: "🦇", rarity: "common" },
+    { universe: "halloween", key: "card_spider", name: "Spider", emoji: "🕷️", rarity: "rare" },
+    { universe: "halloween", key: "card_skeleton", name: "Skeleton", emoji: "💀", rarity: "rare" },
+    { universe: "halloween", key: "card_monster", name: "Monster", emoji: "👹", rarity: "epic" },
+    { universe: "halloween", key: "card_spooky", name: "Spooky", emoji: "😱", rarity: "legendary" },
 
     { universe: "emotions", key: "card_happy", name: "Happy", emoji: "😄", rarity: "common" },
     { universe: "emotions", key: "card_sad", name: "Sad", emoji: "😢", rarity: "common" },
     { universe: "emotions", key: "card_excited", name: "Excited", emoji: "🤩", rarity: "rare" },
     { universe: "emotions", key: "card_brave", name: "Brave", emoji: "🦸", rarity: "epic" },
     { universe: "emotions", key: "card_grateful", name: "Grateful", emoji: "🙏", rarity: "legendary" },
+    { universe: "emotions", key: "card_angry", name: "Angry", emoji: "😠", rarity: "common" },
+    { universe: "emotions", key: "card_scared", name: "Scared", emoji: "😱", rarity: "rare" },
+    { universe: "emotions", key: "card_surprised", name: "Surprised", emoji: "😲", rarity: "rare" },
+    { universe: "emotions", key: "card_proud", name: "Proud", emoji: "🥹", rarity: "epic" },
+    { universe: "emotions", key: "card_curious", name: "Curious", emoji: "🤔", rarity: "legendary" },
 
     { universe: "christmas", key: "card_santa", name: "Santa", emoji: "🎅", rarity: "common" },
     { universe: "christmas", key: "card_snowman", name: "Snowman", emoji: "⛄", rarity: "common" },
     { universe: "christmas", key: "card_reindeer", name: "Reindeer", emoji: "🦌", rarity: "rare" },
     { universe: "christmas", key: "card_elf", name: "Elf", emoji: "🧝", rarity: "epic" },
     { universe: "christmas", key: "card_gingerbread", name: "Gingerbread", emoji: "🍪", rarity: "legendary" },
+    { universe: "christmas", key: "card_present", name: "Present", emoji: "🎁", rarity: "common" },
+    { universe: "christmas", key: "card_sleigh", name: "Sleigh", emoji: "🛷", rarity: "rare" },
+    { universe: "christmas", key: "card_stocking", name: "Stocking", emoji: "🧦", rarity: "rare" },
+    { universe: "christmas", key: "card_wreath", name: "Wreath", emoji: "🎄", rarity: "epic" },
+    { universe: "christmas", key: "card_snowflake", name: "Snowflake", emoji: "❄️", rarity: "legendary" },
   ];
 
   const characterInserted = await db
@@ -356,6 +418,46 @@ async function main() {
   const avatarItemRows = await db.select().from(avatarItems);
   const avatarItemByKey = new Map(avatarItemRows.map((a) => [a.key, a]));
   console.log(`  avatar items: ${avatarItemRows.length} total`);
+
+  // --- Room sets (buy a whole coordinated room in one purchase) -------------
+  // Only bundles wallpaper/floor/furniture that are individually
+  // coin_purchase (never a level_unlock piece — bundling one of those would
+  // let coins buy past a level gate). Priced below the sum of the three
+  // pieces bought separately, so the bundle is a genuine discount, not just
+  // a repackaging.
+  const roomSetSeed = [
+    {
+      key: "room_set_candy_cozy",
+      name: "Candy Cozy Room",
+      wallpaper: "wallpaper_stripes",
+      floor: "floor_rug",
+      furniture: "furniture_lamp",
+      coinPrice: 60, // vs. 30 + 25 + 20 = 75 bought separately
+    },
+    {
+      key: "room_set_garden_nook",
+      name: "Garden Reading Nook",
+      wallpaper: "wallpaper_dots",
+      floor: "floor_grass",
+      furniture: "furniture_bookshelf",
+      coinPrice: 80, // vs. 35 + 30 + 35 = 100 bought separately
+    },
+  ];
+  const roomSetInserted = await db
+    .insert(roomSets)
+    .values(
+      roomSetSeed.map((set) => ({
+        key: set.key,
+        name: set.name,
+        coinPrice: set.coinPrice,
+        wallpaperItemId: avatarItemByKey.get(set.wallpaper)!.id,
+        floorItemId: avatarItemByKey.get(set.floor)!.id,
+        furnitureItemId: avatarItemByKey.get(set.furniture)!.id,
+      }))
+    )
+    .onConflictDoNothing()
+    .returning();
+  console.log(`  room sets: ${roomSetInserted.length} new`);
 
   // --- Avatar cases (Subway-Surfers-style mystery unlocks) ------------------
   const avatarCaseTypeSeed = [

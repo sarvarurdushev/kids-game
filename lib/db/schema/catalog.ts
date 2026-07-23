@@ -122,6 +122,28 @@ export const avatarItems = pgTable("avatar_items", {
   bundledItemKeys: jsonb("bundled_item_keys").$type<string[]>(),
 }, (table) => [uniqueIndex("avatar_items_key_idx").on(table.key)]).enableRLS();
 
+// A curated wallpaper+floor+furniture combo sold as a single coin purchase
+// (lib/student/roomSets.ts) — "sell the whole room at once instead of one
+// piece at a time" — priced below the sum of buying the three pieces
+// separately. Only bundles coin_purchase-tier avatarItems (never a
+// level_unlock piece), so buying a set can't be used to skip a level gate.
+export const roomSets = pgTable("room_sets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  key: text("key").notNull(),
+  name: text("name").notNull(),
+  coinPrice: integer("coin_price").notNull(),
+  wallpaperItemId: uuid("wallpaper_item_id")
+    .notNull()
+    .references(() => avatarItems.id),
+  floorItemId: uuid("floor_item_id")
+    .notNull()
+    .references(() => avatarItems.id),
+  furnitureItemId: uuid("furniture_item_id")
+    .notNull()
+    .references(() => avatarItems.id),
+  active: boolean("active").notNull().default(true),
+}, (table) => [uniqueIndex("room_sets_key_idx").on(table.key)]).enableRLS();
+
 export const avatarCaseTypes = pgTable("avatar_case_types", {
   id: uuid("id").primaryKey().defaultRandom(),
   key: text("key").notNull(),
