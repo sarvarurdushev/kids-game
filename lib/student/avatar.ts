@@ -27,8 +27,12 @@ const SLOT_TO_EQUIPPED_COLUMN: Record<
 
 /** level_unlock items are implicitly owned once the student's level meets the
  * requirement — no grant row needed. Starter, achievement, and coin-purchase
- * items are only owned once a student_avatar_items row exists. */
-function isOwned(item: AvatarItemRow, ownedIds: Set<string>, level: number): boolean {
+ * items are only owned once a student_avatar_items row exists. The admin
+ * login (students.isAdmin) owns every species outright - this is the one
+ * place that's decided, so both the list view (getAvatarItems) and the
+ * actual equip action (equipAvatarItem) agree with each other. */
+function isOwned(item: AvatarItemRow, ownedIds: Set<string>, level: number, isAdmin: boolean): boolean {
+  if (isAdmin && item.slot === "species") return true;
   if (ownedIds.has(item.id)) return true;
   return item.acquisitionMethod === "level_unlock" && item.unlockLevel !== null && level >= item.unlockLevel;
 }
@@ -58,11 +62,7 @@ export async function getAvatarItems(student: AuthedStudent) {
   );
 
   return items.map((item) => {
-    // Admin login: every character/species is shown as owned (the request
-    // is specifically "characters" - hats/accessories/decor still work
-    // through the normal purchase flow, just with an effectively unlimited
-    // coin balance, see scripts/seed.ts's admin seed).
-    const owns = (student.isAdmin && item.slot === "species") || isOwned(item, ownedIds, level);
+    const owns = isOwned(item, ownedIds, level, student.isAdmin);
     let state: "owned" | "purchasable" | "locked" = "owned";
     let reason: string | null = null;
     let affordable = true;
@@ -168,7 +168,7 @@ export async function equipAvatarItem(student: AuthedStudent, avatarItemId: stri
     .where(eq(studentAvatarItems.studentId, student.id));
   const ownedIds = new Set(owned.map((o) => o.avatarItemId));
   const { level } = await getLevelInfo(student.xpTotal);
-  if (!isOwned(item, ownedIds, level)) {
+  if (!isOwned(item, ownedIds, level, student.isAdmin)) {
     throw new ServiceError("Item is not unlocked yet", 403);
   }
 

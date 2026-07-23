@@ -78,21 +78,23 @@ function pickIdleClip(names: string[]): string | null {
 // large/fantasy grouping as the voice synth so a species' size/energy
 // "personality" shows up consistently in both its sound and its moves.
 // No GLB in the roster ships a dedicated dance clip (just Idle), so this is
-// procedural: a bounce + sway, with a spin for the archetypes that suit it.
+// procedural: a bounce + sway + spin, plus a head-bob layered on top (every
+// archetype gets real rotation, not just a mild wag — the first pass here
+// read as too subtle/"emotionless" at these amplitudes).
 interface DanceStyle {
   bounceAmp: number;
   bounceFreq: number;
   swayAmp: number;
   swayFreq: number;
-  spinSpeed: number; // 0 = no spin, just a gentle head-turn wag instead
+  spinSpeed: number;
 }
 
 const DANCE_STYLES: Record<SpeciesArchetype, DanceStyle> = {
-  tiny: { bounceAmp: 0.09, bounceFreq: 6, swayAmp: 0.12, swayFreq: 5, spinSpeed: 4 },
-  small: { bounceAmp: 0.07, bounceFreq: 4, swayAmp: 0.18, swayFreq: 3, spinSpeed: 0 },
-  medium: { bounceAmp: 0.05, bounceFreq: 2.5, swayAmp: 0.14, swayFreq: 2, spinSpeed: 0 },
-  large: { bounceAmp: 0.04, bounceFreq: 1.6, swayAmp: 0.2, swayFreq: 1.3, spinSpeed: 0 },
-  fantasy: { bounceAmp: 0.08, bounceFreq: 3, swayAmp: 0.05, swayFreq: 3, spinSpeed: 3 },
+  tiny: { bounceAmp: 0.14, bounceFreq: 7, swayAmp: 0.24, swayFreq: 6, spinSpeed: 5 },
+  small: { bounceAmp: 0.12, bounceFreq: 5, swayAmp: 0.3, swayFreq: 4, spinSpeed: 2.5 },
+  medium: { bounceAmp: 0.09, bounceFreq: 3.2, swayAmp: 0.24, swayFreq: 2.6, spinSpeed: 1.6 },
+  large: { bounceAmp: 0.07, bounceFreq: 2.2, swayAmp: 0.28, swayFreq: 1.8, spinSpeed: 1.2 },
+  fantasy: { bounceAmp: 0.13, bounceFreq: 4.5, swayAmp: 0.16, swayFreq: 4.5, spinSpeed: 4.5 },
 };
 
 interface AnimalCharacter3DProps {
@@ -212,8 +214,12 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
       const style = DANCE_STYLES[getSpeciesArchetype(species)];
       group.position.y = Math.abs(Math.sin(t.current * style.bounceFreq)) * style.bounceAmp;
       group.rotation.z = Math.sin(t.current * style.swayFreq) * style.swayAmp;
-      group.rotation.y =
-        style.spinSpeed > 0 ? t.current * style.spinSpeed : Math.sin(t.current * style.swayFreq * 0.5) * 0.15;
+      group.rotation.y = t.current * style.spinSpeed;
+      // A bobblehead nod on top of the body moves, faster than the bounce so
+      // it reads as its own beat rather than just following the body.
+      if (headBoneRef.current) {
+        headBoneRef.current.rotation.x += Math.sin(t.current * style.bounceFreq * 2) * 0.3;
+      }
       return;
     }
 
