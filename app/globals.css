@@ -16,11 +16,20 @@
   --color-rarity-epic: #8338ec;
   --color-rarity-legendary: #ffb703;
 
-  --color-universe-ocean: #219ebc;
-  --color-universe-dinosaur: #588157;
+  /* One color per curriculum month (lib/games/curriculum.ts) — the
+     collection's universes are these 12 topics, in month order. */
   --color-universe-space: #8338ec;
-  --color-universe-story: #fb6f92;
-  --color-universe-discovery: #fb8500;
+  --color-universe-culture: #e07a5f;
+  --color-universe-friends: #fb6f92;
+  --color-universe-environment: #588157;
+  --color-universe-family: #f4a261;
+  --color-universe-animals: #219ebc;
+  --color-universe-weather: #457b9d;
+  --color-universe-travel: #fb8500;
+  --color-universe-body: #e76f51;
+  --color-universe-halloween: #6a4c93;
+  --color-universe-emotions: #ffb703;
+  --color-universe-christmas: #d62828;
 }
 
 @theme inline {
@@ -41,11 +50,18 @@
   --color-rarity-epic: var(--color-rarity-epic);
   --color-rarity-legendary: var(--color-rarity-legendary);
 
-  --color-universe-ocean: var(--color-universe-ocean);
-  --color-universe-dinosaur: var(--color-universe-dinosaur);
   --color-universe-space: var(--color-universe-space);
-  --color-universe-story: var(--color-universe-story);
-  --color-universe-discovery: var(--color-universe-discovery);
+  --color-universe-culture: var(--color-universe-culture);
+  --color-universe-friends: var(--color-universe-friends);
+  --color-universe-environment: var(--color-universe-environment);
+  --color-universe-family: var(--color-universe-family);
+  --color-universe-animals: var(--color-universe-animals);
+  --color-universe-weather: var(--color-universe-weather);
+  --color-universe-travel: var(--color-universe-travel);
+  --color-universe-body: var(--color-universe-body);
+  --color-universe-halloween: var(--color-universe-halloween);
+  --color-universe-emotions: var(--color-universe-emotions);
+  --color-universe-christmas: var(--color-universe-christmas);
 }
 
 body {

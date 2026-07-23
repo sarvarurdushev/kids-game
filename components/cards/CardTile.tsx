@@ -1,10 +1,9 @@
 import { RARITY_COLOR_VAR } from "@/lib/visuals";
-import { CreatureArt } from "@/components/creatures/CreatureArt";
 import { CardFrame } from "./CardFrame";
 import type { Rarity } from "@/lib/reward-engine/types";
 
 interface CardTileProps {
-  characterKey: string;
+  emoji: string;
   name: string;
   rarity: Rarity;
   owned?: boolean;
@@ -13,7 +12,7 @@ interface CardTileProps {
 }
 
 export function CardTile({
-  characterKey,
+  emoji,
   name,
   rarity,
   owned = true,
@@ -30,10 +29,10 @@ export function CardTile({
         </span>
       )}
       <div
-        className="flex h-20 w-20 items-center justify-center rounded-full"
+        className="flex h-20 w-20 items-center justify-center rounded-full text-4xl"
         style={{ backgroundColor: `color-mix(in srgb, ${color} 16%, white)` }}
       >
-        <CreatureArt characterKey={characterKey} rarity={rarity} size={72} />
+        {emoji}
       </div>
       <p className="font-display text-sm font-semibold">{name}</p>
       <span

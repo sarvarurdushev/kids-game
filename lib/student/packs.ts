@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, lte } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   characters,
@@ -8,9 +8,11 @@ import {
   packTypes,
   studentCards,
   students,
+  universes,
 } from "@/lib/db/schema";
 import { rollPackContents } from "@/lib/reward-engine/packs";
 import type { CharacterConfig } from "@/lib/reward-engine/types";
+import { getCurrentCurriculum } from "@/lib/games/curriculum";
 import { ServiceError } from "./errors";
 
 export async function getPackShop(coinsBalance: number) {
@@ -112,10 +114,19 @@ export async function openPack(
       .limit(1);
     if (!packType) throw new ServiceError("Pack type not found", 500);
 
-    const pool = await tx
-      .select()
-      .from(packTypePool)
-      .where(eq(packTypePool.packTypeId, grant.packTypeId));
+    // Cards can only come from the current month's curriculum topic or an
+    // already-passed one this year — a future month's universe (e.g.
+    // Christmas in July) is excluded from the roll entirely, not just hidden
+    // in the UI, so a pack can never grant a card the student "shouldn't"
+    // have yet.
+    const { month: currentMonth } = getCurrentCurriculum();
+    const unlockedUniverseIds = new Set(
+      (await tx.select().from(universes).where(lte(universes.sortOrder, currentMonth))).map((u) => u.id)
+    );
+
+    const pool = (
+      await tx.select().from(packTypePool).where(eq(packTypePool.packTypeId, grant.packTypeId))
+    ).filter((p) => unlockedUniverseIds.has(p.universeId));
     if (pool.length === 0) {
       throw new ServiceError("Pack type has no configured universe pool", 500);
     }

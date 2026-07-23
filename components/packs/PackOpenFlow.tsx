@@ -15,6 +15,7 @@ interface RevealedCard {
   characterKey: string;
   name: string;
   rarity: Rarity;
+  imageUrl: string | null;
   isNew: boolean;
 }
 
@@ -149,7 +150,7 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
               transition={{ type: "spring", stiffness: 260, damping: 18 }}
             >
               <CardTile
-                characterKey={card.characterKey}
+                emoji={card.imageUrl ?? "❔"}
                 name={card.name}
                 rarity={card.rarity}
                 isNew={card.isNew}

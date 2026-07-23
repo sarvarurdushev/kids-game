@@ -1,6 +1,6 @@
 import "./_env";
 import { createHash } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   achievements,
@@ -20,6 +20,24 @@ import {
   webhookClients,
 } from "@/lib/db/schema";
 import { hashPin } from "@/lib/auth/pin";
+import { CURRICULUM } from "@/lib/games/curriculum";
+
+// Collection universes are the 12 curriculum months themselves (see
+// lib/games/curriculum.ts) — one CSS color per topic, matching app/globals.css.
+const UNIVERSE_COLOR: Record<string, string> = {
+  space: "var(--color-universe-space)",
+  culture: "var(--color-universe-culture)",
+  friends: "var(--color-universe-friends)",
+  environment: "var(--color-universe-environment)",
+  family: "var(--color-universe-family)",
+  animals: "var(--color-universe-animals)",
+  weather: "var(--color-universe-weather)",
+  travel: "var(--color-universe-travel)",
+  body: "var(--color-universe-body)",
+  halloween: "var(--color-universe-halloween)",
+  emotions: "var(--color-universe-emotions)",
+  christmas: "var(--color-universe-christmas)",
+};
 
 function round50(n: number): number {
   return Math.round(n / 50) * 50;
@@ -28,16 +46,27 @@ function round50(n: number): number {
 async function main() {
   console.log("Seeding Golden Kids Adventure Universe...\n");
 
-  // --- Universes ---------------------------------------------------------
+  // --- Universes -----------------------------------------------------------
+  // The collection is *only* the 12 curriculum months (task: "collections
+  // should be only related to the curriculums") — replaces the old 5
+  // unrelated fantasy universes (ocean/dinosaur/space/story/discovery)
+  // entirely. Old universes are deleted first (cascades to their characters
+  // and any owned student_cards) so a re-run of this script cleanly migrates
+  // existing data rather than leaving orphaned rows alongside the new set.
+  await db.delete(universes).where(
+    inArray(universes.key, ["ocean", "dinosaur", "space", "story", "discovery"])
+  );
+
   const universeInserted = await db
     .insert(universes)
-    .values([
-      { key: "ocean", name: "Ocean Universe", color: "var(--color-universe-ocean)", sortOrder: 1 },
-      { key: "dinosaur", name: "Dinosaur Universe", color: "var(--color-universe-dinosaur)", sortOrder: 2 },
-      { key: "space", name: "Space Universe", color: "var(--color-universe-space)", sortOrder: 3 },
-      { key: "story", name: "Story Universe", color: "var(--color-universe-story)", sortOrder: 4 },
-      { key: "discovery", name: "Discovery Universe", color: "var(--color-universe-discovery)", sortOrder: 5 },
-    ])
+    .values(
+      CURRICULUM.map((topic) => ({
+        key: topic.key,
+        name: topic.label,
+        color: UNIVERSE_COLOR[topic.key],
+        sortOrder: topic.month,
+      }))
+    )
     .onConflictDoNothing()
     .returning();
   // Re-fetch the full set (not just newly-inserted rows) so lookups below
@@ -46,38 +75,90 @@ async function main() {
   const universeByKey = new Map(universeRows.map((u) => [u.key, u]));
   console.log(`  universes: ${universeInserted.length} new (${universeRows.length} total)`);
 
-  // --- Characters ----------------------------------------------------------
+  // --- Characters ------------------------------------------------------------
+  // 5 cards per month (common/common/rare/epic/legendary), each reusing a
+  // word+emoji already authored for that month's vocabulary (lib/games/wordBank.ts)
+  // — imageUrl holds the emoji directly (the placeholder visual system
+  // documented in lib/visuals.ts), since these are new topics with no
+  // hand-illustrated art the way the old 21 fantasy creatures had.
   const characterSeed: Array<{
     universe: string;
     key: string;
     name: string;
+    emoji: string;
     rarity: "common" | "rare" | "epic" | "legendary";
   }> = [
-    { universe: "ocean", key: "dolphin", name: "Dolphin", rarity: "common" },
-    { universe: "ocean", key: "turtle", name: "Turtle", rarity: "common" },
-    { universe: "ocean", key: "octopus", name: "Octopus", rarity: "rare" },
-    { universe: "ocean", key: "shark", name: "Shark", rarity: "epic" },
-    { universe: "ocean", key: "whale", name: "Whale", rarity: "legendary" },
+    { universe: "space", key: "rocket", name: "Rocket", emoji: "🚀", rarity: "common" },
+    { universe: "space", key: "moon", name: "Moon", emoji: "🌙", rarity: "common" },
+    { universe: "space", key: "astronaut", name: "Astronaut", emoji: "👨‍🚀", rarity: "rare" },
+    { universe: "space", key: "galaxy", name: "Galaxy", emoji: "🌌", rarity: "epic" },
+    { universe: "space", key: "cosmos", name: "Cosmos", emoji: "✨", rarity: "legendary" },
 
-    { universe: "dinosaur", key: "triceratops", name: "Triceratops", rarity: "common" },
-    { universe: "dinosaur", key: "stegosaurus", name: "Stegosaurus", rarity: "rare" },
-    { universe: "dinosaur", key: "pterodactyl", name: "Pterodactyl", rarity: "epic" },
-    { universe: "dinosaur", key: "t_rex", name: "T-Rex", rarity: "legendary" },
+    { universe: "culture", key: "flag", name: "Flag", emoji: "🚩", rarity: "common" },
+    { universe: "culture", key: "song", name: "Song", emoji: "🎶", rarity: "common" },
+    { universe: "culture", key: "festival", name: "Festival", emoji: "🎉", rarity: "rare" },
+    { universe: "culture", key: "instrument", name: "Instrument", emoji: "🪘", rarity: "epic" },
+    { universe: "culture", key: "celebrate", name: "Celebrate", emoji: "🎇", rarity: "legendary" },
 
-    { universe: "space", key: "space_cat", name: "Space Cat", rarity: "common" },
-    { universe: "space", key: "astronaut", name: "Astronaut", rarity: "rare" },
-    { universe: "space", key: "alien", name: "Alien", rarity: "epic" },
-    { universe: "space", key: "rocket_robot", name: "Rocket Robot", rarity: "legendary" },
+    { universe: "friends", key: "friend", name: "Friend", emoji: "👫", rarity: "common" },
+    { universe: "friends", key: "smile", name: "Smile", emoji: "😊", rarity: "common" },
+    { universe: "friends", key: "birthday", name: "Birthday", emoji: "🎈", rarity: "rare" },
+    { universe: "friends", key: "trust", name: "Trust", emoji: "🤞", rarity: "epic" },
+    { universe: "friends", key: "cheerful", name: "Cheerful", emoji: "😃", rarity: "legendary" },
 
-    { universe: "story", key: "fairy", name: "Fairy", rarity: "common" },
-    { universe: "story", key: "knight", name: "Knight", rarity: "rare" },
-    { universe: "story", key: "wizard", name: "Wizard", rarity: "epic" },
-    { universe: "story", key: "dragon", name: "Dragon", rarity: "legendary" },
+    { universe: "environment", key: "tree", name: "Tree", emoji: "🌳", rarity: "common" },
+    { universe: "environment", key: "flower", name: "Flower", emoji: "🌸", rarity: "common" },
+    { universe: "environment", key: "forest", name: "Forest", emoji: "🌲", rarity: "rare" },
+    { universe: "environment", key: "ocean", name: "Ocean", emoji: "🌊", rarity: "epic" },
+    { universe: "environment", key: "protect", name: "Protect", emoji: "🛡️", rarity: "legendary" },
 
-    { universe: "discovery", key: "explorer", name: "Explorer", rarity: "common" },
-    { universe: "discovery", key: "scientist", name: "Scientist", rarity: "rare" },
-    { universe: "discovery", key: "inventor", name: "Inventor", rarity: "epic" },
-    { universe: "discovery", key: "archaeologist", name: "Archaeologist", rarity: "legendary" },
+    { universe: "family", key: "family_mom", name: "Mom", emoji: "👩", rarity: "common" },
+    { universe: "family", key: "family_dad", name: "Dad", emoji: "👨", rarity: "common" },
+    { universe: "family", key: "family_grandma", name: "Grandma", emoji: "👵", rarity: "rare" },
+    { universe: "family", key: "family_cousin", name: "Cousin", emoji: "🧒", rarity: "epic" },
+    { universe: "family", key: "family_together", name: "Family", emoji: "👪", rarity: "legendary" },
+
+    { universe: "animals", key: "card_cat", name: "Cat", emoji: "🐱", rarity: "common" },
+    { universe: "animals", key: "card_dog", name: "Dog", emoji: "🐶", rarity: "common" },
+    { universe: "animals", key: "card_lion", name: "Lion", emoji: "🦁", rarity: "rare" },
+    { universe: "animals", key: "card_elephant", name: "Elephant", emoji: "🐘", rarity: "epic" },
+    { universe: "animals", key: "card_giraffe", name: "Giraffe", emoji: "🦒", rarity: "legendary" },
+
+    { universe: "weather", key: "card_sun", name: "Sun", emoji: "☀️", rarity: "common" },
+    { universe: "weather", key: "card_rain", name: "Rain", emoji: "🌧️", rarity: "common" },
+    { universe: "weather", key: "card_storm", name: "Storm", emoji: "⛈️", rarity: "rare" },
+    { universe: "weather", key: "card_rainbow", name: "Rainbow", emoji: "🌈", rarity: "epic" },
+    { universe: "weather", key: "card_thunder", name: "Thunder", emoji: "⚡", rarity: "legendary" },
+
+    { universe: "travel", key: "card_car", name: "Car", emoji: "🚗", rarity: "common" },
+    { universe: "travel", key: "card_boat", name: "Boat", emoji: "⛵", rarity: "common" },
+    { universe: "travel", key: "card_airplane", name: "Airplane", emoji: "✈️", rarity: "rare" },
+    { universe: "travel", key: "card_passport", name: "Passport", emoji: "🛂", rarity: "epic" },
+    { universe: "travel", key: "card_adventure", name: "Adventure", emoji: "🧭", rarity: "legendary" },
+
+    { universe: "body", key: "card_eye", name: "Eye", emoji: "👁️", rarity: "common" },
+    { universe: "body", key: "card_hand", name: "Hand", emoji: "✋", rarity: "common" },
+    { universe: "body", key: "card_head", name: "Head", emoji: "🧑", rarity: "rare" },
+    { universe: "body", key: "card_finger", name: "Finger", emoji: "👆", rarity: "epic" },
+    { universe: "body", key: "card_shoulder", name: "Shoulder", emoji: "🤷", rarity: "legendary" },
+
+    { universe: "halloween", key: "card_pumpkin", name: "Pumpkin", emoji: "🎃", rarity: "common" },
+    { universe: "halloween", key: "card_ghost", name: "Ghost", emoji: "👻", rarity: "common" },
+    { universe: "halloween", key: "card_witch", name: "Witch", emoji: "🧙", rarity: "rare" },
+    { universe: "halloween", key: "card_vampire", name: "Vampire", emoji: "🧛", rarity: "epic" },
+    { universe: "halloween", key: "card_haunted", name: "Haunted House", emoji: "🏚️", rarity: "legendary" },
+
+    { universe: "emotions", key: "card_happy", name: "Happy", emoji: "😄", rarity: "common" },
+    { universe: "emotions", key: "card_sad", name: "Sad", emoji: "😢", rarity: "common" },
+    { universe: "emotions", key: "card_excited", name: "Excited", emoji: "🤩", rarity: "rare" },
+    { universe: "emotions", key: "card_brave", name: "Brave", emoji: "🦸", rarity: "epic" },
+    { universe: "emotions", key: "card_grateful", name: "Grateful", emoji: "🙏", rarity: "legendary" },
+
+    { universe: "christmas", key: "card_santa", name: "Santa", emoji: "🎅", rarity: "common" },
+    { universe: "christmas", key: "card_snowman", name: "Snowman", emoji: "⛄", rarity: "common" },
+    { universe: "christmas", key: "card_reindeer", name: "Reindeer", emoji: "🦌", rarity: "rare" },
+    { universe: "christmas", key: "card_elf", name: "Elf", emoji: "🧝", rarity: "epic" },
+    { universe: "christmas", key: "card_gingerbread", name: "Gingerbread", emoji: "🍪", rarity: "legendary" },
   ];
 
   const characterInserted = await db
@@ -88,6 +169,7 @@ async function main() {
         key: c.key,
         name: c.name,
         rarity: c.rarity,
+        imageUrl: c.emoji,
         sortOrder: i,
       }))
     )
@@ -110,23 +192,19 @@ async function main() {
   const packTypeByKey = new Map(packTypeRows.map((p) => [p.key, p]));
   console.log(`  pack types: ${packTypeRows.length} total`);
 
+  // Every pack type draws from every curriculum-month universe — the old
+  // "discovery_pack"/"story_pack" restriction to one specific universe no
+  // longer makes sense now that universes ARE the 12 months, not unrelated
+  // themes. Which of those months a student can actually *receive* a card
+  // from is enforced at open time (lib/student/packs.ts), not here — this
+  // pool is just "everything that could ever exist," unlocked-or-not.
   const allUniverseIds = universeRows.map((u) => u.id);
   const poolRows: Array<{ packTypeId: string; universeId: string; weight: number }> = [];
-  for (const key of ["attendance_pack", "participation_pack", "achievement_pack"]) {
+  for (const key of ["attendance_pack", "participation_pack", "discovery_pack", "story_pack", "achievement_pack"]) {
     for (const universeId of allUniverseIds) {
       poolRows.push({ packTypeId: packTypeByKey.get(key)!.id, universeId, weight: 1 });
     }
   }
-  poolRows.push({
-    packTypeId: packTypeByKey.get("discovery_pack")!.id,
-    universeId: universeByKey.get("discovery")!.id,
-    weight: 1,
-  });
-  poolRows.push({
-    packTypeId: packTypeByKey.get("story_pack")!.id,
-    universeId: universeByKey.get("story")!.id,
-    weight: 1,
-  });
   const poolInserted = await db.insert(packTypePool).values(poolRows).onConflictDoNothing().returning();
   console.log(`  pack pools: ${poolInserted.length} new`);
 

@@ -20,20 +20,37 @@ export default async function CollectionPage() {
       </div>
 
       <div className="flex flex-col gap-3">
-        {collection.map(({ universe, progress }) => (
-          <Link key={universe.id} href={`/collection/${universe.key}`}>
-            <Card className="flex items-center gap-4 transition-transform active:scale-[0.98]">
-              <span className="text-4xl">{emojiForUniverse(universe.key)}</span>
+        {collection.map(({ universe, progress }) => {
+          const card = (
+            <Card
+              className={`flex items-center gap-4 transition-transform ${universe.locked ? "" : "active:scale-[0.98]"}`}
+            >
+              <span className={`text-4xl ${universe.locked ? "opacity-40 grayscale" : ""}`}>
+                {emojiForUniverse(universe.key)}
+              </span>
               <div className="flex-1">
                 <p className="font-display font-semibold">{universe.name}</p>
-                <ProgressBar value={progress.owned} max={progress.total} />
+                {universe.locked ? (
+                  <p className="text-xs font-semibold text-ink/40">🔒 Unlocks in {universe.unlocksInMonthName}</p>
+                ) : (
+                  <ProgressBar value={progress.owned} max={progress.total} />
+                )}
               </div>
-              <span className="text-sm font-bold text-ink/60">
-                {progress.owned}/{progress.total}
-              </span>
+              {!universe.locked && (
+                <span className="text-sm font-bold text-ink/60">
+                  {progress.owned}/{progress.total}
+                </span>
+              )}
             </Card>
-          </Link>
-        ))}
+          );
+          return universe.locked ? (
+            <div key={universe.id}>{card}</div>
+          ) : (
+            <Link key={universe.id} href={`/collection/${universe.key}`}>
+              {card}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

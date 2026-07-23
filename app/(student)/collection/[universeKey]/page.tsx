@@ -16,6 +16,7 @@ export default async function UniverseCollectionPage({
   const collection = await getCollection(student.id);
   const entry = collection.find((c) => c.universe.key === universeKey);
   if (!entry) notFound();
+  if (entry.universe.locked) redirect("/collection");
 
   return (
     <div className="flex flex-col gap-5">

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { CardTile } from "./CardTile";
-import { CreatureArt } from "@/components/creatures/CreatureArt";
 import { ItemPreviewModal } from "@/components/ui/ItemPreviewModal";
 import { RARITY_COLOR_VAR } from "@/lib/visuals";
 import type { Rarity } from "@/lib/reward-engine/types";
@@ -12,13 +11,14 @@ interface CollectionCharacter {
   key: string;
   name: string;
   rarity: Rarity;
+  imageUrl: string | null;
   owned: boolean;
   quantity: number;
 }
 
-// Subway-Surfers-style preview: tapping any card — owned or not — reveals its
-// real art and name in a modal, even though the grid tile itself still shows
-// the "???" mystery-card look for anything not yet collected.
+// Subway-Surfers-style preview: tapping any card — owned or not — reveals a
+// bigger view. The grid tile itself already shows the real art and name
+// (dimmed when not yet owned) rather than hiding identity behind "???".
 export function CollectionGrid({ characters }: { characters: CollectionCharacter[] }) {
   const [previewCharacter, setPreviewCharacter] = useState<CollectionCharacter | null>(null);
 
@@ -27,7 +27,7 @@ export function CollectionGrid({ characters }: { characters: CollectionCharacter
       <div className="grid grid-cols-3 gap-3">
         {characters.map((c) => (
           <button key={c.id} type="button" onClick={() => setPreviewCharacter(c)} className="text-left">
-            <CardTile characterKey={c.key} name={c.name} rarity={c.rarity} owned={c.owned} quantity={c.quantity} />
+            <CardTile emoji={c.imageUrl ?? "❔"} name={c.name} rarity={c.rarity} owned={c.owned} quantity={c.quantity} />
           </button>
         ))}
       </div>
@@ -41,10 +41,10 @@ export function CollectionGrid({ characters }: { characters: CollectionCharacter
         preview={
           previewCharacter && (
             <div
-              className="flex h-36 w-36 items-center justify-center rounded-full"
+              className="flex h-36 w-36 items-center justify-center rounded-full text-7xl"
               style={{ backgroundColor: `color-mix(in srgb, ${RARITY_COLOR_VAR[previewCharacter.rarity]} 16%, white)` }}
             >
-              <CreatureArt characterKey={previewCharacter.key} rarity={previewCharacter.rarity} size={120} />
+              {previewCharacter.imageUrl ?? "❔"}
             </div>
           )
         }
