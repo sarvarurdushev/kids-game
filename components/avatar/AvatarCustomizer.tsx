@@ -26,10 +26,11 @@ export interface AvatarItem {
   equipped: boolean;
 }
 
-// 3D rendering only exists for the species+hat slots today (AnimalCharacter3D);
-// the rest (hair/eyes/clothes/accessory/background) only render in the 2D
-// AvatarCharacter SVG, so the preview modal picks whichever one applies.
-const RENDERS_IN_3D = new Set<Slot>(["species", "hat"]);
+// 3D rendering exists for species+hat+accessory today (AnimalCharacter3D);
+// clothes/hair/eyes/background can't be draped onto an arbitrary animal GLB
+// procedurally, so those still only render in the 2D AvatarCharacter SVG —
+// the preview modal picks whichever one applies.
+const RENDERS_IN_3D = new Set<Slot>(["species", "hat", "accessory"]);
 
 const SLOTS: Slot[] = ["species", "hair", "eyes", "clothes", "hat", "accessory", "background"];
 const SLOT_LABELS: Record<Slot, string> = {
@@ -136,7 +137,9 @@ export function AvatarCustomizer({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col items-center gap-2">
-        <Avatar3D equippedKeys={equippedKeys} size={160} dancing={dancing} />
+        <div className="w-48 sm:w-72 lg:w-96">
+          <Avatar3D equippedKeys={equippedKeys} size={420} dancing={dancing} responsive />
+        </div>
         <p className="flex items-center gap-1 text-sm font-semibold text-ink/60">
           <CoinIcon size={16} /> {coinsBalance} coins
         </p>
@@ -146,10 +149,12 @@ export function AvatarCustomizer({
           </Button>
         ) : (
           <Button
-            variant="ghost"
+            variant="secondary"
             onClick={purchaseDance}
             disabled={unlockingDance || coinsBalance < danceCost}
-            className="!flex !items-center !gap-1 !px-4 !py-1.5 !text-sm"
+            className={`!flex !items-center !gap-1 !px-4 !py-1.5 !text-sm ${
+              coinsBalance >= danceCost ? "animate-pulse ring-2 ring-gold" : ""
+            }`}
           >
             🎉 Unlock Dance Party — <CoinIcon size={14} /> {danceCost}
           </Button>
@@ -173,7 +178,7 @@ export function AvatarCustomizer({
 
       {error && <p className="text-center text-sm font-semibold text-coral">{error}</p>}
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
         {slotItems.map((item) => (
           <div
             key={item.id}
@@ -230,9 +235,15 @@ export function AvatarCustomizer({
         preview={
           previewItem &&
           (RENDERS_IN_3D.has(previewItem.slot) ? (
-            <Avatar3D equippedKeys={{ ...equippedKeys, [previewItem.slot]: previewItem.key }} size={180} />
+            <div className="w-40 sm:w-56 lg:w-64">
+              <Avatar3D
+                equippedKeys={{ ...equippedKeys, [previewItem.slot]: previewItem.key }}
+                size={280}
+                responsive
+              />
+            </div>
           ) : (
-            <AvatarRenderer equippedKeys={{ ...equippedKeys, [previewItem.slot]: previewItem.key }} size={140} />
+            <AvatarRenderer equippedKeys={{ ...equippedKeys, [previewItem.slot]: previewItem.key }} size={220} />
           ))
         }
         action={

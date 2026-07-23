@@ -29,7 +29,7 @@ export function CardTile({
         </span>
       )}
       <div
-        className="flex h-20 w-20 items-center justify-center rounded-full text-4xl"
+        className="flex h-20 w-20 items-center justify-center rounded-full text-4xl sm:h-24 sm:w-24 sm:text-5xl"
         style={{ backgroundColor: `color-mix(in srgb, ${color} 16%, white)` }}
       >
         {emoji}

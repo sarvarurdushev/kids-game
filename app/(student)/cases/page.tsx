@@ -27,7 +27,7 @@ export default async function CasesPage() {
       {inventory.length > 0 && (
         <section>
           <h2 className="font-display mb-2 text-lg font-semibold">Ready to open</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {inventory.map((grant) => (
               <Link key={grant.id} href={`/cases/open/${grant.id}`}>
                 <Card className="gk-pop-in flex flex-col items-center gap-2 text-center transition-transform active:scale-95">
@@ -43,7 +43,7 @@ export default async function CasesPage() {
 
       <section>
         <h2 className="font-display mb-2 text-lg font-semibold">Case shop</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {shop.map((caseType) => (
             <Card key={caseType.id} className="flex flex-col items-center gap-2">
               <ChestIcon size={64} />

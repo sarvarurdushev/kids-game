@@ -4,7 +4,11 @@ import { db } from "@/lib/db/client";
 import { students } from "@/lib/db/schema";
 import { ServiceError } from "./errors";
 
-export const DANCE_UNLOCK_COST = 150;
+// Priced in line with the most expensive single avatar item (~40-50 coins)
+// and the mid-tier packs (50-100), not above them — 150 sat well beyond what
+// a student earns in a session or two, so the unlock button never felt like
+// a reachable goal, just a locked wall.
+export const DANCE_UNLOCK_COST = 60;
 
 export async function isDanceUnlocked(studentId: string): Promise<boolean> {
   const [student] = await db

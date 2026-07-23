@@ -10,8 +10,8 @@ import { BoosterPackIcon, CoinIcon } from "@/components/icons";
 const PACK_TYPE_COLOR: Record<string, string> = {
   attendance_pack: "var(--color-teal)",
   participation_pack: "var(--color-gk-coral)",
-  discovery_pack: "var(--color-universe-discovery)",
-  story_pack: "var(--color-universe-story)",
+  discovery_pack: "var(--color-universe-space)",
+  story_pack: "var(--color-universe-culture)",
   achievement_pack: "var(--color-rarity-legendary)",
 };
 
@@ -36,7 +36,7 @@ export default async function PacksPage() {
       {inventory.length > 0 && (
         <section>
           <h2 className="font-display mb-2 text-lg font-semibold">Ready to open</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {inventory.map((grant) => (
               <Link key={grant.id} href={`/packs/open/${grant.id}`}>
                 <Card className="gk-pop-in flex flex-col items-center gap-2 text-center transition-transform active:scale-95">
@@ -52,7 +52,7 @@ export default async function PacksPage() {
 
       <section>
         <h2 className="font-display mb-2 text-lg font-semibold">Pack shop</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {shop.map((pack) => (
             <Card key={pack.id} className="flex flex-col items-center gap-2">
               <PackCard

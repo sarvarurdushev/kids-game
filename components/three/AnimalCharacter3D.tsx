@@ -6,6 +6,7 @@ import { useGLTF, useAnimations } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { Group, Vector3 } from "three";
 import { HATS } from "./hats3d";
+import { ACCESSORIES, ACCESSORY_ANCHOR_RATIO } from "./accessories3d";
 import { computeRestBoundingBox } from "./glbGeometry";
 import { playCreatureVoice } from "@/lib/sound";
 import { getSpeciesArchetype, type SpeciesArchetype } from "@/lib/games/speciesArchetype";
@@ -135,6 +136,13 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
     return { scale: s, offset: offsetVec, hatAnchor };
   }, [cloned]);
 
+  // Accessories (glasses/bowtie/scarf/medal) each sit at a different fraction
+  // of the feet→head span rather than the hat's fixed head anchor, since a
+  // bowtie belongs at the neck and a medal hangs on the chest, not the head.
+  function accessoryAnchor(ratio: number): Vector3 {
+    return new Vector3(0, offset.y + (hatAnchor.y - offset.y) * ratio, hatAnchor.z);
+  }
+
   const { actions, names } = useAnimations(animations, cloned);
   useEffect(() => {
     const idle = pickIdleClip(names);
@@ -158,6 +166,16 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
   const prevMoodRef = useRef(mood);
   const bounceEnergyRef = useRef(0);
   const bounceDirRef = useRef<1 | -1>(1);
+  // Loose timer for an occasional idle "perk up" hop (on top of the constant
+  // head-turn/weight-shift below), so the character does something new every
+  // few seconds instead of just breathing in place forever. The random jitter
+  // is applied post-mount (not in the useRef initializer) since calling
+  // Math.random during render is impure.
+  const perkTimerRef = useRef(3);
+  const perkEnergyRef = useRef(0);
+  useEffect(() => {
+    perkTimerRef.current = 3 + Math.random() * 3;
+  }, []);
   useEffect(() => {
     if (mood !== prevMoodRef.current) {
       if (mood === "happy") {
@@ -186,26 +204,47 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
         style.spinSpeed > 0 ? t.current * style.spinSpeed : Math.sin(t.current * style.swayFreq * 0.5) * 0.15;
       return;
     }
-    group.rotation.y = 0;
+
+    // Idle "alive" motion: a slow head-turn look-around and a gentle weight
+    // shift run constantly at rest, so the character is never a frozen
+    // statue between rounds. Kept deliberately subtle (a few degrees, not
+    // the old full-body sine bob) so it reads as breathing/fidgeting rather
+    // than floating.
+    group.rotation.y = Math.sin(t.current * 0.35) * 0.12;
+    group.rotation.z = Math.sin(t.current * 0.55) * 0.02;
+
+    perkTimerRef.current -= delta;
+    if (perkTimerRef.current <= 0) {
+      perkEnergyRef.current = 1;
+      perkTimerRef.current = 5 + Math.random() * 4;
+    }
+    if (perkEnergyRef.current > 0) {
+      perkEnergyRef.current = Math.max(0, perkEnergyRef.current - delta * 2.2);
+    }
 
     if (bounceEnergyRef.current > 0) {
       bounceEnergyRef.current = Math.max(0, bounceEnergyRef.current - delta * 1.8);
     }
     const energy = bounceEnergyRef.current;
-    if (energy <= 0) {
-      group.position.y = 0;
-      group.rotation.z = 0;
-    } else if (bounceDirRef.current === 1) {
-      // Happy: a couple of quick decaying hops, never dipping below the floor.
-      group.position.y = Math.abs(Math.sin(t.current * 12)) * energy * 0.05;
+    if (energy > 0) {
+      // Happy/sad mood reaction takes priority over the idle perk hop.
+      group.position.y =
+        bounceDirRef.current === 1
+          ? Math.abs(Math.sin(t.current * 12)) * energy * 0.05 // happy: quick decaying hops
+          : -Math.abs(Math.sin(t.current * 4)) * energy * 0.03; // sad: gentle decaying droop
+    } else if (perkEnergyRef.current > 0) {
+      group.position.y = Math.abs(Math.sin(t.current * 8)) * perkEnergyRef.current * 0.025;
     } else {
-      // Sad: a gentle decaying droop, never lifting above the floor.
-      group.position.y = -Math.abs(Math.sin(t.current * 4)) * energy * 0.03;
+      group.position.y = 0;
     }
   });
 
   const hatKey = equippedKeys.hat;
   const renderHat = hatKey ? HATS[hatKey] : null;
+
+  const accessoryKey = equippedKeys.accessory;
+  const renderAccessory = accessoryKey ? ACCESSORIES[accessoryKey] : null;
+  const accessoryRatio = accessoryKey ? (ACCESSORY_ANCHOR_RATIO[accessoryKey] ?? 0.6) : 0.6;
 
   return (
     <group ref={groupRef}>
@@ -213,6 +252,7 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
         <primitive object={cloned} />
       </group>
       {renderHat && <group position={hatAnchor}>{renderHat()}</group>}
+      {renderAccessory && <group position={accessoryAnchor(accessoryRatio)}>{renderAccessory()}</group>}
     </group>
   );
 }

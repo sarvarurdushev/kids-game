@@ -20,7 +20,9 @@ export default async function StudentLayout({
       <SoundToggle className="fixed top-4 right-4 z-20" />
       <BackButton />
       <CurriculumAnnouncement studentId={student.id} />
-      <main className="relative z-10 mx-auto w-full max-w-md flex-1 px-4 pt-14 pb-24">{children}</main>
+      <main className="relative z-10 mx-auto w-full max-w-md flex-1 px-4 pt-14 pb-24 sm:max-w-2xl sm:px-6 lg:max-w-5xl lg:px-10">
+        {children}
+      </main>
       <BottomNav />
     </div>
   );

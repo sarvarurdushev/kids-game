@@ -24,7 +24,7 @@ export function CollectionGrid({ characters }: { characters: CollectionCharacter
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
         {characters.map((c) => (
           <button key={c.id} type="button" onClick={() => setPreviewCharacter(c)} className="text-left">
             <CardTile emoji={c.imageUrl ?? "❔"} name={c.name} rarity={c.rarity} owned={c.owned} quantity={c.quantity} />
@@ -41,7 +41,7 @@ export function CollectionGrid({ characters }: { characters: CollectionCharacter
         preview={
           previewCharacter && (
             <div
-              className="flex h-36 w-36 items-center justify-center rounded-full text-7xl"
+              className="flex h-40 w-40 items-center justify-center rounded-full text-8xl sm:h-56 sm:w-56 sm:text-9xl"
               style={{ backgroundColor: `color-mix(in srgb, ${RARITY_COLOR_VAR[previewCharacter.rarity]} 16%, white)` }}
             >
               {previewCharacter.imageUrl ?? "❔"}

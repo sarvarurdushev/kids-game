@@ -16,7 +16,7 @@ export function Modal({ open, onClose, children }: ModalProps) {
       onClick={onClose}
     >
       <div
-        className="gk-pop-in max-h-[85vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl"
+        className="gk-pop-in max-h-[85vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl sm:max-w-lg lg:max-w-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {children}

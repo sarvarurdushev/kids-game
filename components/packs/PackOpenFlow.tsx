@@ -140,7 +140,7 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
         <AnimatePresence>
           {cards.slice(0, revealedCount).map((card, i) => (
             <motion.div
