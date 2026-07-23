@@ -13,7 +13,7 @@ export default async function UniverseCollectionPage({
   if (!student) redirect("/login");
 
   const { universeKey } = await params;
-  const collection = await getCollection(student.id);
+  const collection = await getCollection(student);
   const entry = collection.find((c) => c.universe.key === universeKey);
   if (!entry) notFound();
   if (entry.universe.locked) redirect("/collection");

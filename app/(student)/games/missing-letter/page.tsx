@@ -7,7 +7,7 @@ import { MissingLetter } from "@/components/games/MissingLetter";
 export default async function MissingLetterPage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
-  if (!(await isGameUnlocked(student.id, "missing_letter"))) redirect("/games");
+  if (!(await isGameUnlocked(student, "missing_letter"))) redirect("/games");
 
   const equippedKeys = await getEquippedAvatarKeys(student);
 

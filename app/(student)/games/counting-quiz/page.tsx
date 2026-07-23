@@ -7,7 +7,7 @@ import { CountingQuiz } from "@/components/games/CountingQuiz";
 export default async function CountingQuizPage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
-  if (!(await isGameUnlocked(student.id, "counting_quiz"))) redirect("/games");
+  if (!(await isGameUnlocked(student, "counting_quiz"))) redirect("/games");
 
   const equippedKeys = await getEquippedAvatarKeys(student);
 

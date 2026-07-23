@@ -22,6 +22,12 @@ export const students = pgTable("students", {
 
   tokenVersion: integer("token_version").notNull().default(1),
 
+  // A dedicated dev/demo login (never a real student's) that bypasses the
+  // economy entirely: all games unlocked, all species + collection cards
+  // shown as owned, every curriculum month unlocked regardless of the
+  // calendar. Everyone else keeps the normal rules untouched.
+  isAdmin: boolean("is_admin").notNull().default(false),
+
   xpTotal: integer("xp_total").notNull().default(0),
   coinsBalance: integer("coins_balance").notNull().default(0),
 

@@ -7,7 +7,7 @@ import { TrueOrFalse } from "@/components/games/TrueOrFalse";
 export default async function TrueOrFalsePage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
-  if (!(await isGameUnlocked(student.id, "true_or_false"))) redirect("/games");
+  if (!(await isGameUnlocked(student, "true_or_false"))) redirect("/games");
 
   const equippedKeys = await getEquippedAvatarKeys(student);
 

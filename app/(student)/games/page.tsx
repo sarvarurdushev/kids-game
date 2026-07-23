@@ -48,7 +48,7 @@ export default async function GamesPage() {
 
   const games = await Promise.all(
     GAME_CATALOG.map(async (game) => {
-      const unlocked = await isGameUnlocked(student.id, game.key);
+      const unlocked = await isGameUnlocked(student, game.key);
       return {
         ...game,
         unlocked,

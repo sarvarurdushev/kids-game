@@ -7,7 +7,7 @@ import { FastPicks } from "@/components/games/FastPicks";
 export default async function FastPicksPage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
-  if (!(await isGameUnlocked(student.id, "fast_picks"))) redirect("/games");
+  if (!(await isGameUnlocked(student, "fast_picks"))) redirect("/games");
 
   const equippedKeys = await getEquippedAvatarKeys(student);
 

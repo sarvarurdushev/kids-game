@@ -7,7 +7,7 @@ import { CategoryBlitz } from "@/components/games/CategoryBlitz";
 export default async function CategoryBlitzPage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
-  if (!(await isGameUnlocked(student.id, "category_blitz"))) redirect("/games");
+  if (!(await isGameUnlocked(student, "category_blitz"))) redirect("/games");
 
   const equippedKeys = await getEquippedAvatarKeys(student);
 

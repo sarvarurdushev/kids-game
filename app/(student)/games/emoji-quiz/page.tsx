@@ -7,7 +7,7 @@ import { EmojiQuiz } from "@/components/games/EmojiQuiz";
 export default async function EmojiQuizPage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
-  if (!(await isGameUnlocked(student.id, "emoji_quiz"))) redirect("/games");
+  if (!(await isGameUnlocked(student, "emoji_quiz"))) redirect("/games");
 
   const equippedKeys = await getEquippedAvatarKeys(student);
 

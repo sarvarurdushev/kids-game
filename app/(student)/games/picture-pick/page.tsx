@@ -7,7 +7,7 @@ import { PicturePick } from "@/components/games/PicturePick";
 export default async function PicturePickPage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
-  if (!(await isGameUnlocked(student.id, "picture_pick"))) redirect("/games");
+  if (!(await isGameUnlocked(student, "picture_pick"))) redirect("/games");
 
   const equippedKeys = await getEquippedAvatarKeys(student);
 

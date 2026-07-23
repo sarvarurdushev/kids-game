@@ -7,7 +7,7 @@ import { WordRush } from "@/components/games/WordRush";
 export default async function WordRushPage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
-  if (!(await isGameUnlocked(student.id, "word_rush"))) redirect("/games");
+  if (!(await isGameUnlocked(student, "word_rush"))) redirect("/games");
 
   const equippedKeys = await getEquippedAvatarKeys(student);
 

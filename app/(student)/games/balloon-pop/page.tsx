@@ -7,7 +7,7 @@ import { BalloonPop } from "@/components/games/BalloonPop";
 export default async function BalloonPopPage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
-  if (!(await isGameUnlocked(student.id, "balloon_pop"))) redirect("/games");
+  if (!(await isGameUnlocked(student, "balloon_pop"))) redirect("/games");
 
   const equippedKeys = await getEquippedAvatarKeys(student);
 

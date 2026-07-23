@@ -58,7 +58,11 @@ export async function getAvatarItems(student: AuthedStudent) {
   );
 
   return items.map((item) => {
-    const owns = isOwned(item, ownedIds, level);
+    // Admin login: every character/species is shown as owned (the request
+    // is specifically "characters" - hats/accessories/decor still work
+    // through the normal purchase flow, just with an effectively unlimited
+    // coin balance, see scripts/seed.ts's admin seed).
+    const owns = (student.isAdmin && item.slot === "species") || isOwned(item, ownedIds, level);
     let state: "owned" | "purchasable" | "locked" = "owned";
     let reason: string | null = null;
     let affordable = true;

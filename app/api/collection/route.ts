@@ -7,5 +7,5 @@ export async function GET() {
   if (!student) {
     return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   }
-  return NextResponse.json(await getCollection(student.id));
+  return NextResponse.json(await getCollection(student));
 }

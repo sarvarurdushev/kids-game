@@ -7,7 +7,7 @@ import { SequenceMemory } from "@/components/games/SequenceMemory";
 export default async function SequenceMemoryPage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
-  if (!(await isGameUnlocked(student.id, "sequence_memory"))) redirect("/games");
+  if (!(await isGameUnlocked(student, "sequence_memory"))) redirect("/games");
 
   const equippedKeys = await getEquippedAvatarKeys(student);
 

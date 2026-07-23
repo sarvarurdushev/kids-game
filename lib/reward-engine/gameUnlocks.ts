@@ -4,6 +4,7 @@ import { db } from "@/lib/db/client";
 import { students, studentGameUnlocks } from "@/lib/db/schema";
 import { ServiceError } from "@/lib/student/errors";
 import { GAME_CATALOG } from "@/lib/games/catalog";
+import type { AuthedStudent } from "@/lib/auth/requireStudent";
 import type { GameKey } from "./gameSession";
 
 function gameMeta(gameKey: GameKey) {
@@ -12,13 +13,13 @@ function gameMeta(gameKey: GameKey) {
   return meta;
 }
 
-export async function isGameUnlocked(studentId: string, gameKey: GameKey): Promise<boolean> {
+export async function isGameUnlocked(student: AuthedStudent, gameKey: GameKey): Promise<boolean> {
   const meta = gameMeta(gameKey);
-  if (!meta.coinCost) return true; // free games need no row at all
+  if (!meta.coinCost || student.isAdmin) return true; // free games need no row at all
   const [row] = await db
     .select({ id: studentGameUnlocks.id })
     .from(studentGameUnlocks)
-    .where(and(eq(studentGameUnlocks.studentId, studentId), eq(studentGameUnlocks.gameKey, gameKey)))
+    .where(and(eq(studentGameUnlocks.studentId, student.id), eq(studentGameUnlocks.gameKey, gameKey)))
     .limit(1);
   return !!row;
 }

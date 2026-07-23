@@ -738,6 +738,60 @@ async function main() {
     );
   }
 
+  // --- Admin login (isAdmin bypasses the economy - see lib/student/avatar.ts,
+  // lib/student/collection.ts, lib/reward-engine/gameUnlocks.ts) -----------
+  // A dedicated login, deliberately separate from the Amira/Jamal demo
+  // students so those stay normal, rules-following test accounts.
+  const adminEnrollmentCode = "GOLD-ADMIN";
+  const existingAdmin = await db.query.students.findFirst({
+    where: (s, { eq }) => eq(s.enrollmentCode, adminEnrollmentCode),
+  });
+  if (existingAdmin) {
+    console.log(`  admin student already exists: Admin (code ${adminEnrollmentCode})`);
+  } else {
+    const adminPinHash = await hashPin("0000");
+    const [adminStudent] = await db
+      .insert(students)
+      .values({
+        displayName: "Admin",
+        enrollmentCode: adminEnrollmentCode,
+        pinHash: adminPinHash,
+        isAdmin: true,
+        coinsBalance: 999999,
+      })
+      .returning();
+
+    const adminStarterAssignments: Partial<
+      Record<"species" | "hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture", string>
+    > = {};
+    for (const key of starterItemKeys) {
+      const item = avatarItemByKey.get(key)!;
+      await db.insert(studentAvatarItems).values({
+        studentId: adminStudent.id,
+        avatarItemId: item.id,
+        acquiredVia: "starter",
+      });
+      adminStarterAssignments[
+        item.slot as "species" | "hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture"
+      ] = item.id;
+    }
+    await db
+      .update(students)
+      .set({
+        equippedSpeciesId: adminStarterAssignments.species,
+        equippedHairId: adminStarterAssignments.hair,
+        equippedEyesId: adminStarterAssignments.eyes,
+        equippedClothesId: adminStarterAssignments.clothes,
+        equippedBackgroundId: adminStarterAssignments.background,
+        equippedWallpaperId: adminStarterAssignments.wallpaper,
+        equippedFloorId: adminStarterAssignments.floor,
+        equippedFurnitureId: adminStarterAssignments.furniture,
+      })
+      .where(eq(students.id, adminStudent.id));
+
+    console.log(`  admin student created: Admin — enrollment code "${adminEnrollmentCode}", PIN "0000"`);
+  }
+
   console.log("\nSeed complete.");
 }
 

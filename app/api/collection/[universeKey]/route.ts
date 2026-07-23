@@ -12,7 +12,7 @@ export async function GET(
   }
 
   const { universeKey } = await params;
-  const collection = await getCollection(student.id);
+  const collection = await getCollection(student);
   const entry = collection.find((c) => c.universe.key === universeKey);
   if (!entry) {
     return NextResponse.json({ error: "Universe not found" }, { status: 404 });

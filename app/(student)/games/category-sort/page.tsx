@@ -7,7 +7,7 @@ import { CategorySort } from "@/components/games/CategorySort";
 export default async function CategorySortPage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
-  if (!(await isGameUnlocked(student.id, "category_sort"))) redirect("/games");
+  if (!(await isGameUnlocked(student, "category_sort"))) redirect("/games");
 
   const equippedKeys = await getEquippedAvatarKeys(student);
 
