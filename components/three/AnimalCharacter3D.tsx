@@ -6,7 +6,6 @@ import { useGLTF, useAnimations } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { Group, Object3D, Vector3 } from "three";
 import { HATS } from "./hats3d";
-import { ACCESSORIES, ACCESSORY_ANCHOR_RATIO } from "./accessories3d";
 import { computeRestBoundingBox } from "./glbGeometry";
 import { playCreatureVoice } from "@/lib/sound";
 import { getSpeciesArchetype, type SpeciesArchetype } from "@/lib/games/speciesArchetype";
@@ -150,13 +149,6 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
     headBoneRef.current = cloned.getObjectByName("Head") ?? null;
   }, [cloned]);
 
-  // Accessories (glasses/bowtie/scarf/medal) each sit at a different fraction
-  // of the feet→head span rather than the hat's fixed head anchor, since a
-  // bowtie belongs at the neck and a medal hangs on the chest, not the head.
-  function accessoryAnchor(ratio: number): Vector3 {
-    return new Vector3(0, offset.y + (hatAnchor.y - offset.y) * ratio, hatAnchor.z);
-  }
-
   const { actions, names } = useAnimations(animations, cloned);
   useEffect(() => {
     const idle = pickIdleClip(names);
@@ -270,17 +262,12 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
   const hatKey = equippedKeys.hat;
   const renderHat = hatKey ? HATS[hatKey] : null;
 
-  const accessoryKey = equippedKeys.accessory;
-  const renderAccessory = accessoryKey ? ACCESSORIES[accessoryKey] : null;
-  const accessoryRatio = accessoryKey ? (ACCESSORY_ANCHOR_RATIO[accessoryKey] ?? 0.6) : 0.6;
-
   return (
     <group ref={groupRef}>
       <group scale={scale} position={offset}>
         <primitive object={cloned} />
       </group>
       {renderHat && <group position={hatAnchor}>{renderHat()}</group>}
-      {renderAccessory && <group position={accessoryAnchor(accessoryRatio)}>{renderAccessory()}</group>}
     </group>
   );
 }

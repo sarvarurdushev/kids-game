@@ -4,7 +4,7 @@ import { getCollection } from "@/lib/student/collection";
 import { getAvatarItems } from "@/lib/student/avatar";
 import { CollectionTabs } from "@/components/collection/CollectionTabs";
 
-const STYLE_SLOTS = new Set<string>(["hair", "eyes", "clothes"]);
+const STYLE_SLOTS = new Set<string>(["hair", "eyes", "clothes", "accessory", "background"]);
 
 export default async function CollectionPage() {
   const student = await requireStudent();
@@ -15,7 +15,7 @@ export default async function CollectionPage() {
     .filter((item) => STYLE_SLOTS.has(item.slot))
     .map((item) => ({
       id: item.id,
-      slot: item.slot as "hair" | "eyes" | "clothes",
+      slot: item.slot as "hair" | "eyes" | "clothes" | "accessory" | "background",
       key: item.key,
       name: item.name,
       rarity: item.rarity,

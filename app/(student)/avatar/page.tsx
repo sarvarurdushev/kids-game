@@ -6,7 +6,7 @@ import { isDanceUnlocked, DANCE_UNLOCK_COST } from "@/lib/student/dance";
 import { AvatarCustomizer } from "@/components/avatar/AvatarCustomizer";
 import type { AvatarItem } from "@/components/avatar/AvatarCustomizer";
 
-const CHARACTER_SLOTS = new Set<string>(["species", "hat", "accessory", "background"]);
+const CHARACTER_SLOTS = new Set<string>(["species", "hat"]);
 
 export default async function AvatarPage() {
   const student = await requireStudent();

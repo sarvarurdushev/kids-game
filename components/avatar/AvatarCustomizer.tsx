@@ -11,14 +11,15 @@ import { CoinIcon } from "@/components/icons";
 
 const DANCE_DURATION_MS = 4000;
 
-// hair/eyes/clothes used to live here too, but they only ever rendered in the
-// flat 2D AvatarCharacter SVG (draping arbitrary clothing/fur onto a GLB
-// animal model procedurally isn't feasible), while species/hat/accessory
-// show on the real 3D model everyone actually sees — so switching tabs felt
-// broken ("some work some don't"). Those three now live in the Styles
-// collection (components/cards/StyleCollectionGrid.tsx) as ownable cards
-// instead of pretending to be 3D-equippable cosmetics.
-type Slot = "species" | "hat" | "accessory" | "background";
+// Every other slot (hair/eyes/clothes, then accessory/background) used to
+// live here too, but none of them ever showed up on the real 3D model
+// everyone actually sees - only species+hat do (AnimalCharacter3D) -
+// switching tabs kept feeling broken ("some work some don't"). They now all
+// live in the Styles collection (components/cards/StyleCollectionGrid.tsx)
+// as ownable cards instead of pretending to be 3D-equippable cosmetics.
+// What's left here is genuinely just "the 3D avatar," so there's no more
+// 2D-vs-3D preview branching to speak of.
+type Slot = "species" | "hat";
 
 export interface AvatarItem {
   id: string;
@@ -33,18 +34,10 @@ export interface AvatarItem {
   equipped: boolean;
 }
 
-// 3D rendering exists for species+hat+accessory today (AnimalCharacter3D);
-// background can't be draped onto an arbitrary animal GLB procedurally, so it
-// still only renders in the 2D AvatarCharacter SVG — the preview modal picks
-// whichever one applies.
-const RENDERS_IN_3D = new Set<Slot>(["species", "hat", "accessory"]);
-
-const SLOTS: Slot[] = ["species", "hat", "accessory", "background"];
+const SLOTS: Slot[] = ["species", "hat"];
 const SLOT_LABELS: Record<Slot, string> = {
   species: "Animal",
   hat: "Hat",
-  accessory: "Accessory",
-  background: "Background",
 };
 
 export function AvatarCustomizer({
@@ -237,8 +230,7 @@ export function AvatarCustomizer({
         rarity={previewItem?.rarity}
         reason={previewItem?.state === "locked" ? previewItem.reason : null}
         preview={
-          previewItem &&
-          (RENDERS_IN_3D.has(previewItem.slot) ? (
+          previewItem && (
             <div className="w-40 sm:w-56 lg:w-64">
               <Avatar3D
                 equippedKeys={{ ...equippedKeys, [previewItem.slot]: previewItem.key }}
@@ -246,9 +238,7 @@ export function AvatarCustomizer({
                 responsive
               />
             </div>
-          ) : (
-            <AvatarRenderer equippedKeys={{ ...equippedKeys, [previewItem.slot]: previewItem.key }} size={220} />
-          ))
+          )
         }
         action={
           previewItem &&
