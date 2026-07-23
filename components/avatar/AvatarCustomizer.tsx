@@ -11,7 +11,14 @@ import { CoinIcon } from "@/components/icons";
 
 const DANCE_DURATION_MS = 4000;
 
-type Slot = "species" | "hair" | "eyes" | "clothes" | "hat" | "accessory" | "background";
+// hair/eyes/clothes used to live here too, but they only ever rendered in the
+// flat 2D AvatarCharacter SVG (draping arbitrary clothing/fur onto a GLB
+// animal model procedurally isn't feasible), while species/hat/accessory
+// show on the real 3D model everyone actually sees — so switching tabs felt
+// broken ("some work some don't"). Those three now live in the Styles
+// collection (components/cards/StyleCollectionGrid.tsx) as ownable cards
+// instead of pretending to be 3D-equippable cosmetics.
+type Slot = "species" | "hat" | "accessory" | "background";
 
 export interface AvatarItem {
   id: string;
@@ -27,17 +34,14 @@ export interface AvatarItem {
 }
 
 // 3D rendering exists for species+hat+accessory today (AnimalCharacter3D);
-// clothes/hair/eyes/background can't be draped onto an arbitrary animal GLB
-// procedurally, so those still only render in the 2D AvatarCharacter SVG —
-// the preview modal picks whichever one applies.
+// background can't be draped onto an arbitrary animal GLB procedurally, so it
+// still only renders in the 2D AvatarCharacter SVG — the preview modal picks
+// whichever one applies.
 const RENDERS_IN_3D = new Set<Slot>(["species", "hat", "accessory"]);
 
-const SLOTS: Slot[] = ["species", "hair", "eyes", "clothes", "hat", "accessory", "background"];
+const SLOTS: Slot[] = ["species", "hat", "accessory", "background"];
 const SLOT_LABELS: Record<Slot, string> = {
   species: "Animal",
-  hair: "Fur",
-  eyes: "Eyes",
-  clothes: "Clothes",
   hat: "Hat",
   accessory: "Accessory",
   background: "Background",

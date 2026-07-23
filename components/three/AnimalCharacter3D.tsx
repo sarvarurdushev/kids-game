@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF, useAnimations } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
-import { Group, Vector3 } from "three";
+import { Group, Object3D, Vector3 } from "three";
 import { HATS } from "./hats3d";
 import { ACCESSORIES, ACCESSORY_ANCHOR_RATIO } from "./accessories3d";
 import { computeRestBoundingBox } from "./glbGeometry";
@@ -112,6 +112,12 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
   // species would fight over one shared skinned mesh/armature.
   const cloned = useMemo(() => SkeletonUtils.clone(scene) as Group, [scene]);
 
+  // Kept across frames (not just inside the memo below) so useFrame can nod
+  // it during the idle "perk" pulse — null on models without a named Head
+  // bone (e.g. the bear, which has no armature at all), which just skips
+  // the nod entirely rather than erroring.
+  const headBoneRef = useRef<Object3D | null>(null);
+
   const { scale, offset, hatAnchor } = useMemo(() => {
     const box = computeRestBoundingBox(cloned);
     const size = new Vector3();
@@ -134,6 +140,12 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
 
     const hatAnchor = new Vector3(0, anchorY * s + offsetVec.y + HAT_CLEARANCE, offsetVec.z);
     return { scale: s, offset: offsetVec, hatAnchor };
+  }, [cloned]);
+
+  // Ref mutation belongs in an effect, not the memo above (which runs during
+  // render) - a second, cheap getObjectByName lookup, not a perf concern.
+  useEffect(() => {
+    headBoneRef.current = cloned.getObjectByName("Head") ?? null;
   }, [cloned]);
 
   // Accessories (glasses/bowtie/scarf/medal) each sit at a different fraction
@@ -220,6 +232,16 @@ export function AnimalCharacter3D({ species, equippedKeys, mood, dancing = false
     }
     if (perkEnergyRef.current > 0) {
       perkEnergyRef.current = Math.max(0, perkEnergyRef.current - delta * 2.2);
+    }
+
+    // Nod the head bone specifically (not the whole body) during the perk
+    // pulse, on models that have one — added on top of whatever the Idle
+    // clip's own mixer already set that frame (this runs after useAnimations'
+    // own useFrame, since that hook is called earlier in this component),
+    // not replacing it, so it reads as "the character nodded" rather than
+    // fighting the base animation.
+    if (headBoneRef.current && perkEnergyRef.current > 0) {
+      headBoneRef.current.rotation.x += Math.sin(t.current * 6) * perkEnergyRef.current * 0.14;
     }
 
     if (bounceEnergyRef.current > 0) {

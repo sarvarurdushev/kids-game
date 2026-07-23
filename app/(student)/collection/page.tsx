@@ -1,16 +1,29 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireStudent } from "@/lib/auth/requireStudent";
 import { getCollection } from "@/lib/student/collection";
-import { Card } from "@/components/ui/Card";
-import { ProgressBar } from "@/components/ui/ProgressBar";
-import { emojiForUniverse } from "@/lib/visuals";
+import { getAvatarItems } from "@/lib/student/avatar";
+import { CollectionTabs } from "@/components/collection/CollectionTabs";
+
+const STYLE_SLOTS = new Set<string>(["hair", "eyes", "clothes"]);
 
 export default async function CollectionPage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
 
-  const collection = await getCollection(student.id);
+  const collection = await getCollection(student);
+  const styleItems = (await getAvatarItems(student))
+    .filter((item) => STYLE_SLOTS.has(item.slot))
+    .map((item) => ({
+      id: item.id,
+      slot: item.slot as "hair" | "eyes" | "clothes",
+      key: item.key,
+      name: item.name,
+      rarity: item.rarity,
+      coinPrice: item.coinPrice,
+      state: item.state,
+      reason: item.reason,
+      affordable: item.affordable,
+    }));
 
   return (
     <div className="flex flex-col gap-5">
@@ -19,39 +32,7 @@ export default async function CollectionPage() {
         <p className="text-ink/60">Keep collecting to fill every universe!</p>
       </div>
 
-      <div className="flex flex-col gap-3">
-        {collection.map(({ universe, progress }) => {
-          const card = (
-            <Card
-              className={`flex items-center gap-4 transition-transform ${universe.locked ? "" : "active:scale-[0.98]"}`}
-            >
-              <span className={`text-4xl ${universe.locked ? "opacity-40 grayscale" : ""}`}>
-                {emojiForUniverse(universe.key)}
-              </span>
-              <div className="flex-1">
-                <p className="font-display font-semibold">{universe.name}</p>
-                {universe.locked ? (
-                  <p className="text-xs font-semibold text-ink/40">🔒 Unlocks in {universe.unlocksInMonthName}</p>
-                ) : (
-                  <ProgressBar value={progress.owned} max={progress.total} />
-                )}
-              </div>
-              {!universe.locked && (
-                <span className="text-sm font-bold text-ink/60">
-                  {progress.owned}/{progress.total}
-                </span>
-              )}
-            </Card>
-          );
-          return universe.locked ? (
-            <div key={universe.id}>{card}</div>
-          ) : (
-            <Link key={universe.id} href={`/collection/${universe.key}`}>
-              {card}
-            </Link>
-          );
-        })}
-      </div>
+      <CollectionTabs collection={collection} styleItems={styleItems} />
     </div>
   );
 }
