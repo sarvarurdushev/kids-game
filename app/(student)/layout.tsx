@@ -4,6 +4,7 @@ import { BottomNav } from "@/components/nav/BottomNav";
 import { BackButton } from "@/components/nav/BackButton";
 import { SoundToggle } from "@/components/ui/SoundToggle";
 import { CurriculumAnnouncement } from "@/components/curriculum/CurriculumAnnouncement";
+import { getClaimableQuestCount } from "@/lib/reward-engine/quests";
 
 export default async function StudentLayout({
   children,
@@ -12,6 +13,7 @@ export default async function StudentLayout({
 }) {
   const student = await requireStudent();
   if (!student) redirect("/login");
+  const questBadge = await getClaimableQuestCount(student.id);
 
   return (
     <div className="relative flex min-h-full flex-1 flex-col overflow-hidden bg-gradient-to-b from-gold/20 via-cream to-cream">
@@ -23,7 +25,7 @@ export default async function StudentLayout({
       <main className="relative z-10 mx-auto w-full max-w-md flex-1 px-4 pt-14 pb-24 sm:max-w-2xl sm:px-6 lg:max-w-5xl lg:px-10">
         {children}
       </main>
-      <BottomNav />
+      <BottomNav questBadge={questBadge} />
     </div>
   );
 }

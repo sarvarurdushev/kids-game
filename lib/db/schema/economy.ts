@@ -166,6 +166,32 @@ export const studentGameUnlocks = pgTable("student_game_unlocks", {
   ),
 ]).enableRLS();
 
+// Only *claims* are stored. Quest progress itself is derived at read time by
+// querying game_sessions/pack_grants for the period (lib/reward-engine/
+// quests.ts) rather than kept in incrementing counters — there's nothing to
+// hook into every game/pack/pet code path, nothing to backfill when a new
+// quest type is added, and progress can never drift out of sync with the
+// sessions it's supposed to describe.
+export const questClaims = pgTable("quest_claims", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: uuid("student_id")
+    .notNull()
+    .references(() => students.id, { onDelete: "cascade" }),
+  questKey: text("quest_key").notNull(),
+  // Day (daily quests) or Monday of the ISO week (weekly quests) the claim
+  // belongs to — this is what makes a quest re-claimable next period.
+  periodStart: date("period_start").notNull(),
+  coinsAwarded: integer("coins_awarded").notNull().default(0),
+  goldStarsAwarded: integer("gold_stars_awarded").notNull().default(0),
+  claimedAt: timestamp("claimed_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("quest_claims_student_quest_period_idx").on(
+    table.studentId,
+    table.questKey,
+    table.periodStart
+  ),
+]).enableRLS();
+
 export const gameSessions = pgTable("game_sessions", {
   id: uuid("id").primaryKey().defaultRandom(),
   studentId: uuid("student_id")

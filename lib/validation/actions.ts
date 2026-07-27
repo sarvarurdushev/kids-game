@@ -30,3 +30,9 @@ export const purchaseCaseSchema = z.object({
 export const purchaseRoomSetSchema = z.object({
   roomSetId: z.string().uuid(),
 });
+
+// Quest keys are code-defined (lib/reward-engine/quests.ts), not UUIDs — the
+// route re-validates the key against the catalog, so this is just a shape check.
+export const claimQuestSchema = z.object({
+  questKey: z.string().min(1).max(64),
+});

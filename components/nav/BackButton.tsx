@@ -2,11 +2,22 @@
 
 import { usePathname, useRouter } from "next/navigation";
 
-// The 6 bottom-nav tabs are the "home base" screens — no back button there.
+// The bottom-nav tabs are the "home base" screens — no back button there.
 // Every other route (collection/[universeKey], games/[slug], room, etc.) gets
 // a consistent way back instead of relying on the browser's own back
 // gesture/button, which isn't always visible or obvious on a touch device.
-const TOP_LEVEL_PATHS = new Set(["/home", "/games", "/packs", "/collection", "/avatar", "/badges"]);
+// Must stay in sync with BottomNav's TABS — "/badges" was listed here but the
+// Badges tab actually routes to /achievements, so that tab was wrongly showing
+// a back button.
+const TOP_LEVEL_PATHS = new Set([
+  "/home",
+  "/games",
+  "/quests",
+  "/packs",
+  "/collection",
+  "/avatar",
+  "/achievements",
+]);
 
 export function BackButton() {
   const pathname = usePathname();
