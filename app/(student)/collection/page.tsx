@@ -20,6 +20,8 @@ export default async function CollectionPage() {
       name: item.name,
       rarity: item.rarity,
       coinPrice: item.coinPrice,
+      featured: item.featured,
+      effectivePrice: item.effectivePrice,
       state: item.state,
       reason: item.reason,
       affordable: item.affordable,

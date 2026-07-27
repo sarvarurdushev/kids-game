@@ -4,6 +4,7 @@ import { db } from "@/lib/db/client";
 import { avatarItems, students, studentAvatarItems } from "@/lib/db/schema";
 import { getLevelInfo } from "./levelInfo";
 import { ServiceError } from "./errors";
+import { discountedPrice, featuredKeysFor } from "@/lib/shop/weeklyRotation";
 import type { AuthedStudent } from "@/lib/auth/requireStudent";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 
@@ -61,8 +62,19 @@ export async function getAvatarItems(student: AuthedStudent) {
     ].filter((id): id is string => Boolean(id))
   );
 
+  // The weekly "Featured" rotation is derived from the ISO week alone (see
+  // lib/shop/weeklyRotation.ts) — no table, no cron — so every student sees
+  // the same featured set for the whole week, stable across reloads.
+  const coinPurchaseKeys = items
+    .filter((item) => item.acquisitionMethod === "coin_purchase")
+    .map((item) => item.key);
+  const featuredKeys = new Set(featuredKeysFor(coinPurchaseKeys, new Date()));
+
   return items.map((item) => {
     const owns = isOwned(item, ownedIds, level, student.isAdmin);
+    const featured = item.acquisitionMethod === "coin_purchase" && featuredKeys.has(item.key);
+    const effectivePrice =
+      item.coinPrice === null ? null : featured ? discountedPrice(item.coinPrice) : item.coinPrice;
     let state: "owned" | "purchasable" | "locked" = "owned";
     let reason: string | null = null;
     let affordable = true;
@@ -70,7 +82,7 @@ export async function getAvatarItems(student: AuthedStudent) {
     if (!owns) {
       if (item.acquisitionMethod === "coin_purchase") {
         state = "purchasable";
-        affordable = item.coinPrice !== null && student.coinsBalance >= item.coinPrice;
+        affordable = effectivePrice !== null && student.coinsBalance >= effectivePrice;
       } else if (item.acquisitionMethod === "level_unlock") {
         state = "locked";
         reason = `Reach level ${item.unlockLevel}`;
@@ -91,6 +103,8 @@ export async function getAvatarItems(student: AuthedStudent) {
       imageUrl: item.imageUrl,
       rarity: item.rarity,
       coinPrice: item.coinPrice,
+      featured,
+      effectivePrice,
       state,
       reason,
       affordable,
@@ -116,6 +130,19 @@ export async function purchaseAvatarItem(studentId: string, avatarItemId: string
       throw new ServiceError("Item is not purchasable", 400);
     }
 
+    // The client only ever sends an item id, never a price — the discount is
+    // authoritative here, recomputed from the same deterministic weekly
+    // rotation getAvatarItems uses, so a tampered request can't buy below
+    // the real (possibly discounted) price.
+    const coinPurchaseItems = await tx
+      .select({ key: avatarItems.key })
+      .from(avatarItems)
+      .where(and(eq(avatarItems.active, true), eq(avatarItems.acquisitionMethod, "coin_purchase")));
+    const featuredKeys = new Set(
+      featuredKeysFor(coinPurchaseItems.map((i) => i.key), new Date())
+    );
+    const price = featuredKeys.has(item.key) ? discountedPrice(item.coinPrice) : item.coinPrice;
+
     // Lock the student row before checking ownership, so two concurrent
     // purchase requests (double-tap, two tabs) serialize here instead of
     // both passing the "not yet owned" check and racing to insert the same
@@ -138,19 +165,19 @@ export async function purchaseAvatarItem(studentId: string, avatarItemId: string
       .limit(1);
     if (existing) throw new ServiceError("Already owned", 409);
 
-    if (student.coinsBalance < item.coinPrice) {
+    if (student.coinsBalance < price) {
       throw new ServiceError("Not enough coins", 402);
     }
 
     await tx
       .update(students)
-      .set({ coinsBalance: student.coinsBalance - item.coinPrice, updatedAt: new Date() })
+      .set({ coinsBalance: student.coinsBalance - price, updatedAt: new Date() })
       .where(eq(students.id, studentId));
     await tx
       .insert(studentAvatarItems)
       .values({ studentId, avatarItemId, acquiredVia: "coin_purchase" });
 
-    return { avatarItemId, coinsRemaining: student.coinsBalance - item.coinPrice };
+    return { avatarItemId, coinsRemaining: student.coinsBalance - price };
   });
 }
 

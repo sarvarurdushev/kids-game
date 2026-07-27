@@ -19,6 +19,12 @@ export interface RoomItem {
   name: string;
   rarity: string;
   coinPrice: number | null;
+  // `coinPrice` stays the original price (so the UI can strike it through);
+  // `effectivePrice` is what purchase actually charges — discounted when
+  // `featured`, matching `coinPrice` otherwise. The server prices every
+  // purchase itself, so this is display-only.
+  featured: boolean;
+  effectivePrice: number | null;
   state: "owned" | "purchasable" | "locked";
   reason: string | null;
   affordable: boolean;
@@ -197,10 +203,15 @@ export function RoomCustomizer({
         {slotItems.map((item) => (
           <div
             key={item.id}
-            className={`flex flex-col items-center gap-2 rounded-2xl p-2 text-center ${
+            className={`relative flex flex-col items-center gap-2 rounded-2xl p-2 text-center ${
               item.equipped ? "bg-gold/20 ring-2 ring-gold" : "bg-white"
             }`}
           >
+            {item.featured && item.state === "purchasable" && (
+              <span className="absolute -top-1 -right-2 z-10 rounded-full bg-coral px-2 py-0.5 text-[10px] font-bold text-white shadow">
+                ★ 25% OFF
+              </span>
+            )}
             <button type="button" onClick={() => setPreviewItem(item)} className="flex w-full flex-col items-center gap-2">
               <div className={`w-full overflow-hidden rounded-xl ${item.state === "locked" ? "opacity-40 grayscale" : ""}`}>
                 <RoomScene equippedKeys={{ [item.slot]: item.key }} avatarSize={70} className="w-full" />
@@ -229,7 +240,9 @@ export function RoomCustomizer({
               >
                 {item.affordable ? (
                   <>
-                    <CoinIcon size={13} /> {item.coinPrice}
+                    <CoinIcon size={13} />
+                    {item.featured && <span className="text-ink/50 line-through">{item.coinPrice}</span>}
+                    {item.effectivePrice}
                   </>
                 ) : (
                   "Not enough coins"
@@ -281,7 +294,11 @@ export function RoomCustomizer({
             >
               {previewItem.affordable ? (
                 <>
-                  <CoinIcon size={14} /> {previewItem.coinPrice}
+                  <CoinIcon size={14} />
+                  {previewItem.featured && (
+                    <span className="text-ink/50 line-through">{previewItem.coinPrice}</span>
+                  )}
+                  {previewItem.effectivePrice}
                 </>
               ) : (
                 "Not enough coins"

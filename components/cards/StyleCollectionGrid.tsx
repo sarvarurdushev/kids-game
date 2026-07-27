@@ -18,6 +18,12 @@ export interface StyleItem {
   name: string;
   rarity: Rarity;
   coinPrice: number | null;
+  // `coinPrice` stays the original price (so the UI can strike it through);
+  // `effectivePrice` is what purchase actually charges — discounted when
+  // `featured`, matching `coinPrice` otherwise. The server prices every
+  // purchase itself, so this is display-only.
+  featured: boolean;
+  effectivePrice: number | null;
   state: "owned" | "purchasable" | "locked";
   reason: string | null;
   affordable: boolean;
@@ -63,6 +69,15 @@ export function StyleCollectionGrid({ items }: { items: StyleItem[] }) {
         {items.map((item) => (
           <button key={item.id} type="button" onClick={() => setPreviewItem(item)} className="text-left">
             <CardFrame rarity={item.rarity} dimmed={item.state !== "owned"} className="flex flex-col items-center gap-1.5 p-3 pt-4">
+              {/* Positioned inside the card bounds rather than hanging off the
+                  corner: CardFrame is overflow-hidden (it clips its holo
+                  shimmer sweep), so a negative offset gets sliced off
+                  mid-word. top-2.5 clears the frame's h-2 rarity bar. */}
+              {item.featured && item.state === "purchasable" && (
+                <span className="absolute top-2.5 right-1.5 z-10 rounded-full bg-coral px-2 py-0.5 text-[10px] font-bold text-white shadow">
+                  ★ 25% OFF
+                </span>
+              )}
               <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full">
                 <AvatarRenderer equippedKeys={{ [item.slot]: item.key }} size={72} />
               </div>
@@ -107,7 +122,11 @@ export function StyleCollectionGrid({ items }: { items: StyleItem[] }) {
             >
               {previewItem.affordable ? (
                 <>
-                  <CoinIcon size={14} /> {previewItem.coinPrice}
+                  <CoinIcon size={14} />
+                  {previewItem.featured && (
+                    <span className="text-ink/50 line-through">{previewItem.coinPrice}</span>
+                  )}
+                  {previewItem.effectivePrice}
                 </>
               ) : (
                 "Not enough coins"

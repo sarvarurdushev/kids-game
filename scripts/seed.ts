@@ -448,7 +448,7 @@ async function main() {
       wallpaper: "wallpaper_stripes",
       floor: "floor_rug",
       furniture: "furniture_lamp",
-      coinPrice: 400, // vs. 200 + 80 + 80 = 360 separately, plus an exclusive combo
+      coinPrice: 280, // vs. 200 + 80 + 80 = 360 bought separately
     },
     {
       key: "room_set_garden_nook",
@@ -459,6 +459,25 @@ async function main() {
       coinPrice: 550, // vs. 450 + 200 + 450 = 1100 separately - a real bundle discount
     },
   ];
+  // A "bundle" that costs more than its parts is worse than not existing, and
+  // it's easy to reintroduce silently whenever individual prices are rebalanced
+  // (exactly how Candy Cozy ended up at 400 against 360 of pieces). Fail the
+  // seed loudly rather than shipping a shop that punishes buying the set.
+  for (const set of roomSetSeed) {
+    const pieces = [set.wallpaper, set.floor, set.furniture].map((key) => {
+      const item = avatarItemByKey.get(key);
+      if (!item) throw new Error(`Room set "${set.key}" references unknown item "${key}"`);
+      return item.coinPrice ?? 0;
+    });
+    const piecesTotal = pieces.reduce((sum, p) => sum + p, 0);
+    if (set.coinPrice >= piecesTotal) {
+      throw new Error(
+        `Room set "${set.key}" costs ${set.coinPrice} but its pieces total only ${piecesTotal} — ` +
+          `a bundle must be cheaper than buying the pieces separately.`
+      );
+    }
+  }
+
   const roomSetInserted = await db
     .insert(roomSets)
     .values(
