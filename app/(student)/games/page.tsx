@@ -1,11 +1,10 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireStudent } from "@/lib/auth/requireStudent";
-import { getGamePlaysRemainingToday } from "@/lib/reward-engine/gameSession";
-import { isGameUnlocked } from "@/lib/reward-engine/gameUnlocks";
+import { getRewardedSessionsRemainingToday } from "@/lib/reward-engine/gameSession";
+import { getGameUnlockStates } from "@/lib/reward-engine/gameUnlocks";
 import { GAME_CATALOG } from "@/lib/games/catalog";
 import { Card } from "@/components/ui/Card";
-import { UnlockGameButton } from "@/components/games/UnlockGameButton";
 import {
   WordCatchIcon,
   MemoryMatchIcon,
@@ -46,22 +45,28 @@ export default async function GamesPage() {
   const student = await requireStudent();
   if (!student) redirect("/login");
 
-  const games = await Promise.all(
-    GAME_CATALOG.map(async (game) => {
-      const unlocked = await isGameUnlocked(student, game.key);
-      return {
-        ...game,
-        unlocked,
-        playsRemaining: unlocked ? await getGamePlaysRemainingToday(student.id, game.key) : 0,
-      };
-    })
-  );
+  // The rewarded-session budget is shared across every game, so it's one
+  // number for the whole page rather than a per-card count.
+  const [unlockStates, sessionsRemaining] = await Promise.all([
+    getGameUnlockStates(student),
+    getRewardedSessionsRemainingToday(student.id),
+  ]);
+  const unlockByKey = new Map(unlockStates.map((s) => [s.key, s]));
+  const games = GAME_CATALOG.map((game) => ({
+    ...game,
+    unlocked: unlockByKey.get(game.key)?.unlocked ?? false,
+    requiredLevel: unlockByKey.get(game.key)?.requiredLevel ?? null,
+  }));
 
   return (
     <div className="flex flex-col gap-5">
       <div>
         <h1 className="font-display text-2xl font-bold">Game Arcade</h1>
-        <p className="text-ink/60">Play, learn, and earn XP + coins!</p>
+        <p className="text-ink/60">
+          {sessionsRemaining > 0
+            ? `${sessionsRemaining} rewarded round${sessionsRemaining === 1 ? "" : "s"} left today — play any game!`
+            : "All rewarded rounds used today — keep playing for fun!"}
+        </p>
       </div>
 
       <div className="flex flex-col gap-4">
@@ -81,20 +86,11 @@ export default async function GamesPage() {
               <div className="flex-1">
                 <h2 className="font-display text-lg font-bold">{game.name}</h2>
                 <p className="text-sm text-ink/60">{game.tagline}</p>
-                {game.unlocked && (
-                  <p className="mt-1 text-xs font-bold" style={{ color: game.color }}>
-                    {game.playsRemaining > 0
-                      ? `${game.playsRemaining} rewarded round${game.playsRemaining === 1 ? "" : "s"} left today`
-                      : "Practice mode — play for fun!"}
-                  </p>
-                )}
               </div>
-              {!game.unlocked && game.coinCost && (
-                <UnlockGameButton
-                  gameKey={game.key}
-                  coinCost={game.coinCost}
-                  affordable={student.coinsBalance >= game.coinCost}
-                />
+              {!game.unlocked && game.requiredLevel && (
+                <span className="shrink-0 rounded-full bg-ink/10 px-3 py-1.5 text-xs font-bold whitespace-nowrap text-ink/50">
+                  🔒 Level {game.requiredLevel}
+                </span>
               )}
             </Card>
           );

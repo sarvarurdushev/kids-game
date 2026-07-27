@@ -6,10 +6,16 @@ export interface GameMeta {
   tagline: string;
   href: string;
   color: string;
-  // Coin cost to unlock (lib/reward-engine/gameUnlocks.ts). Absent/0 = free,
-  // no unlock row needed at all — the three original games stay free so a
-  // brand-new student always has something to play immediately.
-  coinCost?: number;
+  // Level required to unlock (lib/reward-engine/gameUnlocks.ts). Absent =
+  // free from level 1, so a brand-new student always has something to play.
+  //
+  // Games are gated on LEVEL rather than coins on purpose. When they cost
+  // coins, unlocking one raised your daily coin income (it added rewarded
+  // sessions), so a game paid for itself within a day or two and then
+  // printed currency — a faucet dressed up as a sink. Levels come from XP,
+  // which you earn by actually playing and learning, so the roster now
+  // unlocks on a steady schedule and coins stay purely cosmetic.
+  unlockLevel?: number;
 }
 
 export const GAME_CATALOG: GameMeta[] = [
@@ -40,7 +46,7 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "Pick the word that matches the picture!",
     href: "/games/emoji-quiz",
     color: "var(--color-gk-coral)",
-    coinCost: 60,
+    unlockLevel: 4,
   },
   {
     key: "picture_pick",
@@ -48,7 +54,7 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "A word shows up — tap the picture that matches!",
     href: "/games/picture-pick",
     color: "var(--color-gk-gold)",
-    coinCost: 40,
+    unlockLevel: 2,
   },
   {
     key: "true_or_false",
@@ -56,7 +62,7 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "Does the word match the picture? Tap yes or no!",
     href: "/games/true-or-false",
     color: "var(--color-teal)",
-    coinCost: 40,
+    unlockLevel: 3,
   },
   {
     key: "odd_one_out",
@@ -64,7 +70,7 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "Three belong together — find the one that doesn't!",
     href: "/games/odd-one-out",
     color: "var(--color-gk-coral)",
-    coinCost: 50,
+    unlockLevel: 5,
   },
   {
     key: "category_sort",
@@ -72,7 +78,7 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "Tap the group each picture belongs to!",
     href: "/games/category-sort",
     color: "var(--color-teal)",
-    coinCost: 50,
+    unlockLevel: 6,
   },
   {
     key: "counting_quiz",
@@ -80,7 +86,7 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "Count the pictures and tap the number word!",
     href: "/games/counting-quiz",
     color: "var(--color-gk-gold)",
-    coinCost: 60,
+    unlockLevel: 7,
   },
   {
     key: "missing_letter",
@@ -88,7 +94,7 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "Tap the letter that completes the word!",
     href: "/games/missing-letter",
     color: "var(--color-gk-coral)",
-    coinCost: 70,
+    unlockLevel: 8,
   },
   {
     key: "sequence_memory",
@@ -96,7 +102,7 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "Watch the pattern, then tap it back in order!",
     href: "/games/sequence-memory",
     color: "var(--color-teal)",
-    coinCost: 80,
+    unlockLevel: 9,
   },
   {
     key: "balloon_pop",
@@ -104,7 +110,7 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "Pop the balloon that matches before time runs out!",
     href: "/games/balloon-pop",
     color: "var(--color-gk-gold)",
-    coinCost: 90,
+    unlockLevel: 10,
   },
   {
     key: "fast_picks",
@@ -112,7 +118,7 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "Pick the right word fast — the clock keeps speeding up!",
     href: "/games/fast-picks",
     color: "var(--color-gk-coral)",
-    coinCost: 90,
+    unlockLevel: 11,
   },
   {
     key: "word_rush",
@@ -120,7 +126,7 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "Answer as many as you can in 30 seconds!",
     href: "/games/word-rush",
     color: "var(--color-teal)",
-    coinCost: 100,
+    unlockLevel: 12,
   },
   {
     key: "category_blitz",
@@ -128,6 +134,6 @@ export const GAME_CATALOG: GameMeta[] = [
     tagline: "Sort as many as you can in 30 seconds!",
     href: "/games/category-blitz",
     color: "var(--color-gk-gold)",
-    coinCost: 100,
+    unlockLevel: 13,
   },
 ];

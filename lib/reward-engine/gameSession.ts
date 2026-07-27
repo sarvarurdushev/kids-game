@@ -25,9 +25,18 @@ export const GAME_KEYS = [
 export type GameKey = (typeof GAME_KEYS)[number];
 
 // Games award modest XP/coins on top of the classroom-driven economy, not a
-// replacement for it — a daily cap per game keeps grinding from becoming a
-// more efficient path to coins than actually attending class.
-const DAILY_REWARDED_PLAYS_PER_GAME = 3;
+// replacement for it.
+//
+// This cap is deliberately GLOBAL (across every game) rather than per-game.
+// It used to be 3 plays *per game*, which meant daily income scaled with how
+// many games you owned — 9 rewarded sessions on day one, but 45 once the
+// roster was unlocked, so coins/day went from ~110 to ~550-1100. That made
+// buying a game a compounding investment (a 40-coin game paid for itself in
+// about a day, then printed coins forever) instead of a purchase, and the
+// whole shop could be cleared inside a week. One global budget keeps income
+// flat and predictable (~150/day) no matter how many games are unlocked, so
+// unlocking a game is about variety, not income.
+const DAILY_REWARDED_SESSIONS = 12;
 const XP_PER_CORRECT = 2;
 const COINS_PER_CORRECT = 1;
 const PERFECT_BONUS_COINS = 5;
@@ -81,14 +90,13 @@ function todayStartUTC(): Date {
   return d;
 }
 
-async function rewardedPlaysToday(studentId: string, gameKey: GameKey): Promise<number> {
+async function rewardedSessionsToday(studentId: string): Promise<number> {
   const rows = await db
     .select({ id: gameSessions.id })
     .from(gameSessions)
     .where(
       and(
         eq(gameSessions.studentId, studentId),
-        eq(gameSessions.gameKey, gameKey),
         eq(gameSessions.rewarded, true),
         gte(gameSessions.playedAt, todayStartUTC())
       )
@@ -96,8 +104,9 @@ async function rewardedPlaysToday(studentId: string, gameKey: GameKey): Promise<
   return rows.length;
 }
 
-export async function getGamePlaysRemainingToday(studentId: string, gameKey: GameKey): Promise<number> {
-  return Math.max(0, DAILY_REWARDED_PLAYS_PER_GAME - (await rewardedPlaysToday(studentId, gameKey)));
+/** Rewarded sessions left today across ALL games combined, not per game. */
+export async function getRewardedSessionsRemainingToday(studentId: string): Promise<number> {
+  return Math.max(0, DAILY_REWARDED_SESSIONS - (await rewardedSessionsToday(studentId)));
 }
 
 export async function completeGameSession(
@@ -120,13 +129,12 @@ export async function completeGameSession(
       .where(
         and(
           eq(gameSessions.studentId, studentId),
-          eq(gameSessions.gameKey, gameKey),
           eq(gameSessions.rewarded, true),
           gte(gameSessions.playedAt, todayStartUTC())
         )
       );
 
-    const rewarded = todaysRewarded.length < DAILY_REWARDED_PLAYS_PER_GAME;
+    const rewarded = todaysRewarded.length < DAILY_REWARDED_SESSIONS;
 
     let xpAwarded = 0;
     let coinsAwarded = 0;
@@ -193,7 +201,7 @@ export async function completeGameSession(
       levelsCrossed: crossedLevels,
       playsRemainingToday: Math.max(
         0,
-        DAILY_REWARDED_PLAYS_PER_GAME - todaysRewarded.length - (rewarded ? 1 : 0)
+        DAILY_REWARDED_SESSIONS - todaysRewarded.length - (rewarded ? 1 : 0)
       ),
     };
   });

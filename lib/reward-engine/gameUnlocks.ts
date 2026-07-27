@@ -1,9 +1,10 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { students, studentGameUnlocks } from "@/lib/db/schema";
+import { studentGameUnlocks } from "@/lib/db/schema";
 import { ServiceError } from "@/lib/student/errors";
 import { GAME_CATALOG } from "@/lib/games/catalog";
+import { getLevelInfo } from "@/lib/student/levelInfo";
 import type { AuthedStudent } from "@/lib/auth/requireStudent";
 import type { GameKey } from "./gameSession";
 
@@ -13,57 +14,46 @@ function gameMeta(gameKey: GameKey) {
   return meta;
 }
 
-export async function isGameUnlocked(student: AuthedStudent, gameKey: GameKey): Promise<boolean> {
-  const meta = gameMeta(gameKey);
-  if (!meta.coinCost || student.isAdmin) return true; // free games need no row at all
-  const [row] = await db
-    .select({ id: studentGameUnlocks.id })
-    .from(studentGameUnlocks)
-    .where(and(eq(studentGameUnlocks.studentId, student.id), eq(studentGameUnlocks.gameKey, gameKey)))
-    .limit(1);
-  return !!row;
-}
-
-export async function getUnlockedGameKeys(studentId: string): Promise<Set<GameKey>> {
+/** Games unlock by reaching a level (lib/games/catalog.ts). Two exceptions
+ * keep this fair to existing students: rows in student_game_unlocks are still
+ * honored forever, so anyone who bought a game back when they cost coins
+ * keeps it even below its level, and the admin login sees everything. */
+async function unlockedGameKeys(student: AuthedStudent): Promise<Set<string>> {
   const rows = await db
     .select({ gameKey: studentGameUnlocks.gameKey })
     .from(studentGameUnlocks)
-    .where(eq(studentGameUnlocks.studentId, studentId));
-  const unlocked = new Set(rows.map((r) => r.gameKey as GameKey));
-  for (const game of GAME_CATALOG) {
-    if (!game.coinCost) unlocked.add(game.key);
-  }
-  return unlocked;
+    .where(eq(studentGameUnlocks.studentId, student.id));
+  return new Set(rows.map((r) => r.gameKey));
 }
 
-export async function unlockGame(studentId: string, gameKey: GameKey) {
+export async function isGameUnlocked(student: AuthedStudent, gameKey: GameKey): Promise<boolean> {
   const meta = gameMeta(gameKey);
-  const coinCost = meta.coinCost;
-  if (!coinCost) throw new ServiceError("This game is already free to play", 400);
+  if (!meta.unlockLevel || student.isAdmin) return true;
+  const { level } = await getLevelInfo(student.xpTotal);
+  if (level >= meta.unlockLevel) return true;
+  return (await unlockedGameKeys(student)).has(gameKey);
+}
 
-  return db.transaction(async (tx) => {
-    // Lock the student row first, same reason as purchaseAvatarItem: two
-    // concurrent unlock taps must serialize here rather than both passing
-    // the balance check and racing to insert the same (student, game) row.
-    const [student] = await tx.select().from(students).where(eq(students.id, studentId)).for("update");
+export interface GameUnlockState {
+  key: GameKey;
+  unlocked: boolean;
+  /** Level still needed, or null when already unlocked / free. */
+  requiredLevel: number | null;
+}
 
-    const [existing] = await tx
-      .select({ id: studentGameUnlocks.id })
-      .from(studentGameUnlocks)
-      .where(and(eq(studentGameUnlocks.studentId, studentId), eq(studentGameUnlocks.gameKey, gameKey)))
-      .limit(1);
-    if (existing) throw new ServiceError("Already unlocked", 409);
+/** One batched pass over the whole catalog — avoids the N queries that
+ * calling isGameUnlocked per game would cost on the games index page. */
+export async function getGameUnlockStates(student: AuthedStudent): Promise<GameUnlockState[]> {
+  const { level } = await getLevelInfo(student.xpTotal);
+  const legacy = await unlockedGameKeys(student);
 
-    if (student.coinsBalance < coinCost) {
-      throw new ServiceError("Not enough coins", 402);
-    }
-
-    await tx
-      .update(students)
-      .set({ coinsBalance: student.coinsBalance - coinCost, updatedAt: new Date() })
-      .where(eq(students.id, studentId));
-    await tx.insert(studentGameUnlocks).values({ studentId, gameKey });
-
-    return { gameKey, coinsRemaining: student.coinsBalance - coinCost };
+  return GAME_CATALOG.map((meta) => {
+    const unlocked =
+      !meta.unlockLevel || student.isAdmin || level >= meta.unlockLevel || legacy.has(meta.key);
+    return {
+      key: meta.key,
+      unlocked,
+      requiredLevel: unlocked ? null : (meta.unlockLevel ?? null),
+    };
   });
 }

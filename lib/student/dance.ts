@@ -8,7 +8,7 @@ import { ServiceError } from "./errors";
 // and the mid-tier packs (50-100), not above them — 150 sat well beyond what
 // a student earns in a session or two, so the unlock button never felt like
 // a reachable goal, just a locked wall.
-export const DANCE_UNLOCK_COST = 60;
+export const DANCE_UNLOCK_COST = 250;
 
 export async function isDanceUnlocked(studentId: string): Promise<boolean> {
   const [student] = await db

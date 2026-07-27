@@ -1,6 +1,6 @@
 import "./_env";
 import { createHash } from "node:crypto";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   achievements,
@@ -243,13 +243,16 @@ async function main() {
   await db
     .insert(packTypes)
     .values([
-      { key: "attendance_pack", name: "Attendance Pack", coinCost: 50, cardsPerPack: 3 },
-      { key: "participation_pack", name: "Participation Pack", coinCost: 50, cardsPerPack: 3 },
-      { key: "discovery_pack", name: "Discovery Pack", coinCost: 60, cardsPerPack: 3 },
-      { key: "story_pack", name: "Story Pack", coinCost: 60, cardsPerPack: 3 },
-      { key: "achievement_pack", name: "Achievement Pack", coinCost: 100, cardsPerPack: 3 },
+      { key: "attendance_pack", name: "Attendance Pack", coinCost: 120, cardsPerPack: 3 },
+      { key: "participation_pack", name: "Participation Pack", coinCost: 120, cardsPerPack: 3 },
+      { key: "discovery_pack", name: "Discovery Pack", coinCost: 150, cardsPerPack: 3 },
+      { key: "story_pack", name: "Story Pack", coinCost: 150, cardsPerPack: 3 },
+      { key: "achievement_pack", name: "Achievement Pack", coinCost: 250, cardsPerPack: 3 },
     ])
-    .onConflictDoNothing();
+    .onConflictDoUpdate({
+      target: packTypes.key,
+      set: { coinCost: sql`excluded.coin_cost`, cardsPerPack: sql`excluded.cards_per_pack` },
+    });
   const packTypeRows = await db.select().from(packTypes);
   const packTypeByKey = new Map(packTypeRows.map((p) => [p.key, p]));
   console.log(`  pack types: ${packTypeRows.length} total`);
@@ -347,46 +350,46 @@ async function main() {
 
     { slot: "hair", key: "hair_brown", name: "Ginger Fur", acquisitionMethod: "starter" as const },
     { slot: "hair", key: "hair_curly", name: "Fluffy Fur", acquisitionMethod: "level_unlock" as const, unlockLevel: 3 },
-    { slot: "hair", key: "hair_spiky", name: "Tuxedo Fur", acquisitionMethod: "coin_purchase" as const, coinPrice: 40 },
+    { slot: "hair", key: "hair_spiky", name: "Tuxedo Fur", acquisitionMethod: "coin_purchase" as const, coinPrice: 450 },
 
     { slot: "eyes", key: "eyes_round", name: "Round Eyes", acquisitionMethod: "starter" as const },
     { slot: "eyes", key: "eyes_star", name: "Star Eyes", acquisitionMethod: "level_unlock" as const, unlockLevel: 4 },
-    { slot: "eyes", key: "eyes_sparkle", name: "Sparkle Eyes", acquisitionMethod: "coin_purchase" as const, coinPrice: 30 },
+    { slot: "eyes", key: "eyes_sparkle", name: "Sparkle Eyes", acquisitionMethod: "coin_purchase" as const, coinPrice: 200 },
 
     { slot: "clothes", key: "clothes_tshirt", name: "T-Shirt", acquisitionMethod: "starter" as const },
     { slot: "clothes", key: "clothes_hoodie", name: "Hoodie", acquisitionMethod: "level_unlock" as const, unlockLevel: 2 },
-    { slot: "clothes", key: "clothes_dress", name: "Party Dress", acquisitionMethod: "coin_purchase" as const, coinPrice: 50 },
+    { slot: "clothes", key: "clothes_dress", name: "Party Dress", acquisitionMethod: "coin_purchase" as const, coinPrice: 450 },
     { slot: "clothes", key: "clothes_superhero", name: "Superhero Suit", acquisitionMethod: "level_unlock" as const, unlockLevel: 6 },
 
-    { slot: "hat", key: "hat_cap", name: "Baseball Cap", acquisitionMethod: "coin_purchase" as const, coinPrice: 25 },
+    { slot: "hat", key: "hat_cap", name: "Baseball Cap", acquisitionMethod: "coin_purchase" as const, coinPrice: 80 },
     { slot: "hat", key: "hat_wizard", name: "Wizard Hat", acquisitionMethod: "achievement_unlock" as const },
     { slot: "hat", key: "hat_crown", name: "Golden Crown", acquisitionMethod: "level_unlock" as const, unlockLevel: 8 },
-    { slot: "hat", key: "hat_party", name: "Party Hat", acquisitionMethod: "coin_purchase" as const, coinPrice: 35 },
+    { slot: "hat", key: "hat_party", name: "Party Hat", acquisitionMethod: "coin_purchase" as const, coinPrice: 200 },
 
-    { slot: "accessory", key: "accessory_glasses", name: "Cool Glasses", acquisitionMethod: "coin_purchase" as const, coinPrice: 20 },
+    { slot: "accessory", key: "accessory_glasses", name: "Cool Glasses", acquisitionMethod: "coin_purchase" as const, coinPrice: 80 },
     { slot: "accessory", key: "accessory_bowtie", name: "Bow Tie", acquisitionMethod: "level_unlock" as const, unlockLevel: 3 },
-    { slot: "accessory", key: "accessory_scarf", name: "Cozy Scarf", acquisitionMethod: "coin_purchase" as const, coinPrice: 25 },
+    { slot: "accessory", key: "accessory_scarf", name: "Cozy Scarf", acquisitionMethod: "coin_purchase" as const, coinPrice: 200 },
     { slot: "accessory", key: "accessory_medal", name: "Champion Medal", acquisitionMethod: "achievement_unlock" as const },
 
     { slot: "background", key: "background_sunny", name: "Sunny Sky", acquisitionMethod: "starter" as const },
     { slot: "background", key: "background_stars", name: "Starry Night", acquisitionMethod: "level_unlock" as const, unlockLevel: 5 },
-    { slot: "background", key: "background_rainbow", name: "Rainbow", acquisitionMethod: "coin_purchase" as const, coinPrice: 40 },
+    { slot: "background", key: "background_rainbow", name: "Rainbow", acquisitionMethod: "coin_purchase" as const, coinPrice: 450 },
     { slot: "background", key: "background_forest", name: "Forest", acquisitionMethod: "level_unlock" as const, unlockLevel: 7 },
 
     { slot: "wallpaper", key: "wallpaper_plain", name: "Cozy Cream", acquisitionMethod: "starter" as const },
-    { slot: "wallpaper", key: "wallpaper_stripes", name: "Candy Stripes", acquisitionMethod: "coin_purchase" as const, coinPrice: 30 },
+    { slot: "wallpaper", key: "wallpaper_stripes", name: "Candy Stripes", acquisitionMethod: "coin_purchase" as const, coinPrice: 200 },
     { slot: "wallpaper", key: "wallpaper_stars", name: "Night Sky", acquisitionMethod: "level_unlock" as const, unlockLevel: 3 },
-    { slot: "wallpaper", key: "wallpaper_dots", name: "Polka Dots", acquisitionMethod: "coin_purchase" as const, coinPrice: 35 },
+    { slot: "wallpaper", key: "wallpaper_dots", name: "Polka Dots", acquisitionMethod: "coin_purchase" as const, coinPrice: 450 },
 
     { slot: "floor", key: "floor_wood", name: "Wood Floor", acquisitionMethod: "starter" as const },
-    { slot: "floor", key: "floor_rug", name: "Cozy Rug", acquisitionMethod: "coin_purchase" as const, coinPrice: 25 },
+    { slot: "floor", key: "floor_rug", name: "Cozy Rug", acquisitionMethod: "coin_purchase" as const, coinPrice: 80 },
     { slot: "floor", key: "floor_tile", name: "Checker Tile", acquisitionMethod: "level_unlock" as const, unlockLevel: 4 },
-    { slot: "floor", key: "floor_grass", name: "Grass", acquisitionMethod: "coin_purchase" as const, coinPrice: 30 },
+    { slot: "floor", key: "floor_grass", name: "Grass", acquisitionMethod: "coin_purchase" as const, coinPrice: 200 },
 
     { slot: "furniture", key: "furniture_plant", name: "Potted Plant", acquisitionMethod: "starter" as const },
-    { slot: "furniture", key: "furniture_lamp", name: "Reading Lamp", acquisitionMethod: "coin_purchase" as const, coinPrice: 20 },
+    { slot: "furniture", key: "furniture_lamp", name: "Reading Lamp", acquisitionMethod: "coin_purchase" as const, coinPrice: 80 },
     { slot: "furniture", key: "furniture_chest", name: "Toy Chest", acquisitionMethod: "level_unlock" as const, unlockLevel: 6 },
-    { slot: "furniture", key: "furniture_bookshelf", name: "Bookshelf", acquisitionMethod: "coin_purchase" as const, coinPrice: 35 },
+    { slot: "furniture", key: "furniture_bookshelf", name: "Bookshelf", acquisitionMethod: "coin_purchase" as const, coinPrice: 450 },
   ];
 
   await db
@@ -414,7 +417,20 @@ async function main() {
         active: "active" in item ? item.active : true,
       }))
     )
-    .onConflictDoNothing();
+    .onConflictDoUpdate({
+      target: avatarItems.key,
+      // Prices are balance numbers, not content — a re-seed after a
+      // rebalance has to actually move them on rows that already exist,
+      // which onConflictDoNothing silently wouldn't. Ownership lives in
+      // student_avatar_items, so rewriting the catalog row is safe.
+      set: {
+        coinPrice: sql`excluded.coin_price`,
+        unlockLevel: sql`excluded.unlock_level`,
+        acquisitionMethod: sql`excluded.acquisition_method`,
+        rarity: sql`excluded.rarity`,
+        active: sql`excluded.active`,
+      },
+    });
   const avatarItemRows = await db.select().from(avatarItems);
   const avatarItemByKey = new Map(avatarItemRows.map((a) => [a.key, a]));
   console.log(`  avatar items: ${avatarItemRows.length} total`);
@@ -432,7 +448,7 @@ async function main() {
       wallpaper: "wallpaper_stripes",
       floor: "floor_rug",
       furniture: "furniture_lamp",
-      coinPrice: 60, // vs. 30 + 25 + 20 = 75 bought separately
+      coinPrice: 400, // vs. 200 + 80 + 80 = 360 separately, plus an exclusive combo
     },
     {
       key: "room_set_garden_nook",
@@ -440,7 +456,7 @@ async function main() {
       wallpaper: "wallpaper_dots",
       floor: "floor_grass",
       furniture: "furniture_bookshelf",
-      coinPrice: 80, // vs. 35 + 30 + 35 = 100 bought separately
+      coinPrice: 550, // vs. 450 + 200 + 450 = 1100 separately - a real bundle discount
     },
   ];
   const roomSetInserted = await db
@@ -455,15 +471,21 @@ async function main() {
         furnitureItemId: avatarItemByKey.get(set.furniture)!.id,
       }))
     )
-    .onConflictDoNothing()
+    .onConflictDoUpdate({
+      target: roomSets.key,
+      set: { coinPrice: sql`excluded.coin_price`, active: sql`excluded.active` },
+    })
     .returning();
   console.log(`  room sets: ${roomSetInserted.length} new`);
 
   // --- Avatar cases (Subway-Surfers-style mystery unlocks) ------------------
   const avatarCaseTypeSeed = [
-    { key: "case_species", name: "Character Case", slot: "species" as const, coinCost: 100 },
+    { key: "case_species", name: "Character Case", slot: "species" as const, coinCost: 300 },
   ];
-  await db.insert(avatarCaseTypes).values(avatarCaseTypeSeed).onConflictDoNothing();
+  await db
+    .insert(avatarCaseTypes)
+    .values(avatarCaseTypeSeed)
+    .onConflictDoUpdate({ target: avatarCaseTypes.key, set: { coinCost: sql`excluded.coin_cost` } });
   const avatarCaseTypeRows = await db.select().from(avatarCaseTypes);
   console.log(`  avatar case types: ${avatarCaseTypeRows.length} total`);
 

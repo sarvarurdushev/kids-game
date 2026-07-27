@@ -31,6 +31,13 @@ export const students = pgTable("students", {
   xpTotal: integer("xp_total").notNull().default(0),
   coinsBalance: integer("coins_balance").notNull().default(0),
 
+  // Premium currency, deliberately NOT earnable by grinding games — it only
+  // comes from quests/achievements (lib/reward-engine/quests.ts). Coins are
+  // the everyday cosmetic currency whose supply scales with play time; gold
+  // stars gate the genuinely exclusive items, so there's always something
+  // that can't simply be ground out in an afternoon.
+  goldStars: integer("gold_stars").notNull().default(0),
+
   currentStreak: integer("current_streak").notNull().default(0),
   longestStreak: integer("longest_streak").notNull().default(0),
   lastClaimDate: date("last_claim_date"),
