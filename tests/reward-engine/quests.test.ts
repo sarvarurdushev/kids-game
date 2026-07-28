@@ -84,4 +84,32 @@ describe("quest catalog", () => {
   it("sets a positive target for every quest", () => {
     expect(ALL_QUESTS.every((q) => q.target > 0)).toBe(true);
   });
+
+  it("has 5 daily and 6 weekly quests (11 total), including the Word Book ones", () => {
+    expect(DAILY_QUESTS.length).toBe(5);
+    expect(WEEKLY_QUESTS.length).toBe(6);
+    expect(ALL_QUESTS.length).toBe(11);
+  });
+
+  it("defines the daily word-review quest matching the other dailies' reward magnitude", () => {
+    const quest = DAILY_QUESTS.find((q) => q.key === "daily_words_10");
+    expect(quest).toMatchObject({
+      period: "daily",
+      metric: "words_reviewed",
+      target: 10,
+      rewardCoins: 25,
+      rewardGoldStars: 1,
+    });
+  });
+
+  it("defines the weekly word-review quest matching the other weeklies' reward magnitude", () => {
+    const quest = WEEKLY_QUESTS.find((q) => q.key === "weekly_words_50");
+    expect(quest).toMatchObject({
+      period: "weekly",
+      metric: "words_reviewed",
+      target: 50,
+      rewardCoins: 150,
+      rewardGoldStars: 3,
+    });
+  });
 });

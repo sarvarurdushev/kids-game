@@ -1,19 +1,21 @@
 import "server-only";
 import { and, eq, gte, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { gameSessions, packGrants, questClaims, students } from "@/lib/db/schema";
+import { gameSessions, packGrants, questClaims, students, wordReviews } from "@/lib/db/schema";
 import { ServiceError } from "@/lib/student/errors";
 
 export type QuestPeriod = "daily" | "weekly";
 
 /** What a quest counts. Every metric is derivable from rows we already write
- * (game_sessions, pack_grants), which is why quests need no event hooks. */
+ * (game_sessions, pack_grants, word_reviews), which is why quests need no
+ * event hooks. */
 export type QuestMetric =
   | "sessions_played"
   | "correct_answers"
   | "perfect_rounds"
   | "distinct_games"
-  | "packs_opened";
+  | "packs_opened"
+  | "words_reviewed";
 
 export interface QuestDef {
   key: string;
@@ -35,6 +37,7 @@ export const DAILY_QUESTS: QuestDef[] = [
   { key: "daily_correct_20", period: "daily", label: "Get 20 answers right", emoji: "✅", metric: "correct_answers", target: 20, rewardCoins: 30, rewardGoldStars: 0 },
   { key: "daily_perfect_1", period: "daily", label: "Finish a perfect round", emoji: "⭐", metric: "perfect_rounds", target: 1, rewardCoins: 20, rewardGoldStars: 1 },
   { key: "daily_variety_3", period: "daily", label: "Play 3 different games", emoji: "🎲", metric: "distinct_games", target: 3, rewardCoins: 35, rewardGoldStars: 1 },
+  { key: "daily_words_10", period: "daily", label: "Review 10 words", emoji: "🧠", metric: "words_reviewed", target: 10, rewardCoins: 25, rewardGoldStars: 1 },
 ];
 
 export const WEEKLY_QUESTS: QuestDef[] = [
@@ -43,6 +46,7 @@ export const WEEKLY_QUESTS: QuestDef[] = [
   { key: "weekly_perfect_8", period: "weekly", label: "Finish 8 perfect rounds", emoji: "🌟", metric: "perfect_rounds", target: 8, rewardCoins: 175, rewardGoldStars: 5 },
   { key: "weekly_variety_6", period: "weekly", label: "Play 6 different games", emoji: "🕹️", metric: "distinct_games", target: 6, rewardCoins: 150, rewardGoldStars: 3 },
   { key: "weekly_packs_3", period: "weekly", label: "Open 3 packs", emoji: "🎁", metric: "packs_opened", target: 3, rewardCoins: 100, rewardGoldStars: 2 },
+  { key: "weekly_words_50", period: "weekly", label: "Review 50 words", emoji: "📚", metric: "words_reviewed", target: 50, rewardCoins: 150, rewardGoldStars: 3 },
 ];
 
 export const ALL_QUESTS = [...DAILY_QUESTS, ...WEEKLY_QUESTS];
@@ -100,12 +104,18 @@ async function metricsFor(studentId: string, since: Date) {
       )
     );
 
+  const [words] = await db
+    .select({ reviewed: sql<number>`count(*)` })
+    .from(wordReviews)
+    .where(and(eq(wordReviews.studentId, studentId), gte(wordReviews.reviewedAt, since)));
+
   return {
     sessions_played: Number(row?.sessions ?? 0),
     correct_answers: Number(row?.correct ?? 0),
     perfect_rounds: Number(row?.perfect ?? 0),
     distinct_games: Number(row?.distinct ?? 0),
     packs_opened: Number(packs?.opened ?? 0),
+    words_reviewed: Number(words?.reviewed ?? 0),
   } satisfies Record<QuestMetric, number>;
 }
 

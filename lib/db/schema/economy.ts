@@ -192,6 +192,43 @@ export const questClaims = pgTable("quest_claims", {
   ),
 ]).enableRLS();
 
+// Per-student spaced-repetition state for one WORD_BANK word (lib/games/
+// wordBank.ts — a static code catalog, not a DB table, so `word` is the
+// natural key here, not a foreign key). Leitner 5-box system: box 1-5,
+// dueAt is when it next becomes reviewable. A word with no row here yet has
+// never been reviewed — treat it as box 1, immediately due (see
+// lib/student/wordBook.ts).
+export const wordProgress = pgTable("word_progress", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: uuid("student_id")
+    .notNull()
+    .references(() => students.id, { onDelete: "cascade" }),
+  word: text("word").notNull(),
+  box: integer("box").notNull().default(1),
+  dueAt: timestamp("due_at", { withTimezone: true }).notNull().defaultNow(),
+  lastReviewedAt: timestamp("last_reviewed_at", { withTimezone: true }),
+  reviewCount: integer("review_count").notNull().default(0),
+}, (table) => [
+  uniqueIndex("word_progress_student_word_idx").on(table.studentId, table.word),
+]).enableRLS();
+
+// Append-only review log, mirroring gameSessions — quests aggregate over
+// this (count(*) where reviewed_at >= since) rather than trusting
+// word_progress.lastReviewedAt alone, which gets overwritten on every
+// review and would undercount a word reviewed more than once in the same
+// quest period (e.g. a box-1 word that's still-learning twice in one week).
+export const wordReviews = pgTable("word_reviews", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: uuid("student_id")
+    .notNull()
+    .references(() => students.id, { onDelete: "cascade" }),
+  word: text("word").notNull(),
+  knewIt: boolean("knew_it").notNull(),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index("word_reviews_student_reviewed_idx").on(table.studentId, table.reviewedAt),
+]).enableRLS();
+
 export const gameSessions = pgTable("game_sessions", {
   id: uuid("id").primaryKey().defaultRandom(),
   studentId: uuid("student_id")

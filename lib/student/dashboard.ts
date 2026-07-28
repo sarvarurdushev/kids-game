@@ -6,6 +6,7 @@ import { getLevelInfo } from "./levelInfo";
 import { getDailyClaimStatus } from "@/lib/reward-engine/dailyClaim";
 import { petMoodFromHappiness } from "@/lib/reward-engine/pet";
 import { currentPetHappiness } from "./pet";
+import { getWordBookDueCount } from "./wordBook";
 import type { AuthedStudent } from "@/lib/auth/requireStudent";
 
 export async function getDashboard(student: AuthedStudent) {
@@ -16,6 +17,7 @@ export async function getDashboard(student: AuthedStudent) {
     .where(and(eq(packGrants.studentId, student.id), isNull(packGrants.openedAt)));
   const dailyClaim = await getDailyClaimStatus(student.id);
   const petHappiness = currentPetHappiness(student);
+  const wordBookDueCount = await getWordBookDueCount(student.id);
 
   return {
     displayName: student.displayName,
@@ -29,5 +31,6 @@ export async function getDashboard(student: AuthedStudent) {
     dailyClaim,
     petHappiness,
     petMood: petMoodFromHappiness(petHappiness),
+    wordBookDueCount,
   };
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireStudent } from "@/lib/auth/requireStudent";
 import { getRewardedSessionsRemainingToday } from "@/lib/reward-engine/gameSession";
 import { getGameUnlockStates } from "@/lib/reward-engine/gameUnlocks";
+import { getWordBookDueCount } from "@/lib/student/wordBook";
 import { GAME_CATALOG } from "@/lib/games/catalog";
 import { Card } from "@/components/ui/Card";
 import {
@@ -47,9 +48,10 @@ export default async function GamesPage() {
 
   // The rewarded-session budget is shared across every game, so it's one
   // number for the whole page rather than a per-card count.
-  const [unlockStates, sessionsRemaining] = await Promise.all([
+  const [unlockStates, sessionsRemaining, wordBookDueCount] = await Promise.all([
     getGameUnlockStates(student),
     getRewardedSessionsRemainingToday(student.id),
+    getWordBookDueCount(student.id),
   ]);
   const unlockByKey = new Map(unlockStates.map((s) => [s.key, s]));
   const games = GAME_CATALOG.map((game) => ({
@@ -67,6 +69,17 @@ export default async function GamesPage() {
             ? `${sessionsRemaining} rewarded round${sessionsRemaining === 1 ? "" : "s"} left today — play any game!`
             : "All rewarded rounds used today — keep playing for fun!"}
         </p>
+        <Link
+          href="/word-book"
+          className="relative mt-1 inline-flex items-center gap-1 text-sm font-semibold text-teal underline-offset-2 hover:underline"
+        >
+          📖 Word Book
+          {wordBookDueCount > 0 && (
+            <span className="rounded-full bg-coral px-1.5 py-0.5 text-[10px] leading-none font-bold text-white">
+              {wordBookDueCount}
+            </span>
+          )}
+        </Link>
       </div>
 
       <div className="flex flex-col gap-4">

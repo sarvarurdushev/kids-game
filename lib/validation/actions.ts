@@ -40,3 +40,10 @@ export const redeemCardSchema = z.object({
 export const claimQuestSchema = z.object({
   questKey: z.string().min(1).max(64),
 });
+
+// Words are code-defined (lib/games/wordBank.ts), not UUIDs — the route
+// re-validates the word against WORD_BANK, so this is just a shape check.
+export const reviewWordSchema = z.object({
+  word: z.string().min(1).max(64),
+  knewIt: z.boolean(),
+});

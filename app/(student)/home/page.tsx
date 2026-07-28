@@ -84,6 +84,21 @@ export default async function HomePage() {
           <span>→</span>
         </Link>
       )}
+
+      {dashboard.wordBookDueCount > 0 && (
+        <Link
+          href="/word-book"
+          className="gk-pop-in flex items-center gap-3 rounded-2xl bg-gradient-to-br from-teal to-[#1f7a7a] px-4 py-3 font-display font-semibold text-white shadow-md"
+        >
+          <span className="text-3xl" aria-hidden>
+            📖
+          </span>
+          <span className="flex-1">
+            {dashboard.wordBookDueCount} word{dashboard.wordBookDueCount > 1 ? "s are" : " is"} ready to review!
+          </span>
+          <span>→</span>
+        </Link>
+      )}
     </div>
   );
 }
