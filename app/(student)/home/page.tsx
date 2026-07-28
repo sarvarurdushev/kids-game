@@ -85,7 +85,14 @@ export default async function HomePage() {
         </Link>
       )}
 
-      {dashboard.wordBookDueCount > 0 && (
+      {/* Packs takes priority when both are waiting — a freshly-earned pack
+          is the more exciting, time-sensitive draw of the two, and showing
+          both stacked banners at once pushed the second one down far enough
+          that the fixed bottom nav covered it on common phone viewports
+          (measured: ~62% of the banner hidden, with no visual cue to
+          scroll). At most one banner keeps this from recurring as more
+          banners are added later, rather than chasing padding numbers. */}
+      {dashboard.wordBookDueCount > 0 && dashboard.unopenedPackCount === 0 && (
         <Link
           href="/word-book"
           className="gk-pop-in flex items-center gap-3 rounded-2xl bg-gradient-to-br from-teal to-[#1f7a7a] px-4 py-3 font-display font-semibold text-white shadow-md"
