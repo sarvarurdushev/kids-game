@@ -10,7 +10,7 @@ import { ItemPreviewModal } from "@/components/ui/ItemPreviewModal";
 import { playCoin, playPop } from "@/lib/sound";
 import { CoinIcon } from "@/components/icons";
 
-type RoomSlot = "wallpaper" | "floor" | "furniture";
+type RoomSlot = "wallpaper" | "floor" | "furniture" | "furniture_small" | "furniture_wall";
 
 export interface RoomItem {
   id: string;
@@ -39,15 +39,19 @@ export interface RoomSetItem {
   wallpaperKey: string | null;
   floorKey: string | null;
   furnitureKey: string | null;
+  furnitureSmallKey: string | null;
+  furnitureWallKey: string | null;
   owned: boolean;
   affordable: boolean;
 }
 
-const SLOTS: RoomSlot[] = ["wallpaper", "floor", "furniture"];
+const SLOTS: RoomSlot[] = ["wallpaper", "floor", "furniture", "furniture_small", "furniture_wall"];
 const SLOT_LABELS: Record<RoomSlot, string> = {
   wallpaper: "Wallpaper",
   floor: "Floor",
-  furniture: "Furniture",
+  furniture: "Big Furniture",
+  furniture_small: "Small Furniture",
+  furniture_wall: "Wall Decor",
 };
 
 export function RoomCustomizer({
@@ -170,7 +174,13 @@ export function RoomCustomizer({
               <div key={set.id} className="flex flex-col items-center gap-2 rounded-2xl bg-white p-3 text-center">
                 <div className="w-full overflow-hidden rounded-xl">
                   <RoomScene3D
-                    equippedKeys={{ wallpaper: set.wallpaperKey ?? undefined, floor: set.floorKey ?? undefined, furniture: set.furnitureKey ?? undefined }}
+                    equippedKeys={{
+                      wallpaper: set.wallpaperKey ?? undefined,
+                      floor: set.floorKey ?? undefined,
+                      furniture: set.furnitureKey ?? undefined,
+                      furniture_small: set.furnitureSmallKey ?? undefined,
+                      furniture_wall: set.furnitureWallKey ?? undefined,
+                    }}
                     className="w-full"
                   />
                 </div>

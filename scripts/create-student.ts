@@ -70,7 +70,7 @@ async function main() {
       avatarItemId: item.id,
       acquiredVia: "starter",
     });
-    equipped[`equipped${capitalize(item.slot)}Id`] = item.id;
+    equipped[`equipped${toPascalCase(item.slot)}Id`] = item.id;
   }
   if (Object.keys(equipped).length > 0) {
     await db.update(students).set(equipped).where(eq(students.id, student.id));
@@ -85,8 +85,16 @@ async function main() {
   }
 }
 
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
+// Matches the students table's camelCase equipped*Id columns, e.g.
+// "furniture_small" -> "FurnitureSmall" -> equippedFurnitureSmallId.
+// A plain capitalize() of the first letter only worked while every slot was
+// a single word; snake_case slots (furniture_small, furniture_wall) need
+// each underscore-separated part capitalized.
+function toPascalCase(slot: string): string {
+  return slot
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
 }
 
 main()

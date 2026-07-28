@@ -504,6 +504,10 @@ export interface AvatarEquippedKeys {
   wallpaper?: string;
   floor?: string;
   furniture?: string;
+  // Ride along the same way as `furniture` above — the small-furniture and
+  // wall-decor room slots, resolved by the same DB round trip.
+  furniture_small?: string;
+  furniture_wall?: string;
 }
 
 interface AvatarCharacterProps {

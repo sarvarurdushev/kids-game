@@ -24,6 +24,8 @@ const SLOT_TO_EQUIPPED_COLUMN: Record<
   wallpaper: "equippedWallpaperId",
   floor: "equippedFloorId",
   furniture: "equippedFurnitureId",
+  furniture_small: "equippedFurnitureSmallId",
+  furniture_wall: "equippedFurnitureWallId",
 };
 
 /** level_unlock items are implicitly owned once the student's level meets the
@@ -59,6 +61,8 @@ export async function getAvatarItems(student: AuthedStudent) {
       student.equippedWallpaperId,
       student.equippedFloorId,
       student.equippedFurnitureId,
+      student.equippedFurnitureSmallId,
+      student.equippedFurnitureWallId,
     ].filter((id): id is string => Boolean(id))
   );
 
@@ -238,6 +242,8 @@ type EquippedIdRow = Pick<
   | "equippedWallpaperId"
   | "equippedFloorId"
   | "equippedFurnitureId"
+  | "equippedFurnitureSmallId"
+  | "equippedFurnitureWallId"
 >;
 
 function resolveEquippedKeys(row: EquippedIdRow, keyById: Map<string, string>): AvatarEquippedKeys {
@@ -252,6 +258,8 @@ function resolveEquippedKeys(row: EquippedIdRow, keyById: Map<string, string>): 
     wallpaper: row.equippedWallpaperId ? keyById.get(row.equippedWallpaperId) : undefined,
     floor: row.equippedFloorId ? keyById.get(row.equippedFloorId) : undefined,
     furniture: row.equippedFurnitureId ? keyById.get(row.equippedFurnitureId) : undefined,
+    furniture_small: row.equippedFurnitureSmallId ? keyById.get(row.equippedFurnitureSmallId) : undefined,
+    furniture_wall: row.equippedFurnitureWallId ? keyById.get(row.equippedFurnitureWallId) : undefined,
   };
 }
 
@@ -273,6 +281,8 @@ export async function getEquippedAvatarKeysForMany(
           r.equippedWallpaperId,
           r.equippedFloorId,
           r.equippedFurnitureId,
+          r.equippedFurnitureSmallId,
+          r.equippedFurnitureWallId,
         ])
         .filter((id): id is string => Boolean(id))
     ),

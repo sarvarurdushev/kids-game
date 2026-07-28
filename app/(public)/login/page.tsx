@@ -24,6 +24,8 @@ export default async function LoginPage() {
       equippedWallpaperId: students.equippedWallpaperId,
       equippedFloorId: students.equippedFloorId,
       equippedFurnitureId: students.equippedFurnitureId,
+      equippedFurnitureSmallId: students.equippedFurnitureSmallId,
+      equippedFurnitureWallId: students.equippedFurnitureWallId,
     })
     .from(students)
     .where(inArray(students.id, familyIds));

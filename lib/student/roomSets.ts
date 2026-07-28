@@ -4,11 +4,17 @@ import { db } from "@/lib/db/client";
 import { avatarItems, roomSets, students, studentAvatarItems } from "@/lib/db/schema";
 import { ServiceError } from "./errors";
 
+function pieceIdsOf(set: typeof roomSets.$inferSelect): string[] {
+  return [set.wallpaperItemId, set.floorItemId, set.furnitureItemId, set.furnitureSmallItemId, set.furnitureWallItemId].filter(
+    (id): id is string => Boolean(id)
+  );
+}
+
 export async function getRoomSetShop(studentId: string) {
   const sets = await db.select().from(roomSets).where(eq(roomSets.active, true));
   if (sets.length === 0) return [];
 
-  const itemIds = [...new Set(sets.flatMap((s) => [s.wallpaperItemId, s.floorItemId, s.furnitureItemId]))];
+  const itemIds = [...new Set(sets.flatMap((s) => pieceIdsOf(s)))];
   const itemRows = await db.select().from(avatarItems).where(inArray(avatarItems.id, itemIds));
   const itemById = new Map(itemRows.map((i) => [i.id, i]));
 
@@ -21,7 +27,7 @@ export async function getRoomSetShop(studentId: string) {
   const [student] = await db.select().from(students).where(eq(students.id, studentId)).limit(1);
 
   return sets.map((set) => {
-    const pieceIds = [set.wallpaperItemId, set.floorItemId, set.furnitureItemId];
+    const pieceIds = pieceIdsOf(set);
     return {
       id: set.id,
       key: set.key,
@@ -29,7 +35,9 @@ export async function getRoomSetShop(studentId: string) {
       coinPrice: set.coinPrice,
       wallpaperKey: itemById.get(set.wallpaperItemId)?.key ?? null,
       floorKey: itemById.get(set.floorItemId)?.key ?? null,
-      furnitureKey: itemById.get(set.furnitureItemId)?.key ?? null,
+      furnitureKey: set.furnitureItemId ? itemById.get(set.furnitureItemId)?.key ?? null : null,
+      furnitureSmallKey: set.furnitureSmallItemId ? itemById.get(set.furnitureSmallItemId)?.key ?? null : null,
+      furnitureWallKey: set.furnitureWallItemId ? itemById.get(set.furnitureWallItemId)?.key ?? null : null,
       owned: pieceIds.every((id) => ownedIds.has(id)),
       affordable: student.coinsBalance >= set.coinPrice,
     };
@@ -37,8 +45,11 @@ export async function getRoomSetShop(studentId: string) {
 }
 
 /** Buys every piece in the set (skipping any already owned individually) for
- * one bundle price, then equips all three at once — a single tap gives a
- * finished, coordinated room instead of three separate slot-by-slot buys. */
+ * one bundle price, then equips all of them at once — a single tap gives a
+ * finished, coordinated room instead of buying and equipping each slot one
+ * at a time. Only equips the furniture slots the set actually includes;
+ * an omitted slot (e.g. no large furniture in a starter bundle) is left
+ * exactly as it was before the purchase. */
 export async function purchaseRoomSet(studentId: string, roomSetId: string) {
   return db.transaction(async (tx) => {
     const [set] = await tx
@@ -50,7 +61,7 @@ export async function purchaseRoomSet(studentId: string, roomSetId: string) {
 
     const [student] = await tx.select().from(students).where(eq(students.id, studentId)).for("update");
 
-    const pieceIds = [set.wallpaperItemId, set.floorItemId, set.furnitureItemId];
+    const pieceIds = pieceIdsOf(set);
     const owned = await tx
       .select()
       .from(studentAvatarItems)
@@ -70,16 +81,17 @@ export async function purchaseRoomSet(studentId: string, roomSetId: string) {
         .values(missingIds.map((avatarItemId) => ({ studentId, avatarItemId, acquiredVia: "coin_purchase" as const })));
     }
 
-    await tx
-      .update(students)
-      .set({
-        coinsBalance: student.coinsBalance - set.coinPrice,
-        equippedWallpaperId: set.wallpaperItemId,
-        equippedFloorId: set.floorItemId,
-        equippedFurnitureId: set.furnitureItemId,
-        updatedAt: new Date(),
-      })
-      .where(eq(students.id, studentId));
+    const equipUpdates: Partial<typeof students.$inferInsert> = {
+      coinsBalance: student.coinsBalance - set.coinPrice,
+      equippedWallpaperId: set.wallpaperItemId,
+      equippedFloorId: set.floorItemId,
+      updatedAt: new Date(),
+    };
+    if (set.furnitureItemId) equipUpdates.equippedFurnitureId = set.furnitureItemId;
+    if (set.furnitureSmallItemId) equipUpdates.equippedFurnitureSmallId = set.furnitureSmallItemId;
+    if (set.furnitureWallItemId) equipUpdates.equippedFurnitureWallId = set.furnitureWallItemId;
+
+    await tx.update(students).set(equipUpdates).where(eq(students.id, studentId));
 
     return { roomSetId, coinsRemaining: student.coinsBalance - set.coinPrice };
   });

@@ -386,10 +386,14 @@ async function main() {
     { slot: "floor", key: "floor_tile", name: "Checker Tile", acquisitionMethod: "level_unlock" as const, unlockLevel: 4 },
     { slot: "floor", key: "floor_grass", name: "Grass", acquisitionMethod: "coin_purchase" as const, coinPrice: 200 },
 
-    { slot: "furniture", key: "furniture_plant", name: "Potted Plant", acquisitionMethod: "starter" as const },
-    { slot: "furniture", key: "furniture_lamp", name: "Reading Lamp", acquisitionMethod: "coin_purchase" as const, coinPrice: 80 },
+    { slot: "furniture_small", key: "furniture_plant", name: "Potted Plant", acquisitionMethod: "starter" as const },
+    { slot: "furniture_small", key: "furniture_lamp", name: "Reading Lamp", acquisitionMethod: "coin_purchase" as const, coinPrice: 80 },
     { slot: "furniture", key: "furniture_chest", name: "Toy Chest", acquisitionMethod: "level_unlock" as const, unlockLevel: 6 },
     { slot: "furniture", key: "furniture_bookshelf", name: "Bookshelf", acquisitionMethod: "coin_purchase" as const, coinPrice: 450 },
+
+    { slot: "furniture_wall", key: "wall_shelf", name: "Floating Shelf", acquisitionMethod: "starter" as const },
+    { slot: "furniture_wall", key: "wall_clock", name: "Wall Clock", acquisitionMethod: "coin_purchase" as const, coinPrice: 80 },
+    { slot: "furniture_wall", key: "wall_picture", name: "Sunny Picture", acquisitionMethod: "coin_purchase" as const, coinPrice: 200 },
   ];
 
   await db
@@ -406,7 +410,9 @@ async function main() {
           | "background"
           | "wallpaper"
           | "floor"
-          | "furniture",
+          | "furniture"
+          | "furniture_small"
+          | "furniture_wall",
         key: item.key,
         name: item.name,
         acquisitionMethod: item.acquisitionMethod,
@@ -419,11 +425,15 @@ async function main() {
     )
     .onConflictDoUpdate({
       target: avatarItems.key,
-      // Prices are balance numbers, not content — a re-seed after a
-      // rebalance has to actually move them on rows that already exist,
-      // which onConflictDoNothing silently wouldn't. Ownership lives in
-      // student_avatar_items, so rewriting the catalog row is safe.
+      // Prices, and occasionally slot assignment, are balance/catalog
+      // decisions, not fixed content — a re-seed after a rebalance (or a
+      // furniture-slot reassignment, like moving furniture_lamp from
+      // "furniture" to "furniture_small") has to actually move them on rows
+      // that already exist, which onConflictDoNothing silently wouldn't.
+      // Ownership lives in student_avatar_items, so rewriting the catalog
+      // row is safe.
       set: {
+        slot: sql`excluded.slot`,
         coinPrice: sql`excluded.coin_price`,
         unlockLevel: sql`excluded.unlock_level`,
         acquisitionMethod: sql`excluded.acquisition_method`,
@@ -436,18 +446,29 @@ async function main() {
   console.log(`  avatar items: ${avatarItemRows.length} total`);
 
   // --- Room sets (buy a whole coordinated room in one purchase) -------------
-  // Only bundles wallpaper/floor/furniture that are individually
+  // Only bundles wallpaper/floor/furniture pieces that are individually
   // coin_purchase (never a level_unlock piece — bundling one of those would
-  // let coins buy past a level gate). Priced below the sum of the three
-  // pieces bought separately, so the bundle is a genuine discount, not just
-  // a repackaging.
-  const roomSetSeed = [
+  // let coins buy past a level gate). Priced below the sum of the pieces
+  // bought separately, so the bundle is a genuine discount, not just a
+  // repackaging. `furniture`/`furnitureSmall`/`furnitureWall` are each
+  // optional — a set only needs wallpaper + floor, and can then include
+  // whichever furniture categories fit its theme.
+  const roomSetSeed: {
+    key: string;
+    name: string;
+    wallpaper: string;
+    floor: string;
+    furniture?: string;
+    furnitureSmall?: string;
+    furnitureWall?: string;
+    coinPrice: number;
+  }[] = [
     {
       key: "room_set_candy_cozy",
       name: "Candy Cozy Room",
       wallpaper: "wallpaper_stripes",
       floor: "floor_rug",
-      furniture: "furniture_lamp",
+      furnitureSmall: "furniture_lamp",
       coinPrice: 280, // vs. 200 + 80 + 80 = 360 bought separately
     },
     {
@@ -464,7 +485,10 @@ async function main() {
   // (exactly how Candy Cozy ended up at 400 against 360 of pieces). Fail the
   // seed loudly rather than shipping a shop that punishes buying the set.
   for (const set of roomSetSeed) {
-    const pieces = [set.wallpaper, set.floor, set.furniture].map((key) => {
+    const pieceKeys = [set.wallpaper, set.floor, set.furniture, set.furnitureSmall, set.furnitureWall].filter(
+      (key): key is string => Boolean(key)
+    );
+    const pieces = pieceKeys.map((key) => {
       const item = avatarItemByKey.get(key);
       if (!item) throw new Error(`Room set "${set.key}" references unknown item "${key}"`);
       return item.coinPrice ?? 0;
@@ -487,12 +511,20 @@ async function main() {
         coinPrice: set.coinPrice,
         wallpaperItemId: avatarItemByKey.get(set.wallpaper)!.id,
         floorItemId: avatarItemByKey.get(set.floor)!.id,
-        furnitureItemId: avatarItemByKey.get(set.furniture)!.id,
+        furnitureItemId: set.furniture ? avatarItemByKey.get(set.furniture)!.id : null,
+        furnitureSmallItemId: set.furnitureSmall ? avatarItemByKey.get(set.furnitureSmall)!.id : null,
+        furnitureWallItemId: set.furnitureWall ? avatarItemByKey.get(set.furnitureWall)!.id : null,
       }))
     )
     .onConflictDoUpdate({
       target: roomSets.key,
-      set: { coinPrice: sql`excluded.coin_price`, active: sql`excluded.active` },
+      set: {
+        coinPrice: sql`excluded.coin_price`,
+        active: sql`excluded.active`,
+        furnitureItemId: sql`excluded.furniture_item_id`,
+        furnitureSmallItemId: sql`excluded.furniture_small_item_id`,
+        furnitureWallItemId: sql`excluded.furniture_wall_item_id`,
+      },
     })
     .returning();
   console.log(`  room sets: ${roomSetInserted.length} new`);
@@ -715,6 +747,7 @@ async function main() {
     "wallpaper_plain",
     "floor_wood",
     "furniture_plant",
+    "wall_shelf",
   ];
   const demoStudents = [
     { displayName: "Amira", enrollmentCode: "GOLD-AMIRA", pin: "1234", externalId: "demo-amira" },
@@ -741,7 +774,19 @@ async function main() {
       .returning();
 
     const starterAssignments: Partial<
-      Record<"species" | "hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture", string>
+      Record<
+        | "species"
+        | "hair"
+        | "eyes"
+        | "clothes"
+        | "background"
+        | "wallpaper"
+        | "floor"
+        | "furniture"
+        | "furniture_small"
+        | "furniture_wall",
+        string
+      >
     > = {};
     for (const key of starterItemKeys) {
       const item = avatarItemByKey.get(key)!;
@@ -751,7 +796,17 @@ async function main() {
         acquiredVia: "starter",
       });
       starterAssignments[
-        item.slot as "species" | "hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture"
+        item.slot as
+          | "species"
+          | "hair"
+          | "eyes"
+          | "clothes"
+          | "background"
+          | "wallpaper"
+          | "floor"
+          | "furniture"
+          | "furniture_small"
+          | "furniture_wall"
       ] = item.id;
     }
     await db
@@ -765,6 +820,8 @@ async function main() {
         equippedWallpaperId: starterAssignments.wallpaper,
         equippedFloorId: starterAssignments.floor,
         equippedFurnitureId: starterAssignments.furniture,
+        equippedFurnitureSmallId: starterAssignments.furniture_small,
+        equippedFurnitureWallId: starterAssignments.furniture_wall,
       })
       .where(eq(students.id, student.id));
 
@@ -803,7 +860,19 @@ async function main() {
       .returning();
 
     const adminStarterAssignments: Partial<
-      Record<"species" | "hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture", string>
+      Record<
+        | "species"
+        | "hair"
+        | "eyes"
+        | "clothes"
+        | "background"
+        | "wallpaper"
+        | "floor"
+        | "furniture"
+        | "furniture_small"
+        | "furniture_wall",
+        string
+      >
     > = {};
     for (const key of starterItemKeys) {
       const item = avatarItemByKey.get(key)!;
@@ -813,7 +882,17 @@ async function main() {
         acquiredVia: "starter",
       });
       adminStarterAssignments[
-        item.slot as "species" | "hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture"
+        item.slot as
+          | "species"
+          | "hair"
+          | "eyes"
+          | "clothes"
+          | "background"
+          | "wallpaper"
+          | "floor"
+          | "furniture"
+          | "furniture_small"
+          | "furniture_wall"
       ] = item.id;
     }
     await db
@@ -827,10 +906,114 @@ async function main() {
         equippedWallpaperId: adminStarterAssignments.wallpaper,
         equippedFloorId: adminStarterAssignments.floor,
         equippedFurnitureId: adminStarterAssignments.furniture,
+        equippedFurnitureSmallId: adminStarterAssignments.furniture_small,
+        equippedFurnitureWallId: adminStarterAssignments.furniture_wall,
       })
       .where(eq(students.id, adminStudent.id));
 
     console.log(`  admin student created: Admin — enrollment code "${adminEnrollmentCode}", PIN "0000"`);
+  }
+
+  // --- Migrate stale furniture equip references after the slot split -------
+  // Before furniture_small/furniture_wall existed, every furniture item
+  // (including furniture_plant) lived under the single "furniture" slot, and
+  // students had it recorded in equippedFurnitureId. furniture_plant's
+  // catalog row has since moved to "furniture_small" — that old reference is
+  // now stale: it still points at a real item, just via the wrong column.
+  // Move it to whichever column matches the item's current slot (only if
+  // that column isn't already legitimately occupied by something else, e.g.
+  // a student who separately bought furniture_lamp for that slot), otherwise
+  // just clear it.
+  const FURNITURE_EQUIP_COLUMNS: { slot: string; column: keyof typeof students.$inferInsert }[] = [
+    { slot: "furniture", column: "equippedFurnitureId" },
+    { slot: "furniture_small", column: "equippedFurnitureSmallId" },
+    { slot: "furniture_wall", column: "equippedFurnitureWallId" },
+  ];
+  const avatarItemById = new Map(avatarItemRows.map((a) => [a.id, a]));
+  const studentsForFurnitureMigration = await db.select().from(students);
+  let migratedStudents = 0;
+  for (const student of studentsForFurnitureMigration) {
+    const updates: Record<string, string | null> = {};
+    for (const { slot, column } of FURNITURE_EQUIP_COLUMNS) {
+      const equippedId = student[column as keyof typeof student] as string | null;
+      if (!equippedId) continue;
+      const item = avatarItemById.get(equippedId);
+      if (!item || item.slot === slot) continue; // correctly slotted, or a dangling id — leave alone either way
+      updates[column] = null;
+      const correctColumn = FURNITURE_EQUIP_COLUMNS.find((c) => c.slot === item.slot)?.column;
+      if (correctColumn && !student[correctColumn as keyof typeof student] && !(correctColumn in updates)) {
+        updates[correctColumn] = equippedId;
+      }
+    }
+    if (Object.keys(updates).length > 0) {
+      await db
+        .update(students)
+        .set(updates as Partial<typeof students.$inferInsert>)
+        .where(eq(students.id, student.id));
+      migratedStudents++;
+    }
+  }
+  if (migratedStudents > 0) {
+    console.log(`  migrated stale furniture-slot references for ${migratedStudents} student(s)`);
+  }
+
+  // --- Backfill missing starter items on existing students -----------------
+  // A student created before some starter item existed (e.g. wall_shelf,
+  // added by the furniture-slot split) never ran the "new student" branch
+  // above and would be missing it forever — showing up as a starter item
+  // stuck "locked" instead of freely available. Grant whatever's missing to
+  // every student, and only equip it if that slot isn't already customized
+  // (equipped column still null), so a student's actual choices are untouched.
+  const STARTER_SLOT_TO_EQUIPPED_COLUMN: Record<string, keyof typeof students.$inferInsert> = {
+    species: "equippedSpeciesId",
+    hair: "equippedHairId",
+    eyes: "equippedEyesId",
+    clothes: "equippedClothesId",
+    background: "equippedBackgroundId",
+    wallpaper: "equippedWallpaperId",
+    floor: "equippedFloorId",
+    furniture: "equippedFurnitureId",
+    furniture_small: "equippedFurnitureSmallId",
+    furniture_wall: "equippedFurnitureWallId",
+  };
+  const allStudents = await db.select().from(students);
+  let backfilledStudents = 0;
+  for (const student of allStudents) {
+    const owned = await db
+      .select({ avatarItemId: studentAvatarItems.avatarItemId })
+      .from(studentAvatarItems)
+      .where(eq(studentAvatarItems.studentId, student.id));
+    const ownedIds = new Set(owned.map((o) => o.avatarItemId));
+
+    const missingKeys = starterItemKeys.filter((key) => !ownedIds.has(avatarItemByKey.get(key)!.id));
+    if (missingKeys.length === 0) continue;
+
+    await db.insert(studentAvatarItems).values(
+      missingKeys.map((key) => ({
+        studentId: student.id,
+        avatarItemId: avatarItemByKey.get(key)!.id,
+        acquiredVia: "starter" as const,
+      }))
+    );
+
+    const equipUpdates: Record<string, string> = {};
+    for (const key of missingKeys) {
+      const item = avatarItemByKey.get(key)!;
+      const column = STARTER_SLOT_TO_EQUIPPED_COLUMN[item.slot];
+      if (column && !student[column as keyof typeof student]) {
+        equipUpdates[column] = item.id;
+      }
+    }
+    if (Object.keys(equipUpdates).length > 0) {
+      await db
+        .update(students)
+        .set(equipUpdates as Partial<typeof students.$inferInsert>)
+        .where(eq(students.id, student.id));
+    }
+    backfilledStudents++;
+  }
+  if (backfilledStudents > 0) {
+    console.log(`  backfilled missing starter items for ${backfilledStudents} existing student(s)`);
   }
 
   console.log("\nSeed complete.");

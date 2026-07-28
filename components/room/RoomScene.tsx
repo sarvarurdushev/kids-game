@@ -89,22 +89,8 @@ const FLOORS: Record<string, () => ReactNode> = {
   ),
 };
 
-const FURNITURE: Record<string, () => ReactNode> = {
-  furniture_plant: () => (
-    <>
-      <path d="M 24 200 L 30 168 L 56 168 L 62 200 Z" fill="#c8925c" />
-      <ellipse cx={43} cy={140} rx={22} ry={18} fill="#5f9e46" />
-      <ellipse cx={30} cy={150} rx={14} ry={12} fill="#6fae54" />
-      <ellipse cx={58} cy={150} rx={14} ry={12} fill="#4c8a39" />
-    </>
-  ),
-  furniture_lamp: () => (
-    <>
-      <ellipse cx={44} cy={198} rx={20} ry={5} fill="#8a6a45" opacity={0.5} />
-      <rect x={41} y={130} width={6} height={68} fill="#8a6a45" />
-      <path d="M 20 108 L 68 108 L 58 134 L 30 134 Z" fill="#ffd76a" stroke="#e0a800" strokeWidth={1.5} />
-    </>
-  ),
+// Large furniture keeps its original left-side spot.
+const FURNITURE_LARGE: Record<string, () => ReactNode> = {
   furniture_chest: () => (
     <>
       <rect x={16} y={160} width={58} height={38} rx={5} fill="#c8925c" stroke="#8a6a45" strokeWidth={2} />
@@ -127,10 +113,65 @@ const FURNITURE: Record<string, () => ReactNode> = {
   ),
 };
 
+// Small furniture moves to the right side of the room, mirroring the large
+// piece's spot (translated, not redrawn — same shapes as before the split).
+const FURNITURE_SMALL: Record<string, () => ReactNode> = {
+  furniture_plant: () => (
+    <g transform="translate(180, 0)">
+      <path d="M 24 200 L 30 168 L 56 168 L 62 200 Z" fill="#c8925c" />
+      <ellipse cx={43} cy={140} rx={22} ry={18} fill="#5f9e46" />
+      <ellipse cx={30} cy={150} rx={14} ry={12} fill="#6fae54" />
+      <ellipse cx={58} cy={150} rx={14} ry={12} fill="#4c8a39" />
+    </g>
+  ),
+  furniture_lamp: () => (
+    <g transform="translate(180, 0)">
+      <ellipse cx={44} cy={198} rx={20} ry={5} fill="#8a6a45" opacity={0.5} />
+      <rect x={41} y={130} width={6} height={68} fill="#8a6a45" />
+      <path d="M 20 108 L 68 108 L 58 134 L 30 134 Z" fill="#ffd76a" stroke="#e0a800" strokeWidth={1.5} />
+    </g>
+  ),
+};
+
+// Wall-mounted decor — flat SVG props, matching the hand-drawn style of the
+// wallpaper/floor/furniture pieces above. Sits high on the wall, clear of the
+// avatar (anchored bottom-center) and the large/small furniture (both low).
+const WALL_DECOR: Record<string, () => ReactNode> = {
+  wall_shelf: () => (
+    <g transform="translate(96, 30)">
+      <rect x={0} y={0} width={70} height={8} rx={2} fill="#8a6a45" />
+      <rect x={6} y={-18} width={10} height={18} fill="#e63946" />
+      <rect x={20} y={-22} width={9} height={22} fill="#4fb3d9" />
+      <rect x={33} y={-16} width={12} height={16} fill="#ffd23f" />
+    </g>
+  ),
+  wall_clock: () => (
+    <g transform="translate(150, 46)">
+      <circle cx={0} cy={0} r={22} fill="#fdeecb" stroke="#8a6a45" strokeWidth={4} />
+      <line x1={0} y1={0} x2={0} y2={-13} stroke="#2d2a26" strokeWidth={2.5} strokeLinecap="round" />
+      <line x1={0} y1={0} x2={9} y2={6} stroke="#2d2a26" strokeWidth={2.5} strokeLinecap="round" />
+      <circle cx={0} cy={0} r={2} fill="#2d2a26" />
+    </g>
+  ),
+  wall_picture: () => (
+    <g transform="translate(150, 44)">
+      <rect x={-25} y={-20} width={50} height={40} rx={3} fill="#8a6a45" />
+      <rect x={-20} y={-15} width={40} height={30} fill="#ffe8a3" />
+      <circle cx={0} cy={0} r={10} fill="#ffd23f" />
+      {[0, 45, 90, 135].map((deg) => (
+        <rect key={deg} x={-1.5} y={-18} width={3} height={16} fill="#ffd23f" transform={`rotate(${deg})`} />
+      ))}
+      <circle cx={-3.5} cy={-2} r={1.4} fill="#2d2a26" />
+      <circle cx={3.5} cy={-2} r={1.4} fill="#2d2a26" />
+    </g>
+  ),
+};
+
 const DEFAULTS = {
   wallpaper: "wallpaper_plain",
   floor: "floor_wood",
-  furniture: "furniture_plant",
+  furnitureSmall: "furniture_plant",
+  furnitureWall: "wall_shelf",
 };
 
 interface RoomSceneProps {
@@ -154,18 +195,25 @@ export function RoomScene({
 
   const wallpaperKey = equippedKeys.wallpaper ?? DEFAULTS.wallpaper;
   const floorKey = equippedKeys.floor ?? DEFAULTS.floor;
-  const furnitureKey = equippedKeys.furniture ?? DEFAULTS.furniture;
+  // No default for large furniture — that slot starts empty, same as RoomScene3D.
+  const furnitureLargeKey = equippedKeys.furniture;
+  const furnitureSmallKey = equippedKeys.furniture_small ?? DEFAULTS.furnitureSmall;
+  const wallDecorKey = equippedKeys.furniture_wall ?? DEFAULTS.furnitureWall;
 
   const renderWallpaper = WALLPAPERS[wallpaperKey] ?? WALLPAPERS[DEFAULTS.wallpaper];
   const renderFloor = FLOORS[floorKey] ?? FLOORS[DEFAULTS.floor];
-  const renderFurniture = FURNITURE[furnitureKey] ?? FURNITURE[DEFAULTS.furniture];
+  const renderFurnitureLarge = furnitureLargeKey ? FURNITURE_LARGE[furnitureLargeKey] : null;
+  const renderFurnitureSmall = FURNITURE_SMALL[furnitureSmallKey] ?? FURNITURE_SMALL[DEFAULTS.furnitureSmall];
+  const renderWallDecor = WALL_DECOR[wallDecorKey] ?? WALL_DECOR[DEFAULTS.furnitureWall];
 
   return (
     <div className={`relative overflow-hidden rounded-3xl ${className}`}>
       <svg viewBox="0 0 300 200" className="block w-full" preserveAspectRatio="xMidYMax slice">
         {renderWallpaper(dotsId)}
         {renderFloor()}
-        {renderFurniture()}
+        {renderWallDecor()}
+        {renderFurnitureLarge && renderFurnitureLarge()}
+        {renderFurnitureSmall()}
       </svg>
       {onTapAvatar ? (
         <button

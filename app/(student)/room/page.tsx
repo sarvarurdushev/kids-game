@@ -6,7 +6,7 @@ import { getRoomSetShop } from "@/lib/student/roomSets";
 import { RoomCustomizer } from "@/components/room/RoomCustomizer";
 import type { RoomItem } from "@/components/room/RoomCustomizer";
 
-const ROOM_SLOTS = new Set<string>(["wallpaper", "floor", "furniture"]);
+const ROOM_SLOTS = new Set<string>(["wallpaper", "floor", "furniture", "furniture_small", "furniture_wall"]);
 
 export default async function RoomPage() {
   const student = await requireStudent();

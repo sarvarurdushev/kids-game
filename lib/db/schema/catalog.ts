@@ -27,6 +27,8 @@ export const avatarSlotEnum = pgEnum("avatar_slot", [
   "wallpaper",
   "floor",
   "furniture",
+  "furniture_small",
+  "furniture_wall",
 ]);
 
 export const avatarAcquisitionMethodEnum = pgEnum("avatar_acquisition_method", [
@@ -138,9 +140,13 @@ export const roomSets = pgTable("room_sets", {
   floorItemId: uuid("floor_item_id")
     .notNull()
     .references(() => avatarItems.id),
-  furnitureItemId: uuid("furniture_item_id")
-    .notNull()
-    .references(() => avatarItems.id),
+  // All three furniture pieces are optional — a set only requires a
+  // coordinated wallpaper + floor, and can then include whichever of
+  // large/small/wall furniture actually fits its theme (an affordable
+  // starter set might skip the pricier large piece entirely).
+  furnitureItemId: uuid("furniture_item_id").references(() => avatarItems.id),
+  furnitureSmallItemId: uuid("furniture_small_item_id").references(() => avatarItems.id),
+  furnitureWallItemId: uuid("furniture_wall_item_id").references(() => avatarItems.id),
   active: boolean("active").notNull().default(true),
 }, (table) => [uniqueIndex("room_sets_key_idx").on(table.key)]).enableRLS();
 
