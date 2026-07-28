@@ -28,7 +28,7 @@ export default async function UniverseCollectionPage({
         <ProgressBar value={entry.progress.owned} max={entry.progress.total} />
       </div>
 
-      <CollectionGrid characters={entry.characters} />
+      <CollectionGrid characters={entry.characters} cardShards={student.cardShards} />
     </div>
   );
 }

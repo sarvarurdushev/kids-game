@@ -21,6 +21,7 @@ export async function getDashboard(student: AuthedStudent) {
     displayName: student.displayName,
     xpTotal: student.xpTotal,
     coinsBalance: student.coinsBalance,
+    cardShards: student.cardShards,
     currentStreak: student.currentStreak,
     longestStreak: student.longestStreak,
     level: levelInfo,

@@ -31,7 +31,12 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <PokeableRoom equippedKeys={equippedKeys} baseMood={dashboard.petMood} happiness={dashboard.petHappiness} />
+      <PokeableRoom
+        equippedKeys={equippedKeys}
+        baseMood={dashboard.petMood}
+        happiness={dashboard.petHappiness}
+        coinsBalance={dashboard.coinsBalance}
+      />
 
       <Card className="flex items-center gap-4">
         <LevelRing progress={ringProgress} size={92}>
@@ -48,6 +53,10 @@ export default async function HomePage() {
           <div className="flex items-center gap-2 text-sm font-semibold">
             <FlameIcon size={22} />
             {dashboard.currentStreak} day streak
+          </div>
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <span aria-hidden>✨</span>
+            {dashboard.cardShards} shards
           </div>
           <p className="text-xs text-ink/50">
             {dashboard.level.xpForNextLevel !== null

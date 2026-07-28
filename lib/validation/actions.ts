@@ -31,6 +31,10 @@ export const purchaseRoomSetSchema = z.object({
   roomSetId: z.string().uuid(),
 });
 
+export const redeemCardSchema = z.object({
+  characterId: z.string().uuid(),
+});
+
 // Quest keys are code-defined (lib/reward-engine/quests.ts), not UUIDs — the
 // route re-validates the key against the catalog, so this is just a shape check.
 export const claimQuestSchema = z.object({

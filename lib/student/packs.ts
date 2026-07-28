@@ -11,7 +11,8 @@ import {
   universes,
 } from "@/lib/db/schema";
 import { rollPackContents } from "@/lib/reward-engine/packs";
-import type { CharacterConfig } from "@/lib/reward-engine/types";
+import type { CharacterConfig, Rarity } from "@/lib/reward-engine/types";
+import { DUPLICATE_SHARD_REWARD } from "@/lib/reward-engine/shards";
 import { getCurrentCurriculum } from "@/lib/games/curriculum";
 import { ServiceError } from "./errors";
 
@@ -82,6 +83,7 @@ export interface RevealedCard {
   imageUrl: string | null;
   universeId: string;
   isNew: boolean;
+  shardsAwarded: number;
 }
 
 export async function openPack(
@@ -93,7 +95,11 @@ export async function openPack(
     // time (two taps, two tabs) serializes here — both packs may draw the
     // same character, and student_cards has a unique (student, character)
     // index that a second, unserialized transaction would crash into.
-    await tx.select().from(students).where(eq(students.id, studentId)).for("update");
+    const [lockedStudent] = await tx
+      .select()
+      .from(students)
+      .where(eq(students.id, studentId))
+      .for("update");
 
     const [grant] = await tx
       .select()
@@ -151,6 +157,7 @@ export async function openPack(
     );
 
     const revealed: RevealedCard[] = [];
+    let shardsAwarded = 0;
     for (const card of rolled) {
       const detail = universeCharacters.find((c) => c.id === card.id)!;
       const [existing] = await tx
@@ -161,7 +168,10 @@ export async function openPack(
         )
         .limit(1);
 
+      let cardShardsAwarded = 0;
       if (existing) {
+        cardShardsAwarded = DUPLICATE_SHARD_REWARD[detail.rarity as Rarity];
+        shardsAwarded += cardShardsAwarded;
         await tx
           .update(studentCards)
           .set({ quantity: existing.quantity + 1 })
@@ -178,7 +188,15 @@ export async function openPack(
         imageUrl: detail.imageUrl,
         universeId: detail.universeId,
         isNew: !existing,
+        shardsAwarded: cardShardsAwarded,
       });
+    }
+
+    if (shardsAwarded > 0) {
+      await tx
+        .update(students)
+        .set({ cardShards: lockedStudent.cardShards + shardsAwarded, updatedAt: new Date() })
+        .where(eq(students.id, studentId));
     }
 
     await tx

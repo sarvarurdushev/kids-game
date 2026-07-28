@@ -17,6 +17,7 @@ interface RevealedCard {
   rarity: Rarity;
   imageUrl: string | null;
   isNew: boolean;
+  shardsAwarded: number;
 }
 
 type Phase = "loading" | "shaking" | "burst" | "revealing" | "error";
@@ -154,6 +155,7 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
                 name={card.name}
                 rarity={card.rarity}
                 isNew={card.isNew}
+                shardsAwarded={card.shardsAwarded}
               />
             </motion.div>
           ))}

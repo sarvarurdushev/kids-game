@@ -38,6 +38,12 @@ export const students = pgTable("students", {
   // that can't simply be ground out in an afternoon.
   goldStars: integer("gold_stars").notNull().default(0),
 
+  // Earned automatically whenever a pack pull turns out to be a card the
+  // student already owns (see openPack in lib/student/packs.ts) — spent to
+  // redeem a specific still-missing card directly (lib/student/shards.ts)
+  // instead of leaving it to chance. A duplicate is never wasted.
+  cardShards: integer("card_shards").notNull().default(0),
+
   currentStreak: integer("current_streak").notNull().default(0),
   longestStreak: integer("longest_streak").notNull().default(0),
   lastClaimDate: date("last_claim_date"),

@@ -2,6 +2,10 @@ import type { AvatarMood } from "@/components/avatar/AvatarCharacter";
 
 export const HAPPINESS_DECAY_PER_DAY = 4;
 export const INTERACTION_BOOST = 15;
+// A paid, bigger alternative to the free poke (see feedPet in
+// lib/student/pet.ts) — purely additive, the free poke is unchanged.
+export const FEED_COST_COINS = 15;
+export const FEED_BOOST = 35;
 const MAX_HAPPINESS = 100;
 const MIN_HAPPINESS = 0;
 
@@ -36,6 +40,10 @@ export function petHappinessCoinMultiplier(happiness: number): number {
   return 1;
 }
 
+export function boostHappinessBy(currentEffective: number, amount: number): number {
+  return Math.min(MAX_HAPPINESS, currentEffective + amount);
+}
+
 export function boostHappiness(currentEffective: number): number {
-  return Math.min(MAX_HAPPINESS, currentEffective + INTERACTION_BOOST);
+  return boostHappinessBy(currentEffective, INTERACTION_BOOST);
 }
