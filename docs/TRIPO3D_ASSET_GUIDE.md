@@ -1,8 +1,7 @@
 # Tripo3D Asset Generation Guide — Golden Kids
 
-Everything the app needs you to generate, with copy-paste prompts. Generate in
-whatever order you like; each section is independent and can be integrated as
-it arrives.
+Everything the app can actually use right now, with copy-paste prompts.
+Generate in whatever order you like; each section is independent.
 
 ## Global style rules (append to EVERY prompt)
 
@@ -19,83 +18,72 @@ this suffix to every prompt below so new assets match the existing roster:
 - Include textures: **yes** (embedded)
 - Target size: **under ~2 MB per asset** if Tripo offers a decimate/optimize
   option. Larger is workable (I can optimize on my side) but slower to load.
-- Do **not** rig / do not request animation. The app animates procedurally, and
-  every current model is unrigged — consistency matters more than rigging.
+- Do **not** rig / do not request animation. Every model in the app is
+  unrigged and animated procedurally — consistency matters more than rigging.
 
 ## File naming
 
 Name each file exactly as the `key` given in its row below, plus `.glb`.
-Example: `furniture_bed.glb`. Wrong names are fine — just tell me which file
-is which — but correct names let me integrate without asking.
+Example: `wall_clock.glb`. Wrong names are fine — just tell me which file is
+which — but correct names let me integrate without asking.
 
 ---
 
-## SECTION 1 — Furniture (highest priority)
+## SECTION 1 — Wall decor (highest priority — replaces placeholders)
 
-The room currently has **one** furniture slot with 4 pieces. The plan expands
-it to **three simultaneous slots** so a room feels decorated rather than empty.
-That needs a real spread of pieces per slot.
+The room already has three wall-decor items, but they're **hand-drawn flat
+shapes I built directly in code**, not real 3D assets — a stopgap until real
+ones exist. These three are the highest-value thing you can generate: they
+directly replace something visibly lower-quality than the rest of the room.
 
-### 1a. Big furniture (back wall, large footprint) — `slot: furniture_large`
+These should read as **flat-ish and front-facing** — they mount on a wall.
+
+| key | replaces | prompt |
+|---|---|---|
+| `wall_shelf` | placeholder floating shelf | a small floating wooden wall shelf holding three tiny colorful books, flat back, front facing |
+| `wall_clock` | placeholder clock | a round wall clock with a cream face and simple black hands, flat back, front facing |
+| `wall_picture` | placeholder sun picture | a framed picture of a smiling yellow sun in a wooden frame, flat back, front facing |
+
+Optional extras for the same slot, if you want more variety than a 1-for-1 swap:
+
+| key | prompt |
+|---|---|
+| `wall_pennant` | a triangular felt pennant flag banner in bright colors, front facing, flat back |
+| `wall_window` | a square window frame with a blue sky and one fluffy cloud visible, flat back |
+| `wall_star` | a hanging decorative gold star ornament, front facing |
+
+---
+
+## SECTION 2 — More furniture variety (secondary)
+
+The room's other two furniture slots each only have **2 pieces** right now
+(large: a treasure chest and a bookshelf; small: a potted plant and a reading
+lamp — all real Tripo3D assets already). More options make the shop feel
+richer. New "room sets" (bundled purchases) can be built entirely from new
+furniture like this — no new wallpaper/floor art needed, since room sets
+already bundle whatever combination of pieces makes sense.
+
+### 2a. Big furniture (back wall, large footprint) — `slot: furniture_large`
 
 | key | prompt |
 |---|---|
 | `furniture_bed` | a cozy children's bed with a soft blue blanket and one pillow |
-| `furniture_sofa` | a small round two-seat sofa in warm cream fabric |
 | `furniture_desk` | a small wooden study desk with a closed laptop and a cup of pencils |
 | `furniture_wardrobe` | a tall rounded wooden wardrobe with two doors and round knobs |
-| `furniture_toybox` | an open wooden toy box overflowing with soft toy blocks and a ball |
-| `furniture_piano` | a small upright toy piano in cream and gold |
+| `furniture_sofa` | a small round two-seat sofa in warm cream fabric |
 
-### 1b. Small furniture (floor, foreground) — `slot: furniture_small`
+### 2b. Small furniture (floor, foreground) — `slot: furniture_small`
 
 | key | prompt |
 |---|---|
 | `furniture_beanbag` | a squishy round beanbag chair in soft coral pink |
 | `furniture_teddy` | a small sitting teddy bear plush toy, arms out |
-| `furniture_ball` | a colorful striped beach ball resting on the floor |
-| `furniture_blocks` | a small stack of four wooden alphabet blocks |
-| `furniture_stool` | a small round wooden stool with three legs |
 | `furniture_globe` | a small desk globe on a wooden stand |
-
-### 1c. Wall decor (hangs on the back wall) — `slot: furniture_wall`
-
-These should read as **flat-ish and front-facing** — they mount on a wall.
-
-| key | prompt |
-|---|---|
-| `furniture_clock` | a round wall clock with a cream face and simple hands, front facing |
-| `furniture_picture` | a framed picture of a smiling yellow sun, front facing, flat back |
-| `furniture_shelf` | a small floating wall shelf holding three tiny books, flat back |
-| `furniture_pennant` | a triangular felt pennant flag banner, front facing, flat back |
-| `furniture_window` | a square window frame with a blue sky and one cloud visible, flat back |
-| `furniture_star` | a hanging decorative gold star ornament, front facing |
+| `furniture_stool` | a small round wooden stool with three legs |
 
 ---
 
-## SECTION 2 — Complete Room Sets
-
-Each set = **1 wallpaper panel + 1 floor tile + 1 hero furniture piece**, sold
-as one bundle. Generate all three parts per set you want.
-
-For wallpaper: add `, flat rectangular wall panel, front facing, seamless
-pattern` to the prompt.
-For floor: add `, flat square floor tile viewed from above, seamless tiling
-pattern` to the prompt.
-
-| set | wallpaper | floor | hero piece |
-|---|---|---|---|
-| **Space Explorer** (`room_space`) | deep navy wall with small golden stars and a crescent moon | dark grey metal launchpad panel with warning stripes | a telescope on a wooden tripod |
-| **Jungle Adventure** (`room_jungle`) | lush green wall of layered tropical leaves | a dirt path with scattered small stones and grass | a small wooden treehouse with a rope ladder |
-| **Under the Sea** (`room_ocean`) | aqua blue wall with rising bubbles and seaweed | golden sandy seabed with small seashells | an open treasure chest with gold coins and pearls |
-| **Dino Discovery** (`room_dino`) | prehistoric wall of tall green ferns and palm fronds | cracked dry earth with small volcanic rocks | a nest of speckled dinosaur eggs |
-| **Princess Castle** (`room_castle`) | soft pink wall with a gold damask pattern | polished white and gold marble tiles | a small ornate jewelry box shaped like a castle turret |
-| **Superhero HQ** (`room_hero`) | bold comic-book wall with halftone dots and a starburst | a city rooftop with concrete tiles and a skylight | a trophy on a pedestal beside a red cape stand |
-| **Cozy Campfire** (`room_campfire`) | a night forest wall of dark pine tree silhouettes under stars | a grassy clearing with small wildflowers | a campfire of stacked logs with warm orange flames |
-
----
-
-## SECTION 3 — More Species (optional, lower priority)
+## SECTION 3 — More species (optional, lowest priority)
 
 Only if you want to grow the animal roster past the current 21. Same style
 suffix; these should be **standing upright on two legs, front facing, full
@@ -113,11 +101,19 @@ Prompt pattern:
 
 ---
 
+## What's NOT on this list (and why)
+
+**Wallpaper and floor** — these are procedural (drawn in code, not loaded
+from files) and there's no rendering pipeline for GLB versions of them yet.
+Building one would be real new engineering for a visual upgrade kids are
+unlikely to notice next to everything else, so it's not worth your generation
+time right now. If that changes later I'll say so.
+
 ## What to send back
 
 Just the `.glb` files, however is easiest (zip is fine). Tell me which section
-each batch belongs to. I'll handle normalization, scaling, floor placement,
-pricing, and wiring them into the shop.
+each batch belongs to. I'll handle normalization, scaling, floor/wall
+placement, pricing, and wiring them into the shop.
 
 If a model comes out badly proportioned or facing the wrong way, send it
 anyway and flag it — the loader auto-normalizes height and centering, so a lot
