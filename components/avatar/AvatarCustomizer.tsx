@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AvatarRenderer } from "./AvatarRenderer";
 import { Avatar3D } from "@/components/three/Avatar3D";
 import { Button } from "@/components/ui/Button";
 import { ItemPreviewModal } from "@/components/ui/ItemPreviewModal";
+import { ThumbnailImage } from "@/components/ui/ThumbnailImage";
 import { playCoin, playPop, playFanfare } from "@/lib/sound";
 import { CoinIcon } from "@/components/icons";
 
@@ -173,7 +173,11 @@ export function AvatarCustomizer({
             )}
             <button type="button" onClick={() => setPreviewItem(item)} className="flex flex-col items-center gap-2">
               <div className={item.state === "locked" ? "opacity-40 grayscale" : ""}>
-                <AvatarRenderer equippedKeys={{ species: item.key }} size={56} />
+                <ThumbnailImage
+                  src={`/thumbnails/species/${item.key}.png`}
+                  alt={item.name}
+                  className="h-14 w-14 rounded-xl bg-white"
+                />
               </div>
               <p className="text-xs font-semibold">{item.name}</p>
             </button>

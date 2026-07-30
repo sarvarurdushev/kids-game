@@ -23,8 +23,6 @@ export default async function LoginPage() {
       equippedBackgroundId: students.equippedBackgroundId,
       equippedWallpaperId: students.equippedWallpaperId,
       equippedFloorId: students.equippedFloorId,
-      equippedFurnitureId: students.equippedFurnitureId,
-      equippedFurnitureSmallId: students.equippedFurnitureSmallId,
       equippedFurnitureWallId: students.equippedFurnitureWallId,
     })
     .from(students)

@@ -1,8 +1,8 @@
 import "./_env";
 import { randomBytes } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { students, studentAvatarItems, studentExternalRefs } from "@/lib/db/schema";
+import { students, studentAvatarItems, studentExternalRefs, roomPlacements } from "@/lib/db/schema";
 import { hashPin } from "@/lib/auth/pin";
 
 // Staff-run CLI for enrolling a new student. There's no admin UI for this in
@@ -32,6 +32,34 @@ function randomEnrollmentCode(name: string): string {
   const suffix = randomBytes(3).toString("hex").toUpperCase();
   const prefix = name.replace(/[^a-zA-Z]/g, "").slice(0, 6).toUpperCase() || "KID";
   return `GOLD-${prefix}-${suffix}`;
+}
+
+// Grants the starter item a display spot at the lowest free position (0..2)
+// in its slot, same rule as lib/student/roomPlacements.ts's placeItem. A
+// no-op if it's already placed or that slot is already full — matches the
+// "silently skip, don't fail" best-effort rule used everywhere else
+// placement is auto-attempted (mirrors scripts/seed.ts's identical helper).
+async function placeStarterFurniture(studentId: string, item: { id: string; slot: string }) {
+  if (item.slot !== "furniture" && item.slot !== "furniture_small") return;
+  const slot = item.slot;
+  const existing = await db
+    .select()
+    .from(roomPlacements)
+    .where(sql`${roomPlacements.studentId} = ${studentId} and ${roomPlacements.slot} = ${slot}`);
+  if (existing.some((p) => p.avatarItemId === item.id)) return;
+  const taken = new Set(existing.map((p) => p.position));
+  let position = -1;
+  for (let i = 0; i < 3; i++) {
+    if (!taken.has(i)) {
+      position = i;
+      break;
+    }
+  }
+  if (position === -1) return;
+  await db
+    .insert(roomPlacements)
+    .values({ studentId, avatarItemId: item.id, slot, position })
+    .onConflictDoNothing();
 }
 
 async function main() {
@@ -70,7 +98,15 @@ async function main() {
       avatarItemId: item.id,
       acquiredVia: "starter",
     });
-    equipped[`equipped${toPascalCase(item.slot)}Id`] = item.id;
+    // furniture/furniture_small are multi-select (room_placements), not a
+    // single equipped column — give the starter item a display spot instead
+    // of trying to set a now-nonexistent equipped*Id column (which
+    // db.update().set() would silently drop, leaving the room empty).
+    if (item.slot === "furniture" || item.slot === "furniture_small") {
+      await placeStarterFurniture(student.id, item);
+    } else {
+      equipped[`equipped${toPascalCase(item.slot)}Id`] = item.id;
+    }
   }
   if (Object.keys(equipped).length > 0) {
     await db.update(students).set(equipped).where(eq(students.id, student.id));

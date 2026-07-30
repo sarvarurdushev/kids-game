@@ -503,10 +503,14 @@ export interface AvatarEquippedKeys {
   // AvatarCharacter simply ignores whichever fields it doesn't render.
   wallpaper?: string;
   floor?: string;
-  furniture?: string;
-  // Ride along the same way as `furniture` above — the small-furniture and
-  // wall-decor room slots, resolved by the same DB round trip.
-  furniture_small?: string;
+  // Multi-select (up to ROOM_PLACEMENT_CAP = 3 keys), unlike every other
+  // field on this type — a student can display several big-furniture and
+  // several small-furniture pieces at once now (lib/student/roomPlacements.ts),
+  // not just swap one for another. Index 0 renders at position 0's
+  // coordinates in RoomScene3D, etc.
+  furniture?: string[];
+  furniture_small?: string[];
+  // Wall decor stays single-select, unchanged.
   furniture_wall?: string;
 }
 

@@ -11,7 +11,7 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { students } from "./students";
-import { characters, packTypes, avatarItems, avatarCaseTypes, achievements } from "./catalog";
+import { characters, packTypes, avatarItems, avatarCaseTypes, achievements, avatarSlotEnum } from "./catalog";
 
 export const studentCards = pgTable("student_cards", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -70,6 +70,22 @@ export const studentAvatarItems = pgTable("student_avatar_items", {
     table.studentId,
     table.avatarItemId
   ),
+]).enableRLS();
+
+// Multiple simultaneous furniture placements per student, replacing the old
+// single equippedFurnitureId/equippedFurnitureSmallId columns (dropped
+// below) — a student can now display several pieces per category instead
+// of swapping one for another. position is 0..2 (3 display spots per
+// category, matching RoomScene3D's fixed layout positions for each).
+export const roomPlacements = pgTable("room_placements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: uuid("student_id").notNull().references(() => students.id, { onDelete: "cascade" }),
+  avatarItemId: uuid("avatar_item_id").notNull().references(() => avatarItems.id, { onDelete: "cascade" }),
+  slot: avatarSlotEnum("slot").notNull(), // only "furniture" or "furniture_small" ever used
+  position: integer("position").notNull(),
+}, (table) => [
+  uniqueIndex("room_placements_student_slot_position_idx").on(table.studentId, table.slot, table.position),
+  uniqueIndex("room_placements_student_item_idx").on(table.studentId, table.avatarItemId),
 ]).enableRLS();
 
 export const avatarCaseGrants = pgTable("avatar_case_grants", {

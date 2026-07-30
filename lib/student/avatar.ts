@@ -1,19 +1,22 @@
 import "server-only";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { avatarItems, students, studentAvatarItems } from "@/lib/db/schema";
+import { avatarItems, students, studentAvatarItems, roomPlacements } from "@/lib/db/schema";
 import { getLevelInfo } from "./levelInfo";
 import { ServiceError } from "./errors";
+import { getRoomPlacements } from "./roomPlacements";
 import { discountedPrice, featuredKeysFor } from "@/lib/shop/weeklyRotation";
 import type { AuthedStudent } from "@/lib/auth/requireStudent";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 
 type AvatarItemRow = typeof avatarItems.$inferSelect;
 
-const SLOT_TO_EQUIPPED_COLUMN: Record<
-  AvatarItemRow["slot"],
-  keyof typeof students.$inferInsert
-> = {
+// "furniture"/"furniture_small" are excluded — those two slots are now
+// multi-select (room_placements), not a single equipped column, so equipping
+// them goes through lib/student/roomPlacements.ts instead of this map.
+type EquippableSlot = Exclude<AvatarItemRow["slot"], "furniture" | "furniture_small">;
+
+const SLOT_TO_EQUIPPED_COLUMN: Record<EquippableSlot, keyof typeof students.$inferInsert> = {
   species: "equippedSpeciesId",
   hair: "equippedHairId",
   eyes: "equippedEyesId",
@@ -23,8 +26,6 @@ const SLOT_TO_EQUIPPED_COLUMN: Record<
   background: "equippedBackgroundId",
   wallpaper: "equippedWallpaperId",
   floor: "equippedFloorId",
-  furniture: "equippedFurnitureId",
-  furniture_small: "equippedFurnitureSmallId",
   furniture_wall: "equippedFurnitureWallId",
 };
 
@@ -33,8 +34,10 @@ const SLOT_TO_EQUIPPED_COLUMN: Record<
  * items are only owned once a student_avatar_items row exists. The admin
  * login (students.isAdmin) owns every species outright - this is the one
  * place that's decided, so both the list view (getAvatarItems) and the
- * actual equip action (equipAvatarItem) agree with each other. */
-function isOwned(item: AvatarItemRow, ownedIds: Set<string>, level: number, isAdmin: boolean): boolean {
+ * actual equip action (equipAvatarItem) agree with each other. Exported so
+ * lib/student/roomPlacements.ts's placeItem can reuse the exact same
+ * ownership rule instead of re-deriving it and risking drift. */
+export function isOwned(item: AvatarItemRow, ownedIds: Set<string>, level: number, isAdmin: boolean): boolean {
   if (isAdmin && item.slot === "species") return true;
   if (ownedIds.has(item.id)) return true;
   return item.acquisitionMethod === "level_unlock" && item.unlockLevel !== null && level >= item.unlockLevel;
@@ -60,11 +63,17 @@ export async function getAvatarItems(student: AuthedStudent) {
       student.equippedBackgroundId,
       student.equippedWallpaperId,
       student.equippedFloorId,
-      student.equippedFurnitureId,
-      student.equippedFurnitureSmallId,
       student.equippedFurnitureWallId,
     ].filter((id): id is string => Boolean(id))
   );
+
+  // furniture/furniture_small are multi-select now (room_placements), so
+  // "equipped" for those two slots means "currently placed", not "this
+  // slot's single equipped column points at it" — that column no longer
+  // exists for them.
+  const placements = await getRoomPlacements(student.id);
+  const placedFurnitureKeys = new Set(placements.furniture);
+  const placedFurnitureSmallKeys = new Set(placements.furniture_small);
 
   // The weekly "Featured" rotation is derived from the ISO week alone (see
   // lib/shop/weeklyRotation.ts) — no table, no cron — so every student sees
@@ -99,6 +108,13 @@ export async function getAvatarItems(student: AuthedStudent) {
       }
     }
 
+    const equipped =
+      item.slot === "furniture"
+        ? placedFurnitureKeys.has(item.key)
+        : item.slot === "furniture_small"
+          ? placedFurnitureSmallKeys.has(item.key)
+          : equippedIds.has(item.id);
+
     return {
       id: item.id,
       slot: item.slot,
@@ -112,7 +128,7 @@ export async function getAvatarItems(student: AuthedStudent) {
       state,
       reason,
       affordable,
-      equipped: equippedIds.has(item.id),
+      equipped,
     };
   });
 }
@@ -203,19 +219,30 @@ export async function equipAvatarItem(student: AuthedStudent, avatarItemId: stri
     throw new ServiceError("Item is not unlocked yet", 403);
   }
 
+  // furniture/furniture_small are multi-select (room_placements) now —
+  // equip/place are different operations with different semantics
+  // (single-select swap vs. multi-select display), so this route no longer
+  // touches those two slots at all.
+  if (item.slot === "furniture" || item.slot === "furniture_small") {
+    throw new ServiceError("Use the room placement endpoint for this slot", 400);
+  }
+
   const updates: Record<string, string | Date> = { updatedAt: new Date() };
   updates[SLOT_TO_EQUIPPED_COLUMN[item.slot]] = item.id;
 
   // A character bundled with an outfit (avatarItems.bundledItemKeys) auto-
   // equips that outfit alongside it, so picking e.g. "Ninja Fox" doesn't
-  // leave you wearing whatever hat you had on before.
+  // leave you wearing whatever hat you had on before. Bundled furniture/
+  // furniture_small pieces (none exist today) are skipped here — they'd
+  // need to go through room placement instead, which has no notion of
+  // "auto-place on species equip".
   if (item.bundledItemKeys && item.bundledItemKeys.length > 0) {
     const bundled = await db
       .select()
       .from(avatarItems)
       .where(inArray(avatarItems.key, item.bundledItemKeys));
     for (const b of bundled) {
-      if (b.active && ownedIds.has(b.id)) {
+      if (b.active && ownedIds.has(b.id) && b.slot !== "furniture" && b.slot !== "furniture_small") {
         updates[SLOT_TO_EQUIPPED_COLUMN[b.slot]] = b.id;
       }
     }
@@ -241,8 +268,6 @@ type EquippedIdRow = Pick<
   | "equippedBackgroundId"
   | "equippedWallpaperId"
   | "equippedFloorId"
-  | "equippedFurnitureId"
-  | "equippedFurnitureSmallId"
   | "equippedFurnitureWallId"
 >;
 
@@ -257,8 +282,6 @@ function resolveEquippedKeys(row: EquippedIdRow, keyById: Map<string, string>): 
     background: row.equippedBackgroundId ? keyById.get(row.equippedBackgroundId) : undefined,
     wallpaper: row.equippedWallpaperId ? keyById.get(row.equippedWallpaperId) : undefined,
     floor: row.equippedFloorId ? keyById.get(row.equippedFloorId) : undefined,
-    furniture: row.equippedFurnitureId ? keyById.get(row.equippedFurnitureId) : undefined,
-    furniture_small: row.equippedFurnitureSmallId ? keyById.get(row.equippedFurnitureSmallId) : undefined,
     furniture_wall: row.equippedFurnitureWallId ? keyById.get(row.equippedFurnitureWallId) : undefined,
   };
 }
@@ -280,8 +303,6 @@ export async function getEquippedAvatarKeysForMany(
           r.equippedBackgroundId,
           r.equippedWallpaperId,
           r.equippedFloorId,
-          r.equippedFurnitureId,
-          r.equippedFurnitureSmallId,
           r.equippedFurnitureWallId,
         ])
         .filter((id): id is string => Boolean(id))
@@ -291,7 +312,48 @@ export async function getEquippedAvatarKeysForMany(
     ? await db.select({ id: avatarItems.id, key: avatarItems.key }).from(avatarItems).where(inArray(avatarItems.id, ids))
     : [];
   const keyById = new Map(itemRows.map((i) => [i.id, i.key]));
-  return new Map(rows.map((r) => [r.id, resolveEquippedKeys(r, keyById)]));
+
+  // furniture/furniture_small are multi-select (room_placements), resolved
+  // here in one batched query alongside the single-select columns above so
+  // callers still get every student's full equipped-keys set from one
+  // function, same as before the furniture/furniture_small split.
+  const studentIds = rows.map((r) => r.id);
+  const placementRows = studentIds.length
+    ? await db
+        .select({
+          studentId: roomPlacements.studentId,
+          slot: roomPlacements.slot,
+          key: avatarItems.key,
+        })
+        .from(roomPlacements)
+        .innerJoin(avatarItems, eq(roomPlacements.avatarItemId, avatarItems.id))
+        .where(inArray(roomPlacements.studentId, studentIds))
+        .orderBy(asc(roomPlacements.position))
+    : [];
+  const placementsByStudent = new Map<string, { furniture: string[]; furniture_small: string[] }>();
+  for (const row of placementRows) {
+    if (row.slot !== "furniture" && row.slot !== "furniture_small") continue;
+    let entry = placementsByStudent.get(row.studentId);
+    if (!entry) {
+      entry = { furniture: [], furniture_small: [] };
+      placementsByStudent.set(row.studentId, entry);
+    }
+    entry[row.slot].push(row.key);
+  }
+
+  return new Map(
+    rows.map((r) => {
+      const placements = placementsByStudent.get(r.id) ?? { furniture: [], furniture_small: [] };
+      return [
+        r.id,
+        {
+          ...resolveEquippedKeys(r, keyById),
+          furniture: placements.furniture,
+          furniture_small: placements.furniture_small,
+        },
+      ];
+    })
+  );
 }
 
 export async function getEquippedAvatarKeys(student: AuthedStudent): Promise<AvatarEquippedKeys> {

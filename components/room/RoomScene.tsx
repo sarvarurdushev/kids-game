@@ -285,9 +285,14 @@ export function RoomScene({
 
   const wallpaperKey = equippedKeys.wallpaper ?? DEFAULTS.wallpaper;
   const floorKey = equippedKeys.floor ?? DEFAULTS.floor;
-  // No default for large furniture — that slot starts empty, same as RoomScene3D.
-  const furnitureLargeKey = equippedKeys.furniture;
-  const furnitureSmallKey = equippedKeys.furniture_small ?? DEFAULTS.furnitureSmall;
+  // furniture/furniture_small are multi-select arrays now (see
+  // AvatarEquippedKeys) — this 2D renderer only ever draws one of each, so it
+  // just shows the first placed item. In practice this path is effectively
+  // dead since RoomCustomizer only invokes RoomScene for the single-select
+  // wallpaper/floor tabs post-thumbnail-grid (components/room/RoomCustomizer.tsx);
+  // kept correct rather than deleted since it's cheap to do so.
+  const furnitureLargeKey = equippedKeys.furniture?.[0];
+  const furnitureSmallKey = equippedKeys.furniture_small?.[0] ?? DEFAULTS.furnitureSmall;
   const wallDecorKey = equippedKeys.furniture_wall ?? DEFAULTS.furnitureWall;
 
   const renderWallpaper = WALLPAPERS[wallpaperKey] ?? WALLPAPERS[DEFAULTS.wallpaper];

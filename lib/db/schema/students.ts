@@ -80,10 +80,11 @@ export const students = pgTable("students", {
     () => avatarItems.id
   ),
   equippedFloorId: uuid("equipped_floor_id").references(() => avatarItems.id),
-  equippedFurnitureId: uuid("equipped_furniture_id").references(
-    () => avatarItems.id
-  ),
-  equippedFurnitureSmallId: uuid("equipped_furniture_small_id").references(() => avatarItems.id),
+  // equippedFurnitureId/equippedFurnitureSmallId were dropped in favor of
+  // room_placements (lib/db/schema/economy.ts) — a student can now display
+  // several furniture/furniture_small pieces at once instead of swapping one
+  // for another. equippedFurnitureWallId is unchanged (wall decor stays
+  // single-select).
   equippedFurnitureWallId: uuid("equipped_furniture_wall_id").references(() => avatarItems.id),
 
   createdAt: timestamp("created_at", { withTimezone: true })

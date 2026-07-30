@@ -31,6 +31,14 @@ export const purchaseRoomSetSchema = z.object({
   roomSetId: z.string().uuid(),
 });
 
+export const placeRoomItemSchema = z.object({
+  avatarItemId: z.string().uuid(),
+});
+
+export const removeRoomItemSchema = z.object({
+  avatarItemId: z.string().uuid(),
+});
+
 export const redeemCardSchema = z.object({
   characterId: z.string().uuid(),
 });

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Scene3D } from "./Scene3D";
 import { Character3D } from "./Character3D";
 import { Prop3D } from "./Prop3D";
+import { FURNITURE_LARGE_MODEL, FURNITURE_SMALL_MODEL, WALL_DECOR_MODEL } from "./furnitureModels";
 import type { AvatarEquippedKeys, AvatarMood } from "@/components/avatar/AvatarCharacter";
 
 const FLOOR_Y = -0.85;
@@ -121,71 +122,58 @@ const FLOORS: Record<string, () => ReactNode> = {
 };
 
 // x/z placement only — Prop3D's own floorY math already rests the model's
-// bottom at the right height, so this must NOT also carry FLOOR_Y as its y
+// bottom at the right height, so these must NOT also carry FLOOR_Y as their y
 // (that would apply the floor offset twice and sink the prop through the floor).
-const FURNITURE_LARGE_POSITION: [number, number, number] = [-1.5, 0, -0.2];
-// Right side of the room, foreground, clear of both the large piece and the
-// character (which stands around x = 0.35).
-const FURNITURE_SMALL_POSITION: [number, number, number] = [1.6, 0, 0.5];
+//
+// Up to 3 simultaneous big-furniture pieces spread along the left/back wall,
+// and 3 small-furniture pieces along the right/foreground. Index 0 renders at
+// position 0's coordinates, etc. (lib/student/roomPlacements.ts orders
+// placements by position, so array index lines up directly.)
+//
+// Tuned via real Playwright screenshots against the running dev server
+// (enroll GOLD-ADMIN, buy/place 3 large + 3 small at once, screenshot,
+// adjust — same technique the single-item height comments below document).
+// First guesses spread wider (down to x=-2.15/x=2.05) and clipped the
+// leftmost/rightmost slot off the visible frame — pulled inward from there.
+// Position 0 (the tightest spot, since it's furthest from center) was
+// specifically re-verified with a "Dream Room Scene" legendary composite
+// (the widest/most clip-prone tier — furniture_scene_storycorner) swapped
+// in alongside the other two large pieces, since those clip at narrower
+// widths than a single dense prop like the bookshelf.
+const FURNITURE_LARGE_POSITIONS: [number, number, number][] = [
+  [-1.75, 0, -0.4],
+  [-1.1, 0, -0.35],
+  [-0.5, 0, -0.2],
+];
+// Small: spread along the right side, foreground, clear of the large pieces
+// and the character. Same clipping-then-pull-inward tuning pass as large
+// above (first guess out to x=1.75 clipped the rightmost slot).
+const FURNITURE_SMALL_POSITIONS: [number, number, number][] = [
+  [1.5, 0, 0.4],
+  [1.1, 0, 0.25],
+  [0.75, 0, 0.5],
+];
 
-// Real Tripo3D-generated props (see public/models/furniture/CREDITS.md).
-// Each is normalized from its own bounding box to a per-item target height —
-// unlike standing characters, furniture pieces don't share a common height
-// (a bookshelf and a treasure chest are wildly different proportions), so
-// Prop3D takes that height as a prop rather than assuming one constant.
-const FURNITURE_LARGE_MODEL: Record<string, { url: string; height: number }> = {
-  furniture_chest: { url: "/models/furniture/chest.glb", height: 0.4 },
-  furniture_bookshelf: { url: "/models/furniture/bookshelf.glb", height: 0.95 },
-  furniture_desk: { url: "/models/furniture/furniture_desk.glb", height: 0.8 },
-  // Lower than the 0.75 first guess — at 0.75 (width ~1.2) the bed's
-  // headboard post visibly poked past the back wall's left edge into the
-  // page background behind the canvas. 0.45 (width ~0.73, matching
-  // bookshelf's clean 0.73) confirmed clipping-free on screen.
-  furniture_bed: { url: "/models/furniture/furniture_bed.glb", height: 0.45 },
-  // Legendary "Dream Room Scene" tier — detailed photorealistic multi-object
-  // composites (a whole furnished corner), a distinctly more-detailed style
-  // than the rest of the room. Mechanically just more furniture_large items;
-  // see public/models/furniture/CREDITS.md for the style note.
-  //
-  // Heights below were tuned down from the original starting-point guesses
-  // after screenshots showed several of them poking past the back wall's
-  // left edge (visible as the item spilling onto the page background behind
-  // the canvas, at FURNITURE_LARGE_POSITION x=-1.5) — these wide multi-object
-  // scenes clip at notably narrower widths than a single dense prop like the
-  // bookshelf, because their content is spread more evenly across the full
-  // bounding box instead of tapering off near the edges. nurserycorner was
-  // the one exception that looked clean at its original guess and was left
-  // alone.
-  furniture_scene_storycorner: { url: "/models/furniture/scene_story_corner.glb", height: 0.6 },
-  furniture_scene_starlitbed: { url: "/models/furniture/scene_starlit_bed.glb", height: 0.4 },
-  furniture_scene_nurserycorner: { url: "/models/furniture/scene_nursery_corner.glb", height: 0.85 },
-  furniture_scene_playground: { url: "/models/furniture/scene_playground.glb", height: 0.35 },
-  furniture_scene_toycorner: { url: "/models/furniture/scene_toy_corner.glb", height: 0.4 },
-  furniture_scene_blushrug: { url: "/models/furniture/scene_blush_rug.glb", height: 0.35 },
-  furniture_scene_wovennook: { url: "/models/furniture/scene_woven_nook.glb", height: 0.15 },
-};
-
-const FURNITURE_LARGE: Record<string, () => ReactNode> = Object.fromEntries(
+// FURNITURE_LARGE_MODEL/FURNITURE_SMALL_MODEL/WALL_DECOR_MODEL (the actual
+// key -> GLB url + target height data) now live in ./furnitureModels — a
+// plain data module with no react-three-fiber/drei deps, so
+// scripts/render-thumbnails.ts can import the exact same source of truth
+// Node-side without dragging in client-only rendering libraries.
+const FURNITURE_LARGE: Record<string, (position: [number, number, number]) => ReactNode> = Object.fromEntries(
   Object.entries(FURNITURE_LARGE_MODEL).map(([key, { url, height }]) => [
     key,
-    () => <Prop3D url={url} targetHeight={height} floorY={FLOOR_Y} position={FURNITURE_LARGE_POSITION} />,
+    (position: [number, number, number]) => (
+      <Prop3D url={url} targetHeight={height} floorY={FLOOR_Y} position={position} />
+    ),
   ])
 );
 
-const FURNITURE_SMALL_MODEL: Record<string, { url: string; height: number }> = {
-  furniture_plant: { url: "/models/furniture/plant.glb", height: 0.55 },
-  furniture_lamp: { url: "/models/furniture/lamp.glb", height: 0.9 },
-  // Lower than the 0.45 first guess — at 0.45 (width ~0.7) the beanbag
-  // visibly clipped off the right edge of the frame at FURNITURE_SMALL_POSITION
-  // x=1.6. 0.3 (width ~0.47, matching the potted plant's clean ~0.47) fixed it.
-  furniture_beanbag: { url: "/models/furniture/furniture_beanbag.glb", height: 0.3 },
-  furniture_teddy: { url: "/models/furniture/furniture_teddy.glb", height: 0.4 },
-};
-
-const FURNITURE_SMALL: Record<string, () => ReactNode> = Object.fromEntries(
+const FURNITURE_SMALL: Record<string, (position: [number, number, number]) => ReactNode> = Object.fromEntries(
   Object.entries(FURNITURE_SMALL_MODEL).map(([key, { url, height }]) => [
     key,
-    () => <Prop3D url={url} targetHeight={height} floorY={FLOOR_Y} position={FURNITURE_SMALL_POSITION} />,
+    (position: [number, number, number]) => (
+      <Prop3D url={url} targetHeight={height} floorY={FLOOR_Y} position={position} />
+    ),
   ])
 );
 
@@ -195,14 +183,6 @@ const FURNITURE_SMALL: Record<string, () => ReactNode> = Object.fromEntries(
 const WALL_DECOR_X = -0.6;
 const WALL_DECOR_Y = FLOOR_Y + WALL_HEIGHT * 0.68;
 const WALL_DECOR_Z = WALL_Z + 0.03;
-
-// Real Tripo3D-generated wall decor (see public/models/furniture/CREDITS.md),
-// same GLB-model pattern as FURNITURE_LARGE_MODEL/FURNITURE_SMALL_MODEL above.
-const WALL_DECOR_MODEL: Record<string, { url: string; height: number }> = {
-  wall_shelf: { url: "/models/furniture/wall_shelf.glb", height: 0.22 },
-  wall_clock: { url: "/models/furniture/wall_clock.glb", height: 0.45 },
-  wall_picture: { url: "/models/furniture/wall_picture.glb", height: 0.4 },
-};
 
 const WALL_DECOR: Record<string, () => ReactNode> = Object.fromEntries(
   Object.entries(WALL_DECOR_MODEL).map(([key, { url, height }]) => [
@@ -214,7 +194,6 @@ const WALL_DECOR: Record<string, () => ReactNode> = Object.fromEntries(
 const DEFAULTS = {
   wallpaper: "wallpaper_plain",
   floor: "floor_wood",
-  furnitureSmall: "furniture_plant", // plant stays the starter item, just renamed slot
   furnitureWall: "wall_shelf", // new starter wall item
 };
 
@@ -228,17 +207,17 @@ interface RoomScene3DProps {
 export function RoomScene3D({ equippedKeys, mood = "neutral", className = "", onTapAvatar }: RoomScene3DProps) {
   const wallpaperKey = equippedKeys.wallpaper ?? DEFAULTS.wallpaper;
   const floorKey = equippedKeys.floor ?? DEFAULTS.floor;
-  // Deliberately NO default for large furniture — that slot starts empty
-  // (nothing rendered) until a student owns something in it, same as how the
+  // Deliberately NO default for either furniture category — both are real
+  // multi-select now (lib/student/roomPlacements.ts), so an empty room is a
+  // legitimate, reachable state (a student who removes everything should see
+  // an empty room, not a forced-back default piece), same as how the
   // avatar's hat/accessory slots have no forced fallback.
-  const furnitureLargeKey = equippedKeys.furniture;
-  const furnitureSmallKey = equippedKeys.furniture_small ?? DEFAULTS.furnitureSmall;
+  const furnitureLargeKeys = equippedKeys.furniture ?? [];
+  const furnitureSmallKeys = equippedKeys.furniture_small ?? [];
   const wallDecorKey = equippedKeys.furniture_wall ?? DEFAULTS.furnitureWall;
 
   const renderWallpaper = WALLPAPERS[wallpaperKey] ?? WALLPAPERS[DEFAULTS.wallpaper];
   const renderFloor = FLOORS[floorKey] ?? FLOORS[DEFAULTS.floor];
-  const renderFurnitureLarge = furnitureLargeKey ? FURNITURE_LARGE[furnitureLargeKey] : null;
-  const renderFurnitureSmall = FURNITURE_SMALL[furnitureSmallKey] ?? FURNITURE_SMALL[DEFAULTS.furnitureSmall];
   const renderWallDecor = WALL_DECOR[wallDecorKey] ?? WALL_DECOR[DEFAULTS.furnitureWall];
 
   return (
@@ -246,8 +225,16 @@ export function RoomScene3D({ equippedKeys, mood = "neutral", className = "", on
       <Scene3D camera={{ position: [0, -0.05, 3.6], fov: 42 }}>
         {renderWallpaper()}
         {renderFloor()}
-        {renderFurnitureLarge && renderFurnitureLarge()}
-        {renderFurnitureSmall()}
+        {furnitureLargeKeys.slice(0, FURNITURE_LARGE_POSITIONS.length).map((key, i) => {
+          const render = FURNITURE_LARGE[key];
+          if (!render) return null;
+          return <group key={`furniture-${key}-${i}`}>{render(FURNITURE_LARGE_POSITIONS[i])}</group>;
+        })}
+        {furnitureSmallKeys.slice(0, FURNITURE_SMALL_POSITIONS.length).map((key, i) => {
+          const render = FURNITURE_SMALL[key];
+          if (!render) return null;
+          return <group key={`furniture-small-${key}-${i}`}>{render(FURNITURE_SMALL_POSITIONS[i])}</group>;
+        })}
         {renderWallDecor()}
         <group position={[0.35, -0.15, 0.3]}>
           <Character3D equippedKeys={equippedKeys} mood={mood} />

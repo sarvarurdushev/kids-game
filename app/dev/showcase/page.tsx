@@ -135,7 +135,7 @@ export default function ShowcasePage() {
           </div>
           <div className="w-80 rounded-2xl bg-white p-4">
             <RoomScene3D
-              equippedKeys={{ wallpaper: "wallpaper_stars", floor: "floor_rug", furniture: "furniture_bookshelf", hat: "hat_wizard" }}
+              equippedKeys={{ wallpaper: "wallpaper_stars", floor: "floor_rug", furniture: ["furniture_bookshelf", "furniture_desk"], hat: "hat_wizard" }}
               mood="happy"
             />
             <span className="text-sm font-semibold">decked out / happy</span>

@@ -12,6 +12,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "seed": "tsx --conditions=react-server scripts/seed.ts",
+    "render-thumbnails": "tsx --conditions=react-server scripts/render-thumbnails.ts",
     "create-student": "tsx --conditions=react-server scripts/create-student.ts",
     "reset-pin": "tsx --conditions=react-server scripts/reset-student-pin.ts",
     "simulate-event": "tsx scripts/simulate-classroom-event.ts"
@@ -41,6 +42,7 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "playwright": "^1.56.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.1",
     "typescript": "^5",

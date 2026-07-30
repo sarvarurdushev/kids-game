@@ -3,6 +3,7 @@ import { eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { avatarItems, roomSets, students, studentAvatarItems } from "@/lib/db/schema";
 import { ServiceError } from "./errors";
+import { placeBestEffort } from "./roomPlacements";
 
 function pieceIdsOf(set: typeof roomSets.$inferSelect): string[] {
   return [set.wallpaperItemId, set.floorItemId, set.furnitureItemId, set.furnitureSmallItemId, set.furnitureWallItemId].filter(
@@ -87,11 +88,24 @@ export async function purchaseRoomSet(studentId: string, roomSetId: string) {
       equippedFloorId: set.floorItemId,
       updatedAt: new Date(),
     };
-    if (set.furnitureItemId) equipUpdates.equippedFurnitureId = set.furnitureItemId;
-    if (set.furnitureSmallItemId) equipUpdates.equippedFurnitureSmallId = set.furnitureSmallItemId;
     if (set.furnitureWallItemId) equipUpdates.equippedFurnitureWallId = set.furnitureWallItemId;
 
     await tx.update(students).set(equipUpdates).where(eq(students.id, studentId));
+
+    // furniture/furniture_small are multi-select (room_placements) now, not
+    // a single equipped column — best-effort place each piece the set
+    // includes: if that category's already at the 3-item cap, skip it
+    // silently rather than failing the whole purchase (the student still
+    // owns the piece and can place it manually after freeing a slot).
+    const furniturePieceIds = [set.furnitureItemId, set.furnitureSmallItemId].filter(
+      (id): id is string => Boolean(id)
+    );
+    if (furniturePieceIds.length > 0) {
+      const pieceItems = await tx.select().from(avatarItems).where(inArray(avatarItems.id, furniturePieceIds));
+      for (const pieceItem of pieceItems) {
+        await placeBestEffort(tx, studentId, pieceItem);
+      }
+    }
 
     return { roomSetId, coinsRemaining: student.coinsBalance - set.coinPrice };
   });

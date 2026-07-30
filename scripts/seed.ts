@@ -13,6 +13,7 @@ import {
   packTypePool,
   packTypes,
   rewardRules,
+  roomPlacements,
   roomSets,
   studentAvatarItems,
   studentExternalRefs,
@@ -757,6 +758,36 @@ async function main() {
     }
   }
 
+  // furniture/furniture_small are multi-select (room_placements), not a
+  // single equipped column — grants the starter item a display spot at the
+  // lowest free position in its slot (0..2), same rule as
+  // lib/student/roomPlacements.ts's placeItem. A no-op if it's already
+  // placed, or (in the backfill path below) if that slot happens to already
+  // be full for this student, matching the "silently skip, don't fail"
+  // best-effort rule used everywhere else placement is auto-attempted.
+  async function placeStarterFurniture(studentId: string, item: { id: string; slot: string }) {
+    if (item.slot !== "furniture" && item.slot !== "furniture_small") return;
+    const slot = item.slot;
+    const existing = await db
+      .select()
+      .from(roomPlacements)
+      .where(sql`${roomPlacements.studentId} = ${studentId} and ${roomPlacements.slot} = ${slot}`);
+    if (existing.some((p) => p.avatarItemId === item.id)) return;
+    const taken = new Set(existing.map((p) => p.position));
+    let position = -1;
+    for (let i = 0; i < 3; i++) {
+      if (!taken.has(i)) {
+        position = i;
+        break;
+      }
+    }
+    if (position === -1) return;
+    await db
+      .insert(roomPlacements)
+      .values({ studentId, avatarItemId: item.id, slot, position })
+      .onConflictDoNothing();
+  }
+
   // --- Demo students -------------------------------------------------------
   const starterItemKeys = [
     "species_cat",
@@ -802,8 +833,6 @@ async function main() {
         | "background"
         | "wallpaper"
         | "floor"
-        | "furniture"
-        | "furniture_small"
         | "furniture_wall",
         string
       >
@@ -815,19 +844,13 @@ async function main() {
         avatarItemId: item.id,
         acquiredVia: "starter",
       });
-      starterAssignments[
-        item.slot as
-          | "species"
-          | "hair"
-          | "eyes"
-          | "clothes"
-          | "background"
-          | "wallpaper"
-          | "floor"
-          | "furniture"
-          | "furniture_small"
-          | "furniture_wall"
-      ] = item.id;
+      if (item.slot === "furniture" || item.slot === "furniture_small") {
+        await placeStarterFurniture(student.id, item);
+      } else {
+        starterAssignments[
+          item.slot as "species" | "hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture_wall"
+        ] = item.id;
+      }
     }
     await db
       .update(students)
@@ -839,8 +862,6 @@ async function main() {
         equippedBackgroundId: starterAssignments.background,
         equippedWallpaperId: starterAssignments.wallpaper,
         equippedFloorId: starterAssignments.floor,
-        equippedFurnitureId: starterAssignments.furniture,
-        equippedFurnitureSmallId: starterAssignments.furniture_small,
         equippedFurnitureWallId: starterAssignments.furniture_wall,
       })
       .where(eq(students.id, student.id));
@@ -888,8 +909,6 @@ async function main() {
         | "background"
         | "wallpaper"
         | "floor"
-        | "furniture"
-        | "furniture_small"
         | "furniture_wall",
         string
       >
@@ -901,19 +920,13 @@ async function main() {
         avatarItemId: item.id,
         acquiredVia: "starter",
       });
-      adminStarterAssignments[
-        item.slot as
-          | "species"
-          | "hair"
-          | "eyes"
-          | "clothes"
-          | "background"
-          | "wallpaper"
-          | "floor"
-          | "furniture"
-          | "furniture_small"
-          | "furniture_wall"
-      ] = item.id;
+      if (item.slot === "furniture" || item.slot === "furniture_small") {
+        await placeStarterFurniture(adminStudent.id, item);
+      } else {
+        adminStarterAssignments[
+          item.slot as "species" | "hair" | "eyes" | "clothes" | "background" | "wallpaper" | "floor" | "furniture_wall"
+        ] = item.id;
+      }
     }
     await db
       .update(students)
@@ -925,56 +938,11 @@ async function main() {
         equippedBackgroundId: adminStarterAssignments.background,
         equippedWallpaperId: adminStarterAssignments.wallpaper,
         equippedFloorId: adminStarterAssignments.floor,
-        equippedFurnitureId: adminStarterAssignments.furniture,
-        equippedFurnitureSmallId: adminStarterAssignments.furniture_small,
         equippedFurnitureWallId: adminStarterAssignments.furniture_wall,
       })
       .where(eq(students.id, adminStudent.id));
 
     console.log(`  admin student created: Admin — enrollment code "${adminEnrollmentCode}", PIN "0000"`);
-  }
-
-  // --- Migrate stale furniture equip references after the slot split -------
-  // Before furniture_small/furniture_wall existed, every furniture item
-  // (including furniture_plant) lived under the single "furniture" slot, and
-  // students had it recorded in equippedFurnitureId. furniture_plant's
-  // catalog row has since moved to "furniture_small" — that old reference is
-  // now stale: it still points at a real item, just via the wrong column.
-  // Move it to whichever column matches the item's current slot (only if
-  // that column isn't already legitimately occupied by something else, e.g.
-  // a student who separately bought furniture_lamp for that slot), otherwise
-  // just clear it.
-  const FURNITURE_EQUIP_COLUMNS: { slot: string; column: keyof typeof students.$inferInsert }[] = [
-    { slot: "furniture", column: "equippedFurnitureId" },
-    { slot: "furniture_small", column: "equippedFurnitureSmallId" },
-    { slot: "furniture_wall", column: "equippedFurnitureWallId" },
-  ];
-  const avatarItemById = new Map(avatarItemRows.map((a) => [a.id, a]));
-  const studentsForFurnitureMigration = await db.select().from(students);
-  let migratedStudents = 0;
-  for (const student of studentsForFurnitureMigration) {
-    const updates: Record<string, string | null> = {};
-    for (const { slot, column } of FURNITURE_EQUIP_COLUMNS) {
-      const equippedId = student[column as keyof typeof student] as string | null;
-      if (!equippedId) continue;
-      const item = avatarItemById.get(equippedId);
-      if (!item || item.slot === slot) continue; // correctly slotted, or a dangling id — leave alone either way
-      updates[column] = null;
-      const correctColumn = FURNITURE_EQUIP_COLUMNS.find((c) => c.slot === item.slot)?.column;
-      if (correctColumn && !student[correctColumn as keyof typeof student] && !(correctColumn in updates)) {
-        updates[correctColumn] = equippedId;
-      }
-    }
-    if (Object.keys(updates).length > 0) {
-      await db
-        .update(students)
-        .set(updates as Partial<typeof students.$inferInsert>)
-        .where(eq(students.id, student.id));
-      migratedStudents++;
-    }
-  }
-  if (migratedStudents > 0) {
-    console.log(`  migrated stale furniture-slot references for ${migratedStudents} student(s)`);
   }
 
   // --- Backfill missing starter items on existing students -----------------
@@ -992,8 +960,6 @@ async function main() {
     background: "equippedBackgroundId",
     wallpaper: "equippedWallpaperId",
     floor: "equippedFloorId",
-    furniture: "equippedFurnitureId",
-    furniture_small: "equippedFurnitureSmallId",
     furniture_wall: "equippedFurnitureWallId",
   };
   const allStudents = await db.select().from(students);
@@ -1019,6 +985,10 @@ async function main() {
     const equipUpdates: Record<string, string> = {};
     for (const key of missingKeys) {
       const item = avatarItemByKey.get(key)!;
+      if (item.slot === "furniture" || item.slot === "furniture_small") {
+        await placeStarterFurniture(student.id, item);
+        continue;
+      }
       const column = STARTER_SLOT_TO_EQUIPPED_COLUMN[item.slot];
       if (column && !student[column as keyof typeof student]) {
         equipUpdates[column] = item.id;
