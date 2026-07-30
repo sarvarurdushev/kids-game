@@ -11,6 +11,7 @@ const TABS = [
   { href: "/packs", label: "Packs", emoji: "🎁" },
   { href: "/collection", label: "Collection", emoji: "📚" },
   { href: "/avatar", label: "Avatar", emoji: "🐾" },
+  { href: "/room", label: "Room", emoji: "🛋️" },
   { href: "/achievements", label: "Badges", emoji: "🏅" },
 ] as const;
 

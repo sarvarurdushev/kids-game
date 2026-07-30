@@ -3,8 +3,8 @@
 import { usePathname, useRouter } from "next/navigation";
 
 // The bottom-nav tabs are the "home base" screens — no back button there.
-// Every other route (collection/[universeKey], games/[slug], room, etc.) gets
-// a consistent way back instead of relying on the browser's own back
+// Every other route (collection/[universeKey], games/[slug], word-book, etc.)
+// gets a consistent way back instead of relying on the browser's own back
 // gesture/button, which isn't always visible or obvious on a touch device.
 // Must stay in sync with BottomNav's TABS — "/badges" was listed here but the
 // Badges tab actually routes to /achievements, so that tab was wrongly showing
@@ -16,6 +16,7 @@ const TOP_LEVEL_PATHS = new Set([
   "/packs",
   "/collection",
   "/avatar",
+  "/room",
   "/achievements",
 ]);
 
