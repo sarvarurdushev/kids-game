@@ -136,6 +136,33 @@ const FURNITURE_SMALL_POSITION: [number, number, number] = [1.6, 0, 0.5];
 const FURNITURE_LARGE_MODEL: Record<string, { url: string; height: number }> = {
   furniture_chest: { url: "/models/furniture/chest.glb", height: 0.4 },
   furniture_bookshelf: { url: "/models/furniture/bookshelf.glb", height: 0.95 },
+  furniture_desk: { url: "/models/furniture/furniture_desk.glb", height: 0.8 },
+  // Lower than the 0.75 first guess — at 0.75 (width ~1.2) the bed's
+  // headboard post visibly poked past the back wall's left edge into the
+  // page background behind the canvas. 0.45 (width ~0.73, matching
+  // bookshelf's clean 0.73) confirmed clipping-free on screen.
+  furniture_bed: { url: "/models/furniture/furniture_bed.glb", height: 0.45 },
+  // Legendary "Dream Room Scene" tier — detailed photorealistic multi-object
+  // composites (a whole furnished corner), a distinctly more-detailed style
+  // than the rest of the room. Mechanically just more furniture_large items;
+  // see public/models/furniture/CREDITS.md for the style note.
+  //
+  // Heights below were tuned down from the original starting-point guesses
+  // after screenshots showed several of them poking past the back wall's
+  // left edge (visible as the item spilling onto the page background behind
+  // the canvas, at FURNITURE_LARGE_POSITION x=-1.5) — these wide multi-object
+  // scenes clip at notably narrower widths than a single dense prop like the
+  // bookshelf, because their content is spread more evenly across the full
+  // bounding box instead of tapering off near the edges. nurserycorner was
+  // the one exception that looked clean at its original guess and was left
+  // alone.
+  furniture_scene_storycorner: { url: "/models/furniture/scene_story_corner.glb", height: 0.6 },
+  furniture_scene_starlitbed: { url: "/models/furniture/scene_starlit_bed.glb", height: 0.4 },
+  furniture_scene_nurserycorner: { url: "/models/furniture/scene_nursery_corner.glb", height: 0.85 },
+  furniture_scene_playground: { url: "/models/furniture/scene_playground.glb", height: 0.35 },
+  furniture_scene_toycorner: { url: "/models/furniture/scene_toy_corner.glb", height: 0.4 },
+  furniture_scene_blushrug: { url: "/models/furniture/scene_blush_rug.glb", height: 0.35 },
+  furniture_scene_wovennook: { url: "/models/furniture/scene_woven_nook.glb", height: 0.15 },
 };
 
 const FURNITURE_LARGE: Record<string, () => ReactNode> = Object.fromEntries(
@@ -148,6 +175,11 @@ const FURNITURE_LARGE: Record<string, () => ReactNode> = Object.fromEntries(
 const FURNITURE_SMALL_MODEL: Record<string, { url: string; height: number }> = {
   furniture_plant: { url: "/models/furniture/plant.glb", height: 0.55 },
   furniture_lamp: { url: "/models/furniture/lamp.glb", height: 0.9 },
+  // Lower than the 0.45 first guess — at 0.45 (width ~0.7) the beanbag
+  // visibly clipped off the right edge of the frame at FURNITURE_SMALL_POSITION
+  // x=1.6. 0.3 (width ~0.47, matching the potted plant's clean ~0.47) fixed it.
+  furniture_beanbag: { url: "/models/furniture/furniture_beanbag.glb", height: 0.3 },
+  furniture_teddy: { url: "/models/furniture/furniture_teddy.glb", height: 0.4 },
 };
 
 const FURNITURE_SMALL: Record<string, () => ReactNode> = Object.fromEntries(
@@ -157,85 +189,27 @@ const FURNITURE_SMALL: Record<string, () => ReactNode> = Object.fromEntries(
   ])
 );
 
-// Wall-mount anchor for the procedural (no GLB asset yet) wall-decor items —
-// left-of-center, clear of the character (which stands around x = 0.35), and
-// just proud of the wallpaper plane (WALL_Z + 0.03) to avoid z-fighting.
+// Wall-mount anchor for the wall-decor items — left-of-center, clear of the
+// character (which stands around x = 0.35), and just proud of the wallpaper
+// plane (WALL_Z + 0.03) to avoid z-fighting.
 const WALL_DECOR_X = -0.6;
 const WALL_DECOR_Y = FLOOR_Y + WALL_HEIGHT * 0.68;
 const WALL_DECOR_Z = WALL_Z + 0.03;
 
-// Hand-drawn/procedural wall decor, matching the flat-shaded primitive style
-// used by WALLPAPERS/FLOORS above — no Tripo3D asset exists for these yet.
-const WALL_DECOR: Record<string, () => ReactNode> = {
-  wall_shelf: () => (
-    <group position={[WALL_DECOR_X, WALL_DECOR_Y, WALL_DECOR_Z]}>
-      <mesh>
-        <boxGeometry args={[0.7, 0.05, 0.16]} />
-        <meshStandardMaterial color="#8a6a45" flatShading />
-      </mesh>
-      {[
-        { x: -0.22, color: "#e63946", w: 0.07, h: 0.16 },
-        { x: -0.1, color: "#4fb3d9", w: 0.06, h: 0.19 },
-        { x: 0.02, color: "#ffd23f", w: 0.08, h: 0.14 },
-      ].map((book, i) => (
-        <mesh key={i} position={[book.x, 0.025 + book.h / 2, 0]}>
-          <boxGeometry args={[book.w, book.h, 0.12]} />
-          <meshStandardMaterial color={book.color} flatShading />
-        </mesh>
-      ))}
-    </group>
-  ),
-  wall_clock: () => (
-    <group position={[WALL_DECOR_X, WALL_DECOR_Y, WALL_DECOR_Z]}>
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.22, 0.22, 0.03, 20]} />
-        <meshStandardMaterial color="#fdeecb" flatShading />
-      </mesh>
-      <mesh>
-        <torusGeometry args={[0.22, 0.025, 8, 20]} />
-        <meshStandardMaterial color="#8a6a45" flatShading />
-      </mesh>
-      <mesh position={[0, 0.06, 0.02]} rotation={[0, 0, Math.PI / 8]}>
-        <boxGeometry args={[0.025, 0.14, 0.02]} />
-        <meshStandardMaterial color="#2d2a26" flatShading />
-      </mesh>
-      <mesh position={[0.05, 0, 0.02]} rotation={[0, 0, -Math.PI / 2.4]}>
-        <boxGeometry args={[0.02, 0.1, 0.02]} />
-        <meshStandardMaterial color="#2d2a26" flatShading />
-      </mesh>
-    </group>
-  ),
-  wall_picture: () => (
-    <group position={[WALL_DECOR_X, WALL_DECOR_Y, WALL_DECOR_Z]}>
-      <mesh>
-        <boxGeometry args={[0.46, 0.38, 0.03]} />
-        <meshStandardMaterial color="#8a6a45" flatShading />
-      </mesh>
-      <mesh position={[0, 0, 0.02]}>
-        <planeGeometry args={[0.38, 0.3]} />
-        <meshStandardMaterial color="#ffe8a3" flatShading />
-      </mesh>
-      <mesh position={[0, 0, 0.025]}>
-        <circleGeometry args={[0.1, 16]} />
-        <meshStandardMaterial color="#ffd23f" flatShading />
-      </mesh>
-      {[0, 45, 90, 135].map((deg) => (
-        <mesh key={deg} position={[0, 0, 0.023]} rotation={[0, 0, (deg * Math.PI) / 180]}>
-          <planeGeometry args={[0.03, 0.24]} />
-          <meshStandardMaterial color="#ffd23f" flatShading />
-        </mesh>
-      ))}
-      <mesh position={[-0.03, 0.02, 0.028]}>
-        <circleGeometry args={[0.012, 8]} />
-        <meshStandardMaterial color="#2d2a26" flatShading />
-      </mesh>
-      <mesh position={[0.03, 0.02, 0.028]}>
-        <circleGeometry args={[0.012, 8]} />
-        <meshStandardMaterial color="#2d2a26" flatShading />
-      </mesh>
-    </group>
-  ),
+// Real Tripo3D-generated wall decor (see public/models/furniture/CREDITS.md),
+// same GLB-model pattern as FURNITURE_LARGE_MODEL/FURNITURE_SMALL_MODEL above.
+const WALL_DECOR_MODEL: Record<string, { url: string; height: number }> = {
+  wall_shelf: { url: "/models/furniture/wall_shelf.glb", height: 0.22 },
+  wall_clock: { url: "/models/furniture/wall_clock.glb", height: 0.45 },
+  wall_picture: { url: "/models/furniture/wall_picture.glb", height: 0.4 },
 };
+
+const WALL_DECOR: Record<string, () => ReactNode> = Object.fromEntries(
+  Object.entries(WALL_DECOR_MODEL).map(([key, { url, height }]) => [
+    key,
+    () => <Prop3D url={url} targetHeight={height} anchor="wall" position={[WALL_DECOR_X, WALL_DECOR_Y, WALL_DECOR_Z]} />,
+  ])
+);
 
 const DEFAULTS = {
   wallpaper: "wallpaper_plain",

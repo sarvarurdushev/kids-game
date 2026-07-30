@@ -394,6 +394,26 @@ async function main() {
     { slot: "furniture_wall", key: "wall_shelf", name: "Floating Shelf", acquisitionMethod: "starter" as const },
     { slot: "furniture_wall", key: "wall_clock", name: "Wall Clock", acquisitionMethod: "coin_purchase" as const, coinPrice: 80 },
     { slot: "furniture_wall", key: "wall_picture", name: "Sunny Picture", acquisitionMethod: "coin_purchase" as const, coinPrice: 200 },
+
+    // Real Tripo3D-generated furniture (see public/models/furniture/CREDITS.md)
+    // — clean single-object pieces slotting in as regular catalog items.
+    { slot: "furniture", key: "furniture_desk", name: "Study Desk", acquisitionMethod: "coin_purchase" as const, rarity: "rare" as const, coinPrice: 300 },
+    { slot: "furniture", key: "furniture_bed", name: "Cozy Bed", acquisitionMethod: "coin_purchase" as const, rarity: "epic" as const, coinPrice: 450 },
+    { slot: "furniture_small", key: "furniture_beanbag", name: "Beanbag Chair", acquisitionMethod: "coin_purchase" as const, rarity: "rare" as const, coinPrice: 150 },
+    { slot: "furniture_small", key: "furniture_teddy", name: "Teddy Bear", acquisitionMethod: "coin_purchase" as const, rarity: "common" as const, coinPrice: 100 },
+
+    // "Dream Room Scene" legendary tier — photorealistic multi-object scene
+    // composites from the same Tripo3D batch, a distinctly more-detailed
+    // style than the rest of the room. Mechanically just `furniture` (large)
+    // items, priced as premium "fancy imported" statement pieces. See
+    // public/models/furniture/CREDITS.md for the style note.
+    { slot: "furniture", key: "furniture_scene_storycorner", name: "Dreamy Story Corner", acquisitionMethod: "coin_purchase" as const, rarity: "legendary" as const, coinPrice: 800 },
+    { slot: "furniture", key: "furniture_scene_starlitbed", name: "Starlit Bed Nook", acquisitionMethod: "coin_purchase" as const, rarity: "legendary" as const, coinPrice: 700 },
+    { slot: "furniture", key: "furniture_scene_nurserycorner", name: "Cozy Nursery Corner", acquisitionMethod: "coin_purchase" as const, rarity: "legendary" as const, coinPrice: 800 },
+    { slot: "furniture", key: "furniture_scene_playground", name: "Backyard Playground", acquisitionMethod: "coin_purchase" as const, rarity: "legendary" as const, coinPrice: 900 },
+    { slot: "furniture", key: "furniture_scene_toycorner", name: "Pastel Toy Corner", acquisitionMethod: "coin_purchase" as const, rarity: "legendary" as const, coinPrice: 700 },
+    { slot: "furniture", key: "furniture_scene_blushrug", name: "Blush Playtime Rug", acquisitionMethod: "coin_purchase" as const, rarity: "legendary" as const, coinPrice: 700 },
+    { slot: "furniture", key: "furniture_scene_wovennook", name: "Woven Basket Nook", acquisitionMethod: "coin_purchase" as const, rarity: "legendary" as const, coinPrice: 700 },
   ];
 
   await db

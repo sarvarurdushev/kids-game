@@ -111,6 +111,80 @@ const FURNITURE_LARGE: Record<string, () => ReactNode> = {
       ))}
     </>
   ),
+  furniture_desk: () => (
+    <>
+      <rect x={12} y={172} width={64} height={8} rx={2} fill="#8a6a45" />
+      <rect x={16} y={180} width={6} height={18} fill="#6b5236" />
+      <rect x={66} y={180} width={6} height={18} fill="#6b5236" />
+      <rect x={26} y={156} width={30} height={18} rx={2} fill="#4a4a4a" />
+      <rect x={28} y={158} width={26} height={13} fill="#8ecae6" />
+    </>
+  ),
+  furniture_bed: () => (
+    <>
+      <rect x={10} y={120} width={68} height={22} rx={4} fill="#c8925c" />
+      <rect x={12} y={150} width={64} height={48} rx={6} fill="#f4a6b7" stroke="#c97f91" strokeWidth={2} />
+      <rect x={12} y={150} width={64} height={16} rx={6} fill="#fff" opacity={0.85} />
+      <ellipse cx={26} cy={158} rx={10} ry={7} fill="#fff" />
+    </>
+  ),
+  // "Dream Room Scene" legendary tier — photorealistic multi-object scene
+  // composites in the real 3D model; these are quick flat placeholder icons
+  // for the shop thumbnail only (same "not elaborate, just not blank" bar as
+  // the rest of this file — see public/models/furniture/CREDITS.md).
+  furniture_scene_storycorner: () => (
+    <>
+      <path d="M 12 198 L 26 132 L 62 132 L 76 198 Z" fill="#d8bfe0" stroke="#a97fc2" strokeWidth={2} strokeLinejoin="round" />
+      <path d="M 26 132 L 44 108 L 62 132 Z" fill="#c9a3dc" stroke="#a97fc2" strokeWidth={2} strokeLinejoin="round" />
+      <circle cx={44} cy={122} r={3} fill="#ffd23f" />
+    </>
+  ),
+  furniture_scene_starlitbed: () => (
+    <>
+      <rect x={12} y={158} width={64} height={40} rx={6} fill="#3d3f7a" stroke="#282a5c" strokeWidth={2} />
+      <rect x={12} y={158} width={64} height={14} rx={6} fill="#5a5da3" />
+      {[[20, 132], [40, 120], [60, 134]].map(([cx, cy], i) => (
+        <circle key={i} cx={cx} cy={cy} r={2} fill="#ffe8a3" />
+      ))}
+    </>
+  ),
+  furniture_scene_nurserycorner: () => (
+    <>
+      <rect x={16} y={140} width={52} height={40} rx={6} fill="#fdeecb" stroke="#e3c98f" strokeWidth={2} />
+      {[24, 34, 44, 54, 64].map((x, i) => (
+        <rect key={i} x={x} y={144} width={3} height={30} fill="#e3c98f" />
+      ))}
+      <ellipse cx={42} cy={190} rx={30} ry={8} fill="#c8925c" opacity={0.4} />
+    </>
+  ),
+  furniture_scene_playground: () => (
+    <>
+      <rect x={14} y={110} width={8} height={88} fill="#4fb3d9" />
+      <path d="M 22 118 L 70 178 L 62 186 L 16 130 Z" fill="#ffd23f" stroke="#e0a800" strokeWidth={2} strokeLinejoin="round" />
+      <rect x={58} y={182} width={16} height={16} rx={3} fill="#e63946" />
+    </>
+  ),
+  furniture_scene_toycorner: () => (
+    <>
+      <circle cx={30} cy={175} r={20} fill="#f4a6b7" />
+      <circle cx={55} cy={182} r={14} fill="#a3d9c9" />
+      <circle cx={30} cy={155} r={10} fill="#f4a6b7" />
+      <circle cx={22} cy={150} r={3} fill="#2d2a26" />
+      <circle cx={38} cy={150} r={3} fill="#2d2a26" />
+    </>
+  ),
+  furniture_scene_blushrug: () => (
+    <>
+      <ellipse cx={44} cy={188} rx={34} ry={12} fill="#f4a6b7" />
+      <ellipse cx={44} cy={188} rx={22} ry={7.5} fill="#fff" opacity={0.5} />
+    </>
+  ),
+  furniture_scene_wovennook: () => (
+    <>
+      <ellipse cx={44} cy={191} rx={32} ry={9} fill="#d8b98a" />
+      <ellipse cx={44} cy={191} rx={32} ry={9} fill="none" stroke="#b8956a" strokeWidth={1.5} strokeDasharray="4 3" />
+    </>
+  ),
 };
 
 // Small furniture moves to the right side of the room, mirroring the large
@@ -129,6 +203,22 @@ const FURNITURE_SMALL: Record<string, () => ReactNode> = {
       <ellipse cx={44} cy={198} rx={20} ry={5} fill="#8a6a45" opacity={0.5} />
       <rect x={41} y={130} width={6} height={68} fill="#8a6a45" />
       <path d="M 20 108 L 68 108 L 58 134 L 30 134 Z" fill="#ffd76a" stroke="#e0a800" strokeWidth={1.5} />
+    </g>
+  ),
+  furniture_beanbag: () => (
+    <g transform="translate(180, 0)">
+      <ellipse cx={44} cy={185} rx={28} ry={16} fill="#f7b955" />
+      <ellipse cx={44} cy={182} rx={11} ry={6} fill="#fdeecb" />
+    </g>
+  ),
+  furniture_teddy: () => (
+    <g transform="translate(180, 0)">
+      <circle cx={44} cy={178} r={16} fill="#c8925c" />
+      <circle cx={32} cy={162} r={7} fill="#c8925c" />
+      <circle cx={56} cy={162} r={7} fill="#c8925c" />
+      <circle cx={44} cy={175} r={9} fill="#e3bf94" />
+      <circle cx={39} cy={172} r={1.5} fill="#2d2a26" />
+      <circle cx={49} cy={172} r={1.5} fill="#2d2a26" />
     </g>
   ),
 };
