@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Nunito, Baloo_2 } from "next/font/google";
+import { MusicProvider } from "@/components/music/MusicProvider";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -27,7 +28,9 @@ export default function RootLayout({
       lang="en"
       className={`${nunito.variable} ${baloo.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-cream text-ink">{children}</body>
+      <body className="min-h-full flex flex-col bg-cream text-ink">
+        <MusicProvider>{children}</MusicProvider>
+      </body>
     </html>
   );
 }

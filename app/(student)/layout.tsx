@@ -3,6 +3,7 @@ import { requireStudent } from "@/lib/auth/requireStudent";
 import { BottomNav } from "@/components/nav/BottomNav";
 import { BackButton } from "@/components/nav/BackButton";
 import { SoundToggle } from "@/components/ui/SoundToggle";
+import { MusicToggle } from "@/components/ui/MusicToggle";
 import { CurriculumAnnouncement } from "@/components/curriculum/CurriculumAnnouncement";
 import { getClaimableQuestCount } from "@/lib/reward-engine/quests";
 
@@ -19,7 +20,10 @@ export default async function StudentLayout({
     <div className="relative flex min-h-full flex-1 flex-col overflow-hidden bg-gradient-to-b from-gold/20 via-cream to-cream">
       <div className="pointer-events-none absolute -top-16 -left-16 h-56 w-56 rounded-full bg-teal/15 blur-3xl" />
       <div className="pointer-events-none absolute top-40 -right-20 h-64 w-64 rounded-full bg-coral/15 blur-3xl" />
-      <SoundToggle className="fixed top-4 right-4 z-20" />
+      <div className="fixed top-4 right-4 z-20 flex gap-2">
+        <MusicToggle />
+        <SoundToggle />
+      </div>
       <BackButton />
       <CurriculumAnnouncement studentId={student.id} />
       <main className="relative z-10 mx-auto w-full max-w-md flex-1 px-4 pt-14 pb-24 sm:max-w-2xl sm:px-6 lg:max-w-5xl lg:px-10">

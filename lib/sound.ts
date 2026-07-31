@@ -21,6 +21,14 @@ function getContext(): AudioContext | null {
   return audioContext;
 }
 
+// lib/music.ts (the background-music engine) reuses this exact context
+// instance rather than creating its own — one AudioContext for the whole
+// app, shared by sound effects and music alike, so they're never fighting
+// the audio hardware or a browser's per-tab context limit.
+export function getAudioContext(): AudioContext | null {
+  return getContext();
+}
+
 export function isSoundMuted(): boolean {
   if (typeof window === "undefined") return true;
   const stored = window.localStorage.getItem(MUTE_KEY);
