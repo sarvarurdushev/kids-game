@@ -18,7 +18,13 @@ export interface FurnitureModelSpec {
 export const FURNITURE_LARGE_MODEL: Record<string, FurnitureModelSpec> = {
   furniture_chest: { url: "/models/furniture/chest.glb", height: 0.4 },
   furniture_bookshelf: { url: "/models/furniture/bookshelf.glb", height: 0.95 },
-  furniture_desk: { url: "/models/furniture/furniture_desk.glb", height: 0.8 },
+  // Lower than the 0.8 first guess — this desk is unusually wide relative to
+  // its height (a real GLB measurement showed its scaled width at 0.8 was
+  // 0.98, almost as wide as the whole gap between two furniture slots),
+  // which swallowed the neighboring slot's item almost entirely when both
+  // were placed at once. 0.62 brings its width down to ~0.76, in line with
+  // the other large pieces.
+  furniture_desk: { url: "/models/furniture/furniture_desk.glb", height: 0.62 },
   // Lower than the 0.75 first guess — at 0.75 (width ~1.2) the bed's
   // headboard post visibly poked past the back wall's left edge into the
   // page background behind the canvas. 0.45 (width ~0.73, matching

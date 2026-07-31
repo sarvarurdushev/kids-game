@@ -133,25 +133,31 @@ const FLOORS: Record<string, () => ReactNode> = {
 // Tuned via real Playwright screenshots against the running dev server
 // (enroll GOLD-ADMIN, buy/place 3 large + 3 small at once, screenshot,
 // adjust — same technique the single-item height comments below document).
-// First guesses spread wider (down to x=-2.15/x=2.05) and clipped the
-// leftmost/rightmost slot off the visible frame — pulled inward from there.
-// Position 0 (the tightest spot, since it's furthest from center) was
-// specifically re-verified with a "Dream Room Scene" legendary composite
-// (the widest/most clip-prone tier — furniture_scene_storycorner) swapped
-// in alongside the other two large pieces, since those clip at narrower
-// widths than a single dense prop like the bookshelf.
+// A first multi-item pass spaced these at ~0.6 unit gaps, which looked fine
+// for pairs of narrow items but badly overlapped once a wide item (the desk,
+// scaled width ~0.98) landed next to a neighbor — its footprint alone nearly
+// spanned the gap to the next slot, swallowing it almost entirely. Re-measured
+// every large item's actual scaled width via a headless GLTFLoader pass
+// (not just eyeballing screenshots) and widened the gaps to ~0.9 units,
+// enough clearance for the two widest items (desk ~0.76 after also shrinking
+// its target height, bookshelf/scenes ~0.6-0.8) to sit side by side without
+// touching. Position 0 (the tightest spot, since it's furthest from center)
+// was re-verified with a "Dream Room Scene" legendary composite (the
+// widest/most clip-prone tier) swapped in alongside the other two pieces.
 const FURNITURE_LARGE_POSITIONS: [number, number, number][] = [
-  [-1.75, 0, -0.4],
-  [-1.1, 0, -0.35],
-  [-0.5, 0, -0.2],
+  [-1.95, 0, -0.45],
+  [-1.05, 0, -0.35],
+  [-0.15, 0, -0.15],
 ];
 // Small: spread along the right side, foreground, clear of the large pieces
-// and the character. Same clipping-then-pull-inward tuning pass as large
-// above (first guess out to x=1.75 clipped the rightmost slot).
+// and the character. Same re-measured-widths tuning pass as large above —
+// widths here (plant/beanbag ~0.47, lamp ~0.31, teddy ~0.4) are smaller than
+// large furniture, so gaps only needed to widen from ~0.35-0.4 to ~0.5-0.55,
+// not as far as the large cluster.
 const FURNITURE_SMALL_POSITIONS: [number, number, number][] = [
-  [1.5, 0, 0.4],
-  [1.1, 0, 0.25],
-  [0.75, 0, 0.5],
+  [1.55, 0, 0.4],
+  [1.02, 0, 0.28],
+  [0.55, 0, 0.45],
 ];
 
 // FURNITURE_LARGE_MODEL/FURNITURE_SMALL_MODEL/WALL_DECOR_MODEL (the actual
