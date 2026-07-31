@@ -62,11 +62,30 @@ const SLOT_LABELS: Record<RoomSlot, string> = {
 const PLACEMENT_SLOTS = new Set<RoomSlot>(["furniture", "furniture_small"]);
 const ROOM_PLACEMENT_CAP = 3;
 
-// Grid tiles for these three slots use pre-rendered static thumbnails
-// (scripts/render-thumbnails.ts) instead of a live RoomScene SVG — real GLB
-// pieces, so a static PNG snapshot is available. wallpaper/floor have no GLB
-// (still hand-drawn SVG patterns), so their tiles keep using RoomScene.
-const THUMBNAIL_SLOTS = new Set<RoomSlot>(["furniture", "furniture_small", "furniture_wall"]);
+// Grid tiles for these slots use pre-rendered static thumbnails
+// (scripts/render-thumbnails.ts) instead of a live RoomScene SVG.
+// furniture/furniture_small/furniture_wall are real GLB pieces; wallpaper/
+// floor are procedural plane geometry (no GLB) but render-thumbnails.ts
+// still pre-renders them via a vanilla-three.js recipe mirroring
+// RoomScene3D.tsx's WALLPAPERS/FLOORS, so they get static PNGs too.
+const THUMBNAIL_SLOTS = new Set<RoomSlot>([
+  "furniture",
+  "furniture_small",
+  "furniture_wall",
+  "wallpaper",
+  "floor",
+]);
+
+// Every furniture-ish slot shares one output folder (public/thumbnails/furniture/);
+// wallpaper/floor each get their own folder — see scripts/render-thumbnails.ts's
+// OUT_FURNITURE/OUT_WALLPAPER/OUT_FLOOR.
+const THUMBNAIL_FOLDER: Partial<Record<RoomSlot, string>> = {
+  furniture: "furniture",
+  furniture_small: "furniture",
+  furniture_wall: "furniture",
+  wallpaper: "wallpaper",
+  floor: "floor",
+};
 
 export function RoomCustomizer({
   items,
@@ -296,7 +315,7 @@ export function RoomCustomizer({
               <div className={`w-full overflow-hidden rounded-xl ${item.state === "locked" ? "opacity-40 grayscale" : ""}`}>
                 {THUMBNAIL_SLOTS.has(item.slot) ? (
                   <ThumbnailImage
-                    src={`/thumbnails/furniture/${item.key}.png`}
+                    src={`/thumbnails/${THUMBNAIL_FOLDER[item.slot]}/${item.key}.png`}
                     alt={item.name}
                     className="aspect-[3/2] w-full rounded-xl bg-white"
                   />

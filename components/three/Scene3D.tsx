@@ -44,9 +44,9 @@ export function Scene3D({
       <Suspense fallback={null}>
         <Environment files="/env/studio.hdr" />
       </Suspense>
-      <ambientLight intensity={0.4} />
-      <directionalLight position={[3, 4, 4]} intensity={1.15} />
-      <directionalLight position={[-3, 1.5, -2]} intensity={0.4} color="#bcd9ff" />
+      <ambientLight intensity={0.34} />
+      <directionalLight position={[3, 4, 4]} intensity={0.98} />
+      <directionalLight position={[-3, 1.5, -2]} intensity={0.34} color="#bcd9ff" />
       {children}
     </Canvas>
   );

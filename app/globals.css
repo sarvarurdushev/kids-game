@@ -1,14 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fffaf0;
+  /* Cream was #fffaf0 (near-white, luminance ~250/255) — nudged a touch
+     warmer/deeper for an "eye friendly" pass (owner feedback: real
+     screenshots read too bright/glary). Kept subtle on purpose: this token
+     is the page background AND (via Card.tsx) the default card surface, so
+     it's the single biggest lever for softening overall page brightness
+     without touching the gold/teal/coral accent hues that give the app its
+     identity. */
+  --background: #faf2dc;
   --foreground: #2d2a26;
 
   --color-gk-gold: #ffb703;
   --color-gk-gold-dark: #e89400;
   --color-gk-teal: #219ebc;
   --color-gk-coral: #fb6f92;
-  --color-gk-cream: #fffaf0;
+  --color-gk-cream: #faf2dc;
   --color-gk-ink: #2d2a26;
 
   --color-rarity-common: #8d99ae;
