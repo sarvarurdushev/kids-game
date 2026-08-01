@@ -27,7 +27,7 @@ export default async function PacksPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-bold">Packs</h1>
+        <h1 className="font-display text-2xl font-bold lg:text-4xl">Packs</h1>
         <p className="flex items-center gap-1 text-ink/60">
           <CoinIcon size={18} /> {student.coinsBalance} coins
         </p>

@@ -15,7 +15,7 @@ export default async function QuestsPage() {
     <div className="flex flex-col gap-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold">Quests</h1>
+          <h1 className="font-display text-2xl font-bold lg:text-4xl">Quests</h1>
           <p className="text-ink/60">
             {claimable > 0
               ? `${claimable} reward${claimable === 1 ? "" : "s"} ready to claim!`

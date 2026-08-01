@@ -30,7 +30,7 @@ export default async function CollectionPage() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="font-display text-2xl font-bold">Collection Book</h1>
+        <h1 className="font-display text-2xl font-bold lg:text-4xl">Collection Book</h1>
         <p className="text-ink/60">Keep collecting to fill every universe!</p>
         <p className="mt-1 flex items-center gap-1 font-semibold text-ink/60">
           <span aria-hidden>✨</span> {student.cardShards} shards

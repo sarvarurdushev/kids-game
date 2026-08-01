@@ -23,11 +23,11 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center gap-3">
-        <Sparx size={64} />
-        <div className="relative flex-1 rounded-2xl rounded-bl-none bg-white/90 px-4 py-3 shadow-sm">
-          <h1 className="font-display text-lg font-bold">Hi, {dashboard.displayName}!</h1>
-          <p className="text-sm text-ink/60">Ready for today&apos;s adventure?</p>
+      <div className="flex items-center gap-3 lg:gap-5">
+        <Sparx size={64} className="lg:h-24 lg:w-24" />
+        <div className="relative flex-1 rounded-2xl rounded-bl-none bg-white/90 px-4 py-3 shadow-sm lg:px-6 lg:py-5">
+          <h1 className="font-display text-lg font-bold lg:text-3xl">Hi, {dashboard.displayName}!</h1>
+          <p className="text-sm text-ink/60 lg:text-lg">Ready for today&apos;s adventure?</p>
         </div>
       </div>
 
@@ -38,23 +38,23 @@ export default async function HomePage() {
         coinsBalance={dashboard.coinsBalance}
       />
 
-      <Card className="flex items-center gap-4">
-        <LevelRing progress={ringProgress} size={92}>
-          <span className="font-display text-2xl leading-none font-bold text-gold-dark">
+      <Card className="flex items-center gap-4 lg:gap-8 lg:p-8">
+        <LevelRing progress={ringProgress} size={104}>
+          <span className="font-display text-2xl leading-none font-bold text-gold-dark lg:text-4xl">
             {dashboard.level.level}
           </span>
-          <span className="text-[9px] font-bold tracking-wide text-ink/40 uppercase">Level</span>
+          <span className="text-[9px] font-bold tracking-wide text-ink/40 uppercase lg:text-xs">Level</span>
         </LevelRing>
-        <div className="flex flex-1 flex-col gap-2">
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <CoinIcon size={22} />
+        <div className="flex flex-1 flex-col gap-2 lg:gap-3">
+          <div className="flex items-center gap-2 text-sm font-semibold lg:text-xl">
+            <CoinIcon size={22} className="lg:h-8 lg:w-8" />
             {dashboard.coinsBalance} coins
           </div>
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <FlameIcon size={22} />
+          <div className="flex items-center gap-2 text-sm font-semibold lg:text-xl">
+            <FlameIcon size={22} className="lg:h-8 lg:w-8" />
             {dashboard.currentStreak} day streak
           </div>
-          <div className="flex items-center gap-2 text-sm font-semibold">
+          <div className="flex items-center gap-2 text-sm font-semibold lg:text-xl">
             <span aria-hidden>✨</span>
             {dashboard.cardShards} shards
           </div>

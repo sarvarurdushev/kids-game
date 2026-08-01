@@ -26,7 +26,7 @@ export default async function StudentLayout({
       </div>
       <BackButton />
       <CurriculumAnnouncement studentId={student.id} />
-      <main className="relative z-10 mx-auto w-full max-w-md flex-1 px-4 pt-14 pb-24 sm:max-w-2xl sm:px-6 lg:max-w-5xl lg:px-10">
+      <main className="relative z-10 mx-auto w-full max-w-md flex-1 px-4 pt-14 pb-24 sm:max-w-2xl sm:px-6 lg:max-w-6xl lg:px-10 xl:max-w-7xl">
         {children}
       </main>
       <BottomNav questBadge={questBadge} />

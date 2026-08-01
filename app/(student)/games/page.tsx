@@ -63,7 +63,7 @@ export default async function GamesPage() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="font-display text-2xl font-bold">Game Arcade</h1>
+        <h1 className="font-display text-2xl font-bold lg:text-4xl">Game Arcade</h1>
         <p className="text-ink/60">
           {sessionsRemaining > 0
             ? `${sessionsRemaining} rewarded round${sessionsRemaining === 1 ? "" : "s"} left today — play any game!`

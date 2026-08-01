@@ -18,7 +18,7 @@ export default async function CasesPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-display text-2xl font-bold">Character cases</h1>
+        <h1 className="font-display text-2xl font-bold lg:text-4xl">Character cases</h1>
         <p className="flex items-center gap-1 text-ink/60">
           <CoinIcon size={18} /> {student.coinsBalance} coins
         </p>
