@@ -55,12 +55,16 @@ const SLOT_LABELS: Record<RoomSlot, string> = {
   furniture_wall: "Wall Decor",
 };
 
-// furniture/furniture_small are multi-select (up to ROOM_PLACEMENT_CAP = 3
-// slots each — lib/student/roomPlacements.ts) with their own Place/Remove
-// actions; every other slot keeps the original single-select Use/In-use
-// pattern.
+// furniture/furniture_small are multi-select (up to ROOM_PLACEMENT_CAP slots
+// each — lib/student/roomPlacements.ts, kept in sync by hand here since this
+// is a client component and that module is server-only) with their own
+// Place/Remove actions; every other slot keeps the original single-select
+// Use/In-use pattern.
 const PLACEMENT_SLOTS = new Set<RoomSlot>(["furniture", "furniture_small"]);
-const ROOM_PLACEMENT_CAP = 3;
+const ROOM_PLACEMENT_CAP: Partial<Record<RoomSlot, number>> = {
+  furniture: 4,
+  furniture_small: 3,
+};
 
 // Grid tiles for these slots use pre-rendered static thumbnails
 // (scripts/render-thumbnails.ts) instead of a live RoomScene SVG.
@@ -219,6 +223,7 @@ export function RoomCustomizer({
   const placedCount = PLACEMENT_SLOTS.has(activeSlot)
     ? items.filter((i) => i.slot === activeSlot && i.equipped).length
     : null;
+  const activeCap = ROOM_PLACEMENT_CAP[activeSlot] ?? 0;
 
   return (
     <div className="flex flex-col gap-5">
@@ -246,7 +251,7 @@ export function RoomCustomizer({
 
       {placedCount !== null && (
         <p className="text-center text-xs font-semibold text-ink/50">
-          {placedCount}/{ROOM_PLACEMENT_CAP} placed
+          {placedCount}/{activeCap} placed
         </p>
       )}
 
@@ -353,14 +358,14 @@ export function RoomCustomizer({
                 variant="ghost"
                 className="!px-3 !py-1 !text-xs"
                 onClick={() => place(item)}
-                disabled={busyId === item.id || (placedCount ?? 0) >= ROOM_PLACEMENT_CAP}
+                disabled={busyId === item.id || (placedCount ?? 0) >= activeCap}
                 title={
-                  (placedCount ?? 0) >= ROOM_PLACEMENT_CAP
-                    ? `Room is full (${ROOM_PLACEMENT_CAP}/${ROOM_PLACEMENT_CAP}) — remove something first`
+                  (placedCount ?? 0) >= activeCap
+                    ? `Room is full (${activeCap}/${activeCap}) — remove something first`
                     : undefined
                 }
               >
-                {(placedCount ?? 0) >= ROOM_PLACEMENT_CAP ? "Room full" : "Place"}
+                {(placedCount ?? 0) >= activeCap ? "Room full" : "Place"}
               </Button>
             )}
             {item.state === "purchasable" && (
@@ -439,9 +444,9 @@ export function RoomCustomizer({
                   void place(previewItem);
                   setPreviewItem(null);
                 }}
-                disabled={busyId === previewItem.id || (placedCount ?? 0) >= ROOM_PLACEMENT_CAP}
+                disabled={busyId === previewItem.id || (placedCount ?? 0) >= activeCap}
               >
-                {(placedCount ?? 0) >= ROOM_PLACEMENT_CAP ? "Room full" : "Place"}
+                {(placedCount ?? 0) >= activeCap ? "Room full" : "Place"}
               </Button>
             )
           ) : previewItem.equipped ? (

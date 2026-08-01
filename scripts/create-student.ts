@@ -34,11 +34,13 @@ function randomEnrollmentCode(name: string): string {
   return `GOLD-${prefix}-${suffix}`;
 }
 
-// Grants the starter item a display spot at the lowest free position (0..2)
-// in its slot, same rule as lib/student/roomPlacements.ts's placeItem. A
-// no-op if it's already placed or that slot is already full — matches the
-// "silently skip, don't fail" best-effort rule used everywhere else
-// placement is auto-attempted (mirrors scripts/seed.ts's identical helper).
+// Grants the starter item a display spot at the lowest free position in its
+// slot, same rule (and same per-slot caps) as lib/student/roomPlacements.ts's
+// placeItem/ROOM_PLACEMENT_CAP. A no-op if it's already placed or that slot
+// is already full — matches the "silently skip, don't fail" best-effort rule
+// used everywhere else placement is auto-attempted (mirrors scripts/seed.ts's
+// identical helper).
+const STARTER_PLACEMENT_CAP: Record<string, number> = { furniture: 4, furniture_small: 3 };
 async function placeStarterFurniture(studentId: string, item: { id: string; slot: string }) {
   if (item.slot !== "furniture" && item.slot !== "furniture_small") return;
   const slot = item.slot;
@@ -49,7 +51,7 @@ async function placeStarterFurniture(studentId: string, item: { id: string; slot
   if (existing.some((p) => p.avatarItemId === item.id)) return;
   const taken = new Set(existing.map((p) => p.position));
   let position = -1;
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < STARTER_PLACEMENT_CAP[slot]; i++) {
     if (!taken.has(i)) {
       position = i;
       break;

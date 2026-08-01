@@ -10,21 +10,25 @@ import type { AvatarEquippedKeys, AvatarMood } from "@/components/avatar/AvatarC
 const FLOOR_Y = -0.85;
 const WALL_Z = -1.3;
 const WALL_HEIGHT = 2.6;
+// Widened from 5 to fit a 4th big-furniture slot without crowding — see
+// FURNITURE_LARGE_POSITIONS below for the full story. Floor depth (3)
+// unchanged; only width grew.
+const ROOM_WIDTH = 7.6;
 
 const WALLPAPERS: Record<string, () => ReactNode> = {
   wallpaper_plain: () => (
     <mesh position={[0, FLOOR_Y + WALL_HEIGHT / 2, WALL_Z]}>
-      <planeGeometry args={[5, WALL_HEIGHT]} />
+      <planeGeometry args={[ROOM_WIDTH, WALL_HEIGHT]} />
       <meshStandardMaterial color="#fdeecb" flatShading />
     </mesh>
   ),
   wallpaper_stripes: () => (
     <group>
       <mesh position={[0, FLOOR_Y + WALL_HEIGHT / 2, WALL_Z]}>
-        <planeGeometry args={[5, WALL_HEIGHT]} />
+        <planeGeometry args={[ROOM_WIDTH, WALL_HEIGHT]} />
         <meshStandardMaterial color="#fdeecb" flatShading />
       </mesh>
-      {[-1.8, -1, -0.2, 0.6, 1.4].map((x, i) => (
+      {[-2.8, -2, -1.2, -0.4, 0.4, 1.2, 2] .map((x, i) => (
         <mesh key={i} position={[x, FLOOR_Y + WALL_HEIGHT / 2, WALL_Z + 0.01]}>
           <planeGeometry args={[0.4, WALL_HEIGHT]} />
           <meshStandardMaterial color="#ffd9e6" flatShading />
@@ -35,15 +39,15 @@ const WALLPAPERS: Record<string, () => ReactNode> = {
   wallpaper_stars: () => (
     <group>
       <mesh position={[0, FLOOR_Y + WALL_HEIGHT / 2, WALL_Z]}>
-        <planeGeometry args={[5, WALL_HEIGHT]} />
+        <planeGeometry args={[ROOM_WIDTH, WALL_HEIGHT]} />
         <meshStandardMaterial color="#26315f" flatShading />
       </mesh>
-      <mesh position={[1.7, FLOOR_Y + WALL_HEIGHT - 0.5, WALL_Z + 0.02]}>
+      <mesh position={[2.6, FLOOR_Y + WALL_HEIGHT - 0.5, WALL_Z + 0.02]}>
         <sphereGeometry args={[0.22, 8, 8]} />
         <meshStandardMaterial color="#ffe8a3" flatShading emissive="#ffe8a3" emissiveIntensity={0.4} />
       </mesh>
       {[
-        [-1.6, 0.6], [-0.8, 1.3], [0, 0.4], [0.9, 1.1], [1.3, 0.3], [-1.2, -0.2],
+        [-2.6, 0.6], [-1.8, 1.3], [-1, 0.4], [0, 1.1], [0.9, 0.3], [-2.2, -0.2], [1.8, 0.7], [1.2, -0.3],
       ].map(([x, y], i) => (
         <mesh key={i} position={[x, FLOOR_Y + WALL_HEIGHT / 2 + y, WALL_Z + 0.02]}>
           <octahedronGeometry args={[0.04, 0]} />
@@ -55,12 +59,12 @@ const WALLPAPERS: Record<string, () => ReactNode> = {
   wallpaper_dots: () => (
     <group>
       <mesh position={[0, FLOOR_Y + WALL_HEIGHT / 2, WALL_Z]}>
-        <planeGeometry args={[5, WALL_HEIGHT]} />
+        <planeGeometry args={[ROOM_WIDTH, WALL_HEIGHT]} />
         <meshStandardMaterial color="#fff3e0" flatShading />
       </mesh>
       {Array.from({ length: 4 }).flatMap((_, row) =>
-        Array.from({ length: 6 }).map((_, col) => (
-          <mesh key={`${row}-${col}`} position={[-2 + col * 0.8, FLOOR_Y + 0.4 + row * 0.6, WALL_Z + 0.02]}>
+        Array.from({ length: 9 }).map((_, col) => (
+          <mesh key={`${row}-${col}`} position={[-3.2 + col * 0.8, FLOOR_Y + 0.4 + row * 0.6, WALL_Z + 0.02]}>
             <circleGeometry args={[0.08, 8]} />
             <meshStandardMaterial color="#2a7d8c" flatShading />
           </mesh>
@@ -74,12 +78,12 @@ const FLOORS: Record<string, () => ReactNode> = {
   floor_wood: () => (
     <group>
       <mesh position={[0, FLOOR_Y, 0.5]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[5, 3]} />
+        <planeGeometry args={[ROOM_WIDTH, 3]} />
         <meshStandardMaterial color="#c8925c" flatShading />
       </mesh>
       {[-1, -0.4, 0.2, 0.8, 1.4].map((z, i) => (
         <mesh key={i} position={[0, FLOOR_Y + 0.002, z]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[5, 0.03]} />
+          <planeGeometry args={[ROOM_WIDTH, 0.03]} />
           <meshStandardMaterial color="#a9743f" flatShading />
         </mesh>
       ))}
@@ -88,7 +92,7 @@ const FLOORS: Record<string, () => ReactNode> = {
   floor_rug: () => (
     <group>
       <mesh position={[0, FLOOR_Y, 0.5]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[5, 3]} />
+        <planeGeometry args={[ROOM_WIDTH, 3]} />
         <meshStandardMaterial color="#c8925c" flatShading />
       </mesh>
       <mesh position={[0, FLOOR_Y + 0.01, 0.7]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -100,10 +104,10 @@ const FLOORS: Record<string, () => ReactNode> = {
   floor_tile: () => (
     <group>
       {Array.from({ length: 5 }).flatMap((_, row) =>
-        Array.from({ length: 5 }).map((_, col) => (
+        Array.from({ length: 8 }).map((_, col) => (
           <mesh
             key={`${row}-${col}`}
-            position={[-2 + col, FLOOR_Y, -0.5 + row]}
+            position={[-3.5 + col, FLOOR_Y, -0.5 + row]}
             rotation={[-Math.PI / 2, 0, 0]}
           >
             <planeGeometry args={[1, 1]} />
@@ -115,7 +119,7 @@ const FLOORS: Record<string, () => ReactNode> = {
   ),
   floor_grass: () => (
     <mesh position={[0, FLOOR_Y, 0.5]} rotation={[-Math.PI / 2, 0, 0]}>
-      <planeGeometry args={[5, 3]} />
+      <planeGeometry args={[ROOM_WIDTH, 3]} />
       <meshStandardMaterial color="#8bc76a" flatShading />
     </mesh>
   ),
@@ -144,20 +148,32 @@ const FLOORS: Record<string, () => ReactNode> = {
 // touching. Position 0 (the tightest spot, since it's furthest from center)
 // was re-verified with a "Dream Room Scene" legendary composite (the
 // widest/most clip-prone tier) swapped in alongside the other two pieces.
+// Slots 0-2 are the original, already-verified 3-slot arrangement, left
+// untouched. Slot 3 (a 4th cap, added later — see ROOM_PLACEMENT_CAP.furniture
+// in lib/student/roomPlacements.ts) is appended further left rather than
+// inserted, so existing rooms with 3 items placed don't visually shuffle —
+// only a newly-placed 4th item lands in the new spot. Fitting a 4th slot
+// without crowding required widening the room itself (ROOM_WIDTH, and the
+// camera framing below) rather than squeezing the existing three tighter.
 const FURNITURE_LARGE_POSITIONS: [number, number, number][] = [
   [-1.95, 0, -0.45],
   [-1.05, 0, -0.35],
   [-0.15, 0, -0.15],
+  [-3.05, 0, -0.3],
 ];
 // Small: spread along the right side, foreground, clear of the large pieces
-// and the character. Same re-measured-widths tuning pass as large above —
-// widths here (plant/beanbag ~0.47, lamp ~0.31, teddy ~0.4) are smaller than
-// large furniture, so gaps only needed to widen from ~0.35-0.4 to ~0.5-0.55,
-// not as far as the large cluster.
+// and the character. Re-measuring the character's own GLB bounding box
+// (not just furniture) found it's much wider than it looks at a glance —
+// ~0.9-1.0 units for a standing animal, sometimes more with wings/tails
+// spread — so position 2 (previously the innermost slot, closest to the
+// character) was landing inside the character's own footprint no matter
+// which item occupied it, confirmed by a real screenshot showing whatever
+// was there (a lamp, a potted plant) visibly poking into the character's
+// leg. Pulled the whole cluster further out from the character accordingly.
 const FURNITURE_SMALL_POSITIONS: [number, number, number][] = [
-  [1.55, 0, 0.4],
-  [1.02, 0, 0.28],
-  [0.55, 0, 0.45],
+  [2.45, 0, 0.35],
+  [1.85, 0, 0.3],
+  [1.25, 0, 0.45],
 ];
 
 // FURNITURE_LARGE_MODEL/FURNITURE_SMALL_MODEL/WALL_DECOR_MODEL (the actual
@@ -228,7 +244,7 @@ export function RoomScene3D({ equippedKeys, mood = "neutral", className = "", on
 
   return (
     <div className={`relative aspect-[3/2] w-full overflow-hidden rounded-3xl ${className}`}>
-      <Scene3D camera={{ position: [0, -0.05, 3.6], fov: 42 }}>
+      <Scene3D camera={{ position: [0, -0.05, 4.6], fov: 53 }}>
         {renderWallpaper()}
         {renderFloor()}
         {furnitureLargeKeys.slice(0, FURNITURE_LARGE_POSITIONS.length).map((key, i) => {

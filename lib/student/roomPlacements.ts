@@ -6,10 +6,14 @@ import { getLevelInfo } from "./levelInfo";
 import { ServiceError } from "./errors";
 import { isOwned } from "./avatar";
 
-// 3 display spots per category ("furniture" and "furniture_small" each get
-// their own independent 0..2 position range) — matches RoomScene3D's fixed
-// layout positions for each slot.
-export const ROOM_PLACEMENT_CAP = 3;
+// Display spots per category — each gets its own independent 0..N position
+// range, matching the length of RoomScene3D's FURNITURE_LARGE_POSITIONS/
+// FURNITURE_SMALL_POSITIONS arrays. Big furniture got a 4th slot after the
+// room itself was widened to fit it without crowding; small stayed at 3.
+export const ROOM_PLACEMENT_CAP: Record<PlaceableSlot, number> = {
+  furniture: 4,
+  furniture_small: 3,
+};
 
 type AvatarItemRow = typeof avatarItems.$inferSelect;
 type PlaceableSlot = "furniture" | "furniture_small";
@@ -58,6 +62,10 @@ async function placeIfRoom(
   studentId: string,
   item: AvatarItemRow
 ): Promise<{ status: "placed" | "already-placed"; slot: string; position: number } | { status: "full" }> {
+  if (!isPlaceableSlot(item.slot)) {
+    throw new Error(`placeIfRoom called with non-placeable slot "${item.slot}"`);
+  }
+
   const existing = await executor
     .select()
     .from(roomPlacements)
@@ -68,7 +76,7 @@ async function placeIfRoom(
 
   const takenPositions = new Set(existing.map((p) => p.position));
   let position = -1;
-  for (let i = 0; i < ROOM_PLACEMENT_CAP; i++) {
+  for (let i = 0; i < ROOM_PLACEMENT_CAP[item.slot]; i++) {
     if (!takenPositions.has(i)) {
       position = i;
       break;
