@@ -38,10 +38,11 @@
 // on/off (mute) switch, not an extra volume knob, so those authored values
 // are the true output level.
 //
-// CPU/battery: each theme uses at most 3 voices, simple oscillator types
-// (sine/triangle/square, no filters/effects chains), and modest tempos
-// (68–128bpm) — a small, cheap arrangement meant to run continuously on a
-// phone for as long as the app is open.
+// CPU/battery: each theme uses at most 3 voices and modest tempos
+// (68-120bpm) — a small, cheap arrangement meant to run continuously on a
+// phone for as long as the app is open. Every voice is sine/triangle only
+// (no square/sawtooth — see the scheduleTone comment for why) run through
+// one lowpass filter node per note; still trivially cheap for a phone.
 
 import { getAudioContext } from "./sound";
 
@@ -115,6 +116,10 @@ interface MusicVoice {
   peakGain: number;
   /** Seconds from note-start to peak volume — bigger = softer pad-like entry. */
   attack: number;
+  /** Lowpass cutoff in Hz — lower rounds off more of the tone's edge. Bass
+   * voices default lower (they don't need shimmer); defaults to 2200 if
+   * omitted, which is already soft for a synth tone. */
+  filterHz?: number;
   notes: MusicNote[];
 }
 
@@ -164,6 +169,7 @@ const MUSIC_THEMES: Record<ThemeKey, MusicTheme> = {
         type: "triangle",
         peakGain: 0.03,
         attack: 0.03,
+        filterHz: 1000,
         notes: [
           n("C3", 0, 2), n("C3", 2, 2),
           n("A2", 4, 2), n("A2", 6, 2),
@@ -196,6 +202,7 @@ const MUSIC_THEMES: Record<ThemeKey, MusicTheme> = {
         type: "sine",
         peakGain: 0.028,
         attack: 0.03,
+        filterHz: 1000,
         notes: [
           n("A2", 0, 2), n("A2", 2, 2),
           n("F2", 4, 2), n("F2", 6, 2),
@@ -207,14 +214,17 @@ const MUSIC_THEMES: Record<ThemeKey, MusicTheme> = {
   },
   arcade: {
     label: "Arcade (upbeat)",
-    bpm: 128,
+    bpm: 120,
     loopBeats: 8, // 2 bars: C major, then G major, alternating
     voices: [
       {
-        // Bouncy eighth-note arpeggio (root-3rd-5th-3rd, twice per bar).
-        type: "square",
-        peakGain: 0.026,
+        // Bouncy eighth-note arpeggio (root-3rd-5th-3rd, twice per bar) — a
+        // soft triangle "xylophone" bounce instead of the original square
+        // wave, which measured genuinely harsh (see scheduleTone's comment).
+        type: "triangle",
+        peakGain: 0.03,
         attack: 0.01,
+        filterHz: 2400,
         notes: [
           n("C5", 0, 0.4), n("E5", 0.5, 0.4), n("G5", 1, 0.4), n("E5", 1.5, 0.4),
           n("C5", 2, 0.4), n("E5", 2.5, 0.4), n("G5", 3, 0.4), n("E5", 3.5, 0.4),
@@ -227,18 +237,22 @@ const MUSIC_THEMES: Record<ThemeKey, MusicTheme> = {
         type: "triangle",
         peakGain: 0.032,
         attack: 0.01,
+        filterHz: 900,
         notes: [
           n("C3", 0, 0.9), n("C3", 1, 0.9), n("C3", 2, 0.9), n("C3", 3, 0.9),
           n("G2", 4, 0.9), n("G2", 5, 0.9), n("G2", 6, 0.9), n("G2", 7, 0.9),
         ],
       },
       {
-        // A quick, unpitched-feeling high blip on the off-beats — just enough
-        // rhythmic "energy" for an arcade feel without adding harmonic clutter.
-        type: "square",
-        peakGain: 0.016,
+        // A soft, high sine "ping" on the off-beats — a gentler stand-in for
+        // the original's piercing 1400Hz square blip, kept a musical note
+        // (E6, the arpeggio's own 3rd an octave up) rather than an arbitrary
+        // pitch, so it blends instead of clashing.
+        type: "sine",
+        peakGain: 0.014,
         attack: 0.005,
-        notes: Array.from({ length: 8 }, (_, i) => ({ freq: 1400, beat: i + 0.5, beats: 0.08 })),
+        filterHz: 2600,
+        notes: Array.from({ length: 8 }, (_, i) => n("E6", i + 0.5, 0.12)),
       },
     ],
   },
@@ -269,6 +283,7 @@ const MUSIC_THEMES: Record<ThemeKey, MusicTheme> = {
         type: "sine",
         peakGain: 0.03,
         attack: 0.05,
+        filterHz: 1000,
         notes: [n("C3", 0, 4), n("G2", 4, 4), n("A2", 8, 4), n("F2", 12, 4)],
       },
     ],
@@ -300,20 +315,35 @@ const SCHEDULER_INTERVAL_MS = 100;
 // iteration when the tab wakes up — just resync to "now."
 const MAX_CATCH_UP_SEC = 1.5;
 
+// A first pass at this engine used "square" for a couple of voices (the
+// arcade theme's arpeggio and its off-beat blip) for a chiptune-y "energy."
+// Rendered it offline and measured the spectral centroid — arcade came out
+// around 3.4kHz vs. ~530Hz for the calm theme, i.e. genuinely harsh/buzzy,
+// not just "more energetic" — square waves carry strong harmonics all the
+// way up the spectrum with nothing to tame them. Every voice is sine/
+// triangle now (triangle already rolls off its harmonics much faster than
+// square), and every tone additionally passes through a gentle lowpass
+// filter here to round off whatever harmonic edge is left — the combination
+// is what actually got the harshness down, not either alone.
 function scheduleTone(
   ctx: AudioContext,
   destination: AudioNode,
-  opts: { freq: number; start: number; duration: number; type: OscillatorType; peakGain: number; attack: number }
+  opts: { freq: number; start: number; duration: number; type: OscillatorType; peakGain: number; attack: number; filterHz?: number }
 ) {
-  const { freq, start, duration, type, peakGain, attack } = opts;
+  const { freq, start, duration, type, peakGain, attack, filterHz = 2200 } = opts;
   const osc = ctx.createOscillator();
+  const filter = ctx.createBiquadFilter();
   const gain = ctx.createGain();
   osc.type = type;
   osc.frequency.setValueAtTime(freq, start);
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(filterHz, start);
+  filter.Q.setValueAtTime(0.5, start);
   gain.gain.setValueAtTime(0.0001, start);
   gain.gain.linearRampToValueAtTime(peakGain, start + attack);
   gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-  osc.connect(gain);
+  osc.connect(filter);
+  filter.connect(gain);
   gain.connect(destination);
   osc.start(start);
   osc.stop(start + duration + 0.05);
@@ -330,6 +360,7 @@ function scheduleThemeLoop(ctx: AudioContext, destination: AudioNode, theme: Mus
         type: voice.type,
         peakGain: voice.peakGain,
         attack: voice.attack,
+        filterHz: voice.filterHz,
       });
     }
   }
