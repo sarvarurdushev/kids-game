@@ -10,6 +10,7 @@ import { playCorrect, playWrong, playGameOver } from "@/lib/sound";
 import { randomWords, shuffle, type WordEntry } from "@/lib/games/wordBank";
 import { curriculumWordsUpToDifficulty } from "@/lib/games/curriculum";
 import { GameRewardSummary } from "./GameRewardSummary";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 const TOTAL_ROUNDS = 10;
 const RESULT_PAUSE_MS = 900;
@@ -51,6 +52,7 @@ function buildRound(roundIndex: number, usedWords: Set<string>): RoundData {
 
 // Same refs-for-synchronous-state pattern as EmojiQuiz/WordCatch.
 export function TrueOrFalse({ equippedKeys }: { equippedKeys: AvatarEquippedKeys }) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>("ready");
   const [roundIndex, setRoundIndexState] = useState(0);
   const [round, setRound] = useState<RoundData | null>(null);
@@ -138,21 +140,19 @@ export function TrueOrFalse({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
       <div className="flex flex-col items-center gap-5 text-center">
         <Avatar3D equippedKeys={equippedKeys} size={130} mood="happy" />
         <div>
-          <h1 className="font-display text-2xl font-bold text-gold-dark">True or False</h1>
-          <p className="mt-1 text-sm text-ink/60">
-            Does the word match the picture? Tap ✅ or ❌!
-          </p>
+          <h1 className="font-display text-2xl font-bold text-gold-dark">{t("game.trueOrFalse.name")}</h1>
+          <p className="mt-1 text-sm text-ink/60">{t("game.trueOrFalse.instructions")}</p>
         </div>
-        <Button onClick={() => startRound(0)}>Start Game</Button>
+        <Button onClick={() => startRound(0)}>{t("games.startGame")}</Button>
         <Link href="/games" className="text-sm font-semibold text-teal underline-offset-2 hover:underline">
-          Back to arcade
+          {t("games.backToArcade")}
         </Link>
       </div>
     );
   }
 
   if (phase === "submitting") {
-    return <p className="text-center font-display text-lg">Saving your score...</p>;
+    return <p className="text-center font-display text-lg">{t("games.savingScore")}</p>;
   }
 
   if (phase === "gameover") {
@@ -163,16 +163,15 @@ export function TrueOrFalse({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
           size={120}
           mood={correctCount >= finalRoundsPlayed * 0.6 ? "happy" : "neutral"}
         />
-        <h1 className="font-display text-2xl font-bold text-gold-dark">Nice work!</h1>
+        <h1 className="font-display text-2xl font-bold text-gold-dark">{t("games.niceWork")}</h1>
         <p className="text-ink/70">
-          You got <span className="font-bold text-ink">{correctCount}</span> of{" "}
-          <span className="font-bold text-ink">{finalRoundsPlayed}</span> right!
+          {t("games.scoreOutOf", { correct: correctCount, total: finalRoundsPlayed })}
         </p>
         {result && <GameRewardSummary result={result} />}
         <div className="flex gap-3">
-          <Button onClick={playAgain}>Play Again</Button>
+          <Button onClick={playAgain}>{t("games.playAgain")}</Button>
           <Link href="/games">
-            <Button variant="ghost">Back to Arcade</Button>
+            <Button variant="ghost">{t("games.backToArcade")}</Button>
           </Link>
         </div>
       </div>
@@ -185,7 +184,7 @@ export function TrueOrFalse({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <Link href="/games" className="text-sm font-semibold text-ink/50">
-          ← Exit
+          {t("games.exit")}
         </Link>
         <div className="flex items-center gap-2">
           {streak >= 3 && (
@@ -207,8 +206,8 @@ export function TrueOrFalse({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
 
       <div className="grid grid-cols-2 gap-3">
         {[
-          { key: "yes", label: "✅ Yes", value: true },
-          { key: "no", label: "❌ No", value: false },
+          { key: "yes", labelKey: "game.trueOrFalse.yes" as const, value: true },
+          { key: "no", labelKey: "game.trueOrFalse.no" as const, value: false },
         ].map((option) => {
           const isPicked = pickedTrue === option.value;
           const revealCorrect = phase === "result" && option.value === round.isTrue;
@@ -228,7 +227,7 @@ export function TrueOrFalse({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
               onClick={() => pick(option.value)}
               className={`font-display rounded-2xl border-2 py-5 text-2xl font-bold transition-all ${tone}`}
             >
-              {option.label}
+              {t(option.labelKey)}
             </button>
           );
         })}
@@ -242,7 +241,9 @@ export function TrueOrFalse({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
             exit={{ opacity: 0 }}
             className={`text-center text-sm font-bold ${lastCorrect ? "text-teal" : "text-coral"}`}
           >
-            {lastCorrect ? "Great job!" : `Not quite! It was "${round.emoji.word}"`}
+            {lastCorrect
+              ? t("games.greatJob")
+              : `${t("games.notQuite")} ${t("gameResult.wasActually", { word: round.emoji.word })}`}
           </motion.p>
         )}
       </AnimatePresence>

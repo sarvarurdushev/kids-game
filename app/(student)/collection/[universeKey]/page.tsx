@@ -3,6 +3,7 @@ import { requireStudent } from "@/lib/auth/requireStudent";
 import { getCollection } from "@/lib/student/collection";
 import { CollectionGrid } from "@/components/cards/CollectionGrid";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { T } from "@/components/i18n/T";
 
 export default async function UniverseCollectionPage({
   params,
@@ -23,7 +24,7 @@ export default async function UniverseCollectionPage({
       <div>
         <h1 className="font-display text-2xl font-bold lg:text-4xl">{entry.universe.name}</h1>
         <p className="mb-2 text-ink/60">
-          {entry.progress.owned}/{entry.progress.total} collected
+          <T k="collection.collectedCount" vars={{ count: entry.progress.owned, total: entry.progress.total }} />
         </p>
         <ProgressBar value={entry.progress.owned} max={entry.progress.total} />
       </div>

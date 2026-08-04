@@ -8,6 +8,7 @@ import { ItemPreviewModal } from "@/components/ui/ItemPreviewModal";
 import { ThumbnailImage } from "@/components/ui/ThumbnailImage";
 import { playCoin, playPop, playFanfare } from "@/lib/sound";
 import { CoinIcon } from "@/components/icons";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 const DANCE_DURATION_MS = 4000;
 
@@ -54,6 +55,7 @@ export function AvatarCustomizer({
   danceCost: number;
 }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [previewItem, setPreviewItem] = useState<AvatarItem | null>(null);
@@ -74,7 +76,7 @@ export function AvatarCustomizer({
       const res = await fetch("/api/avatar/unlock-dance", { method: "POST" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Couldn't unlock that");
+        setError(data.error ?? t("avatar.errorUnlockDance"));
         return;
       }
       playCoin();
@@ -98,7 +100,7 @@ export function AvatarCustomizer({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Couldn't equip that");
+        setError(data.error ?? t("common.errorEquip"));
         return;
       }
       playPop();
@@ -119,7 +121,7 @@ export function AvatarCustomizer({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Couldn't buy that");
+        setError(data.error ?? t("common.errorBuy"));
         return;
       }
       playCoin();
@@ -136,11 +138,11 @@ export function AvatarCustomizer({
           <Avatar3D equippedKeys={equippedKeys} size={420} dancing={dancing} responsive />
         </div>
         <p className="flex items-center gap-1 text-sm font-semibold text-ink/60">
-          <CoinIcon size={16} /> {coinsBalance} coins
+          <CoinIcon size={16} /> {coinsBalance} {t("home.coins")}
         </p>
         {danceUnlocked ? (
           <Button variant="secondary" onClick={danceNow} disabled={dancing} className="!px-4 !py-1.5 !text-sm">
-            {dancing ? "Dancing! 🎉" : "Dance!"}
+            {dancing ? t("avatar.dancingButton") : t("avatar.danceButton")}
           </Button>
         ) : (
           <Button
@@ -151,7 +153,7 @@ export function AvatarCustomizer({
               coinsBalance >= danceCost ? "animate-pulse ring-2 ring-gold" : ""
             }`}
           >
-            🎉 Unlock Dance Party — <CoinIcon size={14} /> {danceCost}
+            {t("avatar.unlockDanceParty")} <CoinIcon size={14} /> {danceCost}
           </Button>
         )}
       </div>
@@ -168,7 +170,7 @@ export function AvatarCustomizer({
           >
             {item.featured && item.state === "purchasable" && (
               <span className="absolute -top-1 -right-2 z-10 rounded-full bg-coral px-2 py-0.5 text-[10px] font-bold text-white shadow">
-                ★ 25% OFF
+                {t("common.featuredDiscount")}
               </span>
             )}
             <button type="button" onClick={() => setPreviewItem(item)} className="flex flex-col items-center gap-2">
@@ -188,11 +190,11 @@ export function AvatarCustomizer({
                 onClick={() => equip(item)}
                 disabled={busyId === item.id}
               >
-                Wear
+                {t("common.wear")}
               </Button>
             )}
             {item.state === "owned" && item.equipped && (
-              <span className="text-xs font-bold text-gold-dark">Equipped</span>
+              <span className="text-xs font-bold text-gold-dark">{t("common.equipped")}</span>
             )}
             {item.state === "purchasable" && (
               <Button
@@ -208,7 +210,7 @@ export function AvatarCustomizer({
                     {item.effectivePrice}
                   </>
                 ) : (
-                  "Not enough coins"
+                  t("common.notEnoughCoins")
                 )}
               </Button>
             )}
@@ -240,10 +242,10 @@ export function AvatarCustomizer({
               }}
               disabled={busyId === previewItem.id}
             >
-              Wear
+              {t("common.wear")}
             </Button>
           ) : previewItem.state === "owned" && previewItem.equipped ? (
-            <span className="text-xs font-bold text-gold-dark">Equipped</span>
+            <span className="text-xs font-bold text-gold-dark">{t("common.equipped")}</span>
           ) : previewItem.state === "purchasable" ? (
             <Button
               variant="secondary"
@@ -263,7 +265,7 @@ export function AvatarCustomizer({
                   {previewItem.effectivePrice}
                 </>
               ) : (
-                "Not enough coins"
+                t("common.notEnoughCoins")
               )}
             </Button>
           ) : null)

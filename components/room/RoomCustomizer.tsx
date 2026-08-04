@@ -10,6 +10,8 @@ import { ItemPreviewModal } from "@/components/ui/ItemPreviewModal";
 import { ThumbnailImage } from "@/components/ui/ThumbnailImage";
 import { playCoin, playPop } from "@/lib/sound";
 import { CoinIcon } from "@/components/icons";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
+import type { TranslationKey } from "@/lib/i18n/dictionary";
 
 type RoomSlot = "wallpaper" | "floor" | "furniture" | "furniture_small" | "furniture_wall";
 
@@ -47,12 +49,12 @@ export interface RoomSetItem {
 }
 
 const SLOTS: RoomSlot[] = ["wallpaper", "floor", "furniture", "furniture_small", "furniture_wall"];
-const SLOT_LABELS: Record<RoomSlot, string> = {
-  wallpaper: "Wallpaper",
-  floor: "Floor",
-  furniture: "Big Furniture",
-  furniture_small: "Small Furniture",
-  furniture_wall: "Wall Decor",
+const SLOT_LABEL_KEYS: Record<RoomSlot, TranslationKey> = {
+  wallpaper: "room.wallpaper",
+  floor: "room.floor",
+  furniture: "room.bigFurniture",
+  furniture_small: "room.smallFurniture",
+  furniture_wall: "room.wallDecor",
 };
 
 // furniture/furniture_small are multi-select (up to ROOM_PLACEMENT_CAP slots
@@ -103,6 +105,7 @@ export function RoomCustomizer({
   equippedKeys: AvatarEquippedKeys;
 }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [activeSlot, setActiveSlot] = useState<RoomSlot>("wallpaper");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +123,7 @@ export function RoomCustomizer({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Couldn't buy that room set");
+        setError(data.error ?? t("room.errorBuySet"));
         return;
       }
       playCoin();
@@ -141,7 +144,7 @@ export function RoomCustomizer({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Couldn't equip that");
+        setError(data.error ?? t("common.errorEquip"));
         return;
       }
       playPop();
@@ -162,7 +165,7 @@ export function RoomCustomizer({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Couldn't place that");
+        setError(data.error ?? t("common.errorPlace"));
         return;
       }
       playPop();
@@ -183,7 +186,7 @@ export function RoomCustomizer({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Couldn't remove that");
+        setError(data.error ?? t("common.errorRemove"));
         return;
       }
       playPop();
@@ -204,7 +207,7 @@ export function RoomCustomizer({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Couldn't buy that");
+        setError(data.error ?? t("common.errorBuy"));
         return;
       }
       playCoin();
@@ -230,7 +233,7 @@ export function RoomCustomizer({
       <div className="flex flex-col items-center gap-2">
         <RoomScene3D equippedKeys={equippedKeys} className="w-full" />
         <p className="flex items-center gap-1 text-sm font-semibold text-ink/60">
-          <CoinIcon size={16} /> {coinsBalance} coins
+          <CoinIcon size={16} /> {coinsBalance} {t("home.coins")}
         </p>
       </div>
 
@@ -244,14 +247,14 @@ export function RoomCustomizer({
               activeSlot === slot ? "bg-gold text-ink" : "bg-white text-ink/60"
             }`}
           >
-            {SLOT_LABELS[slot]}
+            {t(SLOT_LABEL_KEYS[slot])}
           </button>
         ))}
       </div>
 
       {placedCount !== null && (
         <p className="text-center text-xs font-semibold text-ink/50">
-          {placedCount}/{activeCap} placed
+          {t("room.placedCount", { count: placedCount, cap: activeCap })}
         </p>
       )}
 
@@ -259,10 +262,8 @@ export function RoomCustomizer({
 
       {roomSets.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h2 className="font-display text-lg font-semibold">Room sets</h2>
-          <p className="text-xs text-ink/50">
-            Buy a whole coordinated wallpaper + floor + furniture set in one tap — cheaper than buying each piece.
-          </p>
+          <h2 className="font-display text-lg font-semibold">{t("room.roomSets")}</h2>
+          <p className="text-xs text-ink/50">{t("room.roomSetsHint")}</p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {roomSets.map((set) => (
               <div key={set.id} className="flex flex-col items-center gap-2 rounded-2xl bg-white p-3 text-center">
@@ -280,7 +281,7 @@ export function RoomCustomizer({
                 </div>
                 <p className="font-display text-sm font-semibold">{set.name}</p>
                 {set.owned ? (
-                  <span className="text-xs font-bold text-gold-dark">Owned</span>
+                  <span className="text-xs font-bold text-gold-dark">{t("common.owned")}</span>
                 ) : (
                   <Button
                     variant="secondary"
@@ -293,7 +294,7 @@ export function RoomCustomizer({
                         <CoinIcon size={13} /> {set.coinPrice}
                       </>
                     ) : (
-                      "Not enough coins"
+                      t("common.notEnoughCoins")
                     )}
                   </Button>
                 )}
@@ -313,7 +314,7 @@ export function RoomCustomizer({
           >
             {item.featured && item.state === "purchasable" && (
               <span className="absolute -top-1 -right-2 z-10 rounded-full bg-coral px-2 py-0.5 text-[10px] font-bold text-white shadow">
-                ★ 25% OFF
+                {t("common.featuredDiscount")}
               </span>
             )}
             <button type="button" onClick={() => setPreviewItem(item)} className="flex w-full flex-col items-center gap-2">
@@ -337,11 +338,11 @@ export function RoomCustomizer({
                 onClick={() => equip(item)}
                 disabled={busyId === item.id}
               >
-                Use
+                {t("common.use")}
               </Button>
             )}
             {item.state === "owned" && !PLACEMENT_SLOTS.has(item.slot) && item.equipped && (
-              <span className="text-xs font-bold text-gold-dark">In use</span>
+              <span className="text-xs font-bold text-gold-dark">{t("common.inUse")}</span>
             )}
             {item.state === "owned" && PLACEMENT_SLOTS.has(item.slot) && item.equipped && (
               <Button
@@ -350,7 +351,7 @@ export function RoomCustomizer({
                 onClick={() => remove(item)}
                 disabled={busyId === item.id}
               >
-                Remove
+                {t("common.remove")}
               </Button>
             )}
             {item.state === "owned" && PLACEMENT_SLOTS.has(item.slot) && !item.equipped && (
@@ -361,11 +362,11 @@ export function RoomCustomizer({
                 disabled={busyId === item.id || (placedCount ?? 0) >= activeCap}
                 title={
                   (placedCount ?? 0) >= activeCap
-                    ? `Room is full (${activeCap}/${activeCap}) — remove something first`
+                    ? t("room.roomFullHint", { cap: activeCap })
                     : undefined
                 }
               >
-                {(placedCount ?? 0) >= activeCap ? "Room full" : "Place"}
+                {(placedCount ?? 0) >= activeCap ? t("common.roomFull") : t("common.place")}
               </Button>
             )}
             {item.state === "purchasable" && (
@@ -382,7 +383,7 @@ export function RoomCustomizer({
                     {item.effectivePrice}
                   </>
                 ) : (
-                  "Not enough coins"
+                  t("common.notEnoughCoins")
                 )}
               </Button>
             )}
@@ -423,7 +424,7 @@ export function RoomCustomizer({
                   {previewItem.effectivePrice}
                 </>
               ) : (
-                "Not enough coins"
+                t("common.notEnoughCoins")
               )}
             </Button>
           ) : previewItem.state !== "owned" ? null : PLACEMENT_SLOTS.has(previewItem.slot) ? (
@@ -436,7 +437,7 @@ export function RoomCustomizer({
                 }}
                 disabled={busyId === previewItem.id}
               >
-                Remove
+                {t("common.remove")}
               </Button>
             ) : (
               <Button
@@ -446,11 +447,11 @@ export function RoomCustomizer({
                 }}
                 disabled={busyId === previewItem.id || (placedCount ?? 0) >= activeCap}
               >
-                {(placedCount ?? 0) >= activeCap ? "Room full" : "Place"}
+                {(placedCount ?? 0) >= activeCap ? t("common.roomFull") : t("common.place")}
               </Button>
             )
           ) : previewItem.equipped ? (
-            <span className="text-xs font-bold text-gold-dark">In use</span>
+            <span className="text-xs font-bold text-gold-dark">{t("common.inUse")}</span>
           ) : (
             <Button
               onClick={() => {
@@ -459,7 +460,7 @@ export function RoomCustomizer({
               }}
               disabled={busyId === previewItem.id}
             >
-              Use
+              {t("common.use")}
             </Button>
           ))
         }

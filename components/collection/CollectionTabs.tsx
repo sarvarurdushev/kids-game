@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { emojiForUniverse } from "@/lib/visuals";
 import { StyleCollectionGrid, type StyleItem } from "@/components/cards/StyleCollectionGrid";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 export interface UniverseProgress {
   universe: {
@@ -31,6 +32,7 @@ export function CollectionTabs({
   collection: UniverseProgress[];
   styleItems: StyleItem[];
 }) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("characters");
 
   return (
@@ -43,7 +45,7 @@ export function CollectionTabs({
             tab === "characters" ? "bg-gold text-ink" : "bg-white text-ink/60"
           }`}
         >
-          Characters
+          {t("collection.characters")}
         </button>
         <button
           type="button"
@@ -52,7 +54,7 @@ export function CollectionTabs({
             tab === "styles" ? "bg-gold text-ink" : "bg-white text-ink/60"
           }`}
         >
-          Styles
+          {t("collection.styles")}
         </button>
       </div>
 
@@ -69,7 +71,9 @@ export function CollectionTabs({
                 <div className="flex-1">
                   <p className="font-display font-semibold">{universe.name}</p>
                   {universe.locked ? (
-                    <p className="text-xs font-semibold text-ink/40">🔒 Unlocks in {universe.unlocksInMonthName}</p>
+                    <p className="text-xs font-semibold text-ink/40">
+                      {t("collection.unlocksIn", { month: universe.unlocksInMonthName ?? "" })}
+                    </p>
                   ) : (
                     <ProgressBar value={progress.owned} max={progress.total} />
                   )}

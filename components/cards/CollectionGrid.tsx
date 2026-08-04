@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { RARITY_COLOR_VAR } from "@/lib/visuals";
 import { playCoin } from "@/lib/sound";
 import type { Rarity } from "@/lib/reward-engine/types";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 interface CollectionCharacter {
   id: string;
@@ -31,6 +32,7 @@ export function CollectionGrid({
   cardShards: number;
 }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [previewCharacter, setPreviewCharacter] = useState<CollectionCharacter | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +48,7 @@ export function CollectionGrid({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Couldn't redeem that card");
+        setError(data.error ?? t("collection.redeemError"));
         return;
       }
       playCoin();
@@ -80,7 +82,7 @@ export function CollectionGrid({
         onClose={() => setPreviewCharacter(null)}
         name={previewCharacter?.name ?? ""}
         rarity={previewCharacter?.rarity}
-        reason={previewCharacter && !previewCharacter.owned ? "Open packs to collect this card!" : null}
+        reason={previewCharacter && !previewCharacter.owned ? t("collection.openPacksHint") : null}
         preview={
           previewCharacter && (
             <div
@@ -103,8 +105,8 @@ export function CollectionGrid({
               disabled={busyId === previewCharacter.id || cardShards < previewCharacter.redeemCost}
             >
               {cardShards < previewCharacter.redeemCost
-                ? `Need ${previewCharacter.redeemCost - cardShards} more shards`
-                : `✨ Redeem for ${previewCharacter.redeemCost} shards`}
+                ? t("collection.needMoreShards", { count: previewCharacter.redeemCost - cardShards })
+                : t("collection.redeemForShards", { count: previewCharacter.redeemCost })}
             </Button>
           ) : null
         }

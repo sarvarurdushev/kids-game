@@ -11,6 +11,7 @@ import { shuffle, type WordEntry } from "@/lib/games/wordBank";
 import { curriculumWordsUpToDifficulty } from "@/lib/games/curriculum";
 import { WordScrambleScene3D } from "./WordScrambleScene3D";
 import { GameRewardSummary } from "./GameRewardSummary";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 const TOTAL_ROUNDS = 8;
 const TIME_BASE_MS = 5000;
@@ -64,6 +65,7 @@ function buildRound(roundIndex: number, usedWords: Set<string>): RoundData {
 }
 
 export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKeys }) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>("ready");
   const [roundIndex, setRoundIndexState] = useState(0);
   const [round, setRound] = useState<RoundData | null>(null);
@@ -208,21 +210,19 @@ export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKey
       <div className="flex flex-col items-center gap-5 text-center">
         <Avatar3D equippedKeys={equippedKeys} size={130} mood="happy" />
         <div>
-          <h1 className="font-display text-2xl font-bold text-gold-dark">Word Scramble</h1>
-          <p className="mt-1 text-sm text-ink/60">
-            Tap the letters in order to spell the word before time runs out!
-          </p>
+          <h1 className="font-display text-2xl font-bold text-gold-dark">{t("game.wordScramble.name")}</h1>
+          <p className="mt-1 text-sm text-ink/60">{t("game.wordScramble.instructions")}</p>
         </div>
-        <Button onClick={() => startRound(0)}>Start Game</Button>
+        <Button onClick={() => startRound(0)}>{t("games.startGame")}</Button>
         <Link href="/games" className="text-sm font-semibold text-teal underline-offset-2 hover:underline">
-          Back to arcade
+          {t("games.backToArcade")}
         </Link>
       </div>
     );
   }
 
   if (phase === "submitting") {
-    return <p className="text-center font-display text-lg">Saving your score...</p>;
+    return <p className="text-center font-display text-lg">{t("games.savingScore")}</p>;
   }
 
   if (phase === "gameover") {
@@ -233,16 +233,15 @@ export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKey
           size={120}
           mood={correctCount >= TOTAL_ROUNDS * 0.6 ? "happy" : "neutral"}
         />
-        <h1 className="font-display text-2xl font-bold text-gold-dark">All done!</h1>
+        <h1 className="font-display text-2xl font-bold text-gold-dark">{t("game.wordScramble.gameOverTitle")}</h1>
         <p className="text-ink/70">
-          You spelled <span className="font-bold text-ink">{correctCount}</span> of{" "}
-          <span className="font-bold text-ink">{TOTAL_ROUNDS}</span> words correctly!
+          {t("game.wordScramble.result", { correct: correctCount, total: TOTAL_ROUNDS })}
         </p>
         {result && <GameRewardSummary result={result} />}
         <div className="flex gap-3">
-          <Button onClick={playAgain}>Play Again</Button>
+          <Button onClick={playAgain}>{t("games.playAgain")}</Button>
           <Link href="/games">
-            <Button variant="ghost">Back to Arcade</Button>
+            <Button variant="ghost">{t("games.backToArcade")}</Button>
           </Link>
         </div>
       </div>
@@ -258,7 +257,7 @@ export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKey
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <Link href="/games" className="text-sm font-semibold text-ink/50">
-          ← Exit
+          {t("games.exit")}
         </Link>
         <div className="flex items-center gap-2">
           {streak >= 3 && (
@@ -267,7 +266,7 @@ export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKey
             </span>
           )}
           <span className="text-sm font-bold text-ink/60">
-            Word {roundIndex + 1}/{TOTAL_ROUNDS}
+            {t("game.wordScramble.progress", { current: roundIndex + 1, total: TOTAL_ROUNDS })}
           </span>
         </div>
       </div>
@@ -292,7 +291,7 @@ export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKey
         className="flex min-h-14 flex-wrap justify-center gap-2"
       >
         {placedIds.length === 0 && phase === "playing" && (
-          <span className="py-3 text-sm text-ink/30">Tap letters below</span>
+          <span className="py-3 text-sm text-ink/30">{t("game.wordScramble.tapLettersBelow")}</span>
         )}
         {placedIds.map((id) => (
           <div
@@ -323,7 +322,7 @@ export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKey
           disabled={placedIds.length === 0 || phase !== "playing"}
           className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-ink/60 shadow-sm disabled:opacity-40"
         >
-          ⌫ Undo
+          {t("game.wordScramble.undo")}
         </button>
       </div>
 
@@ -335,7 +334,9 @@ export function WordScramble({ equippedKeys }: { equippedKeys: AvatarEquippedKey
             exit={{ opacity: 0 }}
             className={`text-center text-sm font-bold ${outcome === "correct" ? "text-teal" : "text-coral"}`}
           >
-            {outcome === "correct" ? "Great job!" : `Time's up! It was "${round.target.word}"`}
+            {outcome === "correct"
+              ? t("games.greatJob")
+              : `${t("games.timesUp")} ${t("gameResult.wasActually", { word: round.target.word })}`}
           </motion.p>
         )}
       </AnimatePresence>

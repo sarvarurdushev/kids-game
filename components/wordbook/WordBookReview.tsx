@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import type { WordEntry } from "@/lib/games/wordBank";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 type Phase = "prompt" | "revealed" | "complete";
 
@@ -13,6 +14,7 @@ type Phase = "prompt" | "revealed" | "complete";
  * word_reviews log that quests read from; the Leitner box math itself lives
  * server-side in lib/student/wordBook.ts. */
 export function WordBookReview({ queue, dueCount }: { queue: WordEntry[]; dueCount: number }) {
+  const { t } = useTranslation();
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("prompt");
   const [reviewedCount, setReviewedCount] = useState(0);
@@ -24,8 +26,8 @@ export function WordBookReview({ queue, dueCount }: { queue: WordEntry[]; dueCou
         <span className="text-4xl" aria-hidden>
           🎉
         </span>
-        <p className="font-display text-lg font-bold">All caught up!</p>
-        <p className="text-sm text-ink/60">Come back later for more words to review.</p>
+        <p className="font-display text-lg font-bold">{t("wordbook.allCaughtUp")}</p>
+        <p className="text-sm text-ink/60">{t("wordbook.comeBackLater")}</p>
       </Card>
     );
   }
@@ -37,11 +39,9 @@ export function WordBookReview({ queue, dueCount }: { queue: WordEntry[]; dueCou
           <span className="text-4xl" aria-hidden>
             🌟
           </span>
-          <p className="font-display text-lg font-bold">
-            Nice! You reviewed {reviewedCount} word{reviewedCount === 1 ? "" : "s"}.
-          </p>
+          <p className="font-display text-lg font-bold">{t("wordbook.reviewedCount", { count: reviewedCount })}</p>
           <Link href="/word-book" className="text-sm font-semibold text-teal underline-offset-2 hover:underline">
-            Back to Word Book
+            {t("wordbook.backToWordBook")}
           </Link>
         </Card>
         {error && <p className="text-center text-sm font-semibold text-coral">{error}</p>}
@@ -64,9 +64,9 @@ export function WordBookReview({ queue, dueCount }: { queue: WordEntry[]; dueCou
       body: JSON.stringify({ word: word.word, knewIt }),
     })
       .then((res) => {
-        if (!res.ok) setError("Couldn't save that review — it may not count yet.");
+        if (!res.ok) setError(t("wordbook.saveError"));
       })
-      .catch(() => setError("Couldn't save that review — it may not count yet."));
+      .catch(() => setError(t("wordbook.saveError")));
 
     setReviewedCount((c) => c + 1);
     if (index + 1 >= queue.length) {
@@ -81,7 +81,7 @@ export function WordBookReview({ queue, dueCount }: { queue: WordEntry[]; dueCou
     <div className="flex flex-col gap-3">
       <p className="text-center text-xs font-bold text-ink/40">
         {index + 1} / {queue.length}
-        {dueCount > queue.length ? ` · ${dueCount} due in total` : ""}
+        {dueCount > queue.length ? ` · ${t("wordbook.dueInTotal", { count: dueCount })}` : ""}
       </p>
 
       <Card className="flex flex-col items-center gap-5 py-10 text-center">
@@ -89,16 +89,16 @@ export function WordBookReview({ queue, dueCount }: { queue: WordEntry[]; dueCou
           {word.emoji}
         </span>
         {phase === "prompt" ? (
-          <Button onClick={() => setPhase("revealed")}>Reveal</Button>
+          <Button onClick={() => setPhase("revealed")}>{t("wordbook.reveal")}</Button>
         ) : (
           <>
             <p className="font-display text-2xl font-bold capitalize text-ink">{word.word}</p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button variant="ghost" onClick={() => submitReview(false)}>
-                😕 Still learning
+                {t("wordbook.stillLearning")}
               </Button>
               <Button variant="secondary" onClick={() => submitReview(true)}>
-                😊 I knew it!
+                {t("wordbook.iKnewIt")}
               </Button>
             </div>
           </>

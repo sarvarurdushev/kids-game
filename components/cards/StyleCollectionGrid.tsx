@@ -9,6 +9,7 @@ import { ItemPreviewModal } from "@/components/ui/ItemPreviewModal";
 import { playCoin } from "@/lib/sound";
 import { CoinIcon } from "@/components/icons";
 import { RARITY_COLOR_VAR } from "@/lib/visuals";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 import type { Rarity } from "@/lib/reward-engine/types";
 
 export interface StyleItem {
@@ -37,6 +38,7 @@ export interface StyleItem {
  * bigger preview) with a buy button standing in for "collect this one." */
 export function StyleCollectionGrid({ items }: { items: StyleItem[] }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [previewItem, setPreviewItem] = useState<StyleItem | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ export function StyleCollectionGrid({ items }: { items: StyleItem[] }) {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Couldn't buy that");
+        setError(data.error ?? t("common.errorBuy"));
         return;
       }
       playCoin();
@@ -75,7 +77,7 @@ export function StyleCollectionGrid({ items }: { items: StyleItem[] }) {
                   mid-word. top-2.5 clears the frame's h-2 rarity bar. */}
               {item.featured && item.state === "purchasable" && (
                 <span className="absolute top-2.5 right-1.5 z-10 rounded-full bg-coral px-2 py-0.5 text-[10px] font-bold text-white shadow">
-                  ★ 25% OFF
+                  {t("common.featuredDiscount")}
                 </span>
               )}
               <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full">
@@ -109,7 +111,7 @@ export function StyleCollectionGrid({ items }: { items: StyleItem[] }) {
         action={
           previewItem &&
           (previewItem.state === "owned" ? (
-            <span className="text-xs font-bold text-gold-dark">Collected</span>
+            <span className="text-xs font-bold text-gold-dark">{t("avatar.collected")}</span>
           ) : previewItem.state === "purchasable" ? (
             <Button
               variant="secondary"
@@ -129,7 +131,7 @@ export function StyleCollectionGrid({ items }: { items: StyleItem[] }) {
                   {previewItem.effectivePrice}
                 </>
               ) : (
-                "Not enough coins"
+                t("common.notEnoughCoins")
               )}
             </Button>
           ) : null)

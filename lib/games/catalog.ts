@@ -1,9 +1,14 @@
 import type { GameKey } from "@/lib/reward-engine/gameSession";
+import type { TranslationKey } from "@/lib/i18n/dictionary";
 
 export interface GameMeta {
   key: GameKey;
-  name: string;
-  tagline: string;
+  // Dictionary keys, not raw strings — this is plain data (not a component),
+  // so it can't call useTranslation() itself. Whatever renders the catalog
+  // (app/(student)/games/GamesArcade.tsx) looks these up with t(). See
+  // lib/i18n/dictionary.ts's "Games: catalog names/taglines" section.
+  nameKey: TranslationKey;
+  taglineKey: TranslationKey;
   href: string;
   color: string;
   // Level required to unlock (lib/reward-engine/gameUnlocks.ts). Absent =
@@ -21,117 +26,117 @@ export interface GameMeta {
 export const GAME_CATALOG: GameMeta[] = [
   {
     key: "word_catch",
-    name: "Word Catch",
-    tagline: "Catch the right word before it drops!",
+    nameKey: "game.wordCatch.name",
+    taglineKey: "game.wordCatch.tagline",
     href: "/games/word-catch",
     color: "var(--color-gk-gold)",
   },
   {
     key: "memory_match",
-    name: "Memory Match",
-    tagline: "Flip cards and find every matching pair!",
+    nameKey: "game.memoryMatch.name",
+    taglineKey: "game.memoryMatch.tagline",
     href: "/games/memory-match",
     color: "var(--color-gk-coral)",
   },
   {
     key: "word_scramble",
-    name: "Word Scramble",
-    tagline: "Unscramble the letters before time runs out!",
+    nameKey: "game.wordScramble.name",
+    taglineKey: "game.wordScramble.tagline",
     href: "/games/word-scramble",
     color: "var(--color-teal)",
   },
   {
     key: "emoji_quiz",
-    name: "Emoji Quiz",
-    tagline: "Pick the word that matches the picture!",
+    nameKey: "game.emojiQuiz.name",
+    taglineKey: "game.emojiQuiz.tagline",
     href: "/games/emoji-quiz",
     color: "var(--color-gk-coral)",
     unlockLevel: 4,
   },
   {
     key: "picture_pick",
-    name: "Picture Pick",
-    tagline: "A word shows up — tap the picture that matches!",
+    nameKey: "game.picturePick.name",
+    taglineKey: "game.picturePick.tagline",
     href: "/games/picture-pick",
     color: "var(--color-gk-gold)",
     unlockLevel: 2,
   },
   {
     key: "true_or_false",
-    name: "True or False",
-    tagline: "Does the word match the picture? Tap yes or no!",
+    nameKey: "game.trueOrFalse.name",
+    taglineKey: "game.trueOrFalse.tagline",
     href: "/games/true-or-false",
     color: "var(--color-teal)",
     unlockLevel: 3,
   },
   {
     key: "odd_one_out",
-    name: "Odd One Out",
-    tagline: "Three belong together — find the one that doesn't!",
+    nameKey: "game.oddOneOut.name",
+    taglineKey: "game.oddOneOut.tagline",
     href: "/games/odd-one-out",
     color: "var(--color-gk-coral)",
     unlockLevel: 5,
   },
   {
     key: "category_sort",
-    name: "Category Sort",
-    tagline: "Tap the group each picture belongs to!",
+    nameKey: "game.categorySort.name",
+    taglineKey: "game.categorySort.tagline",
     href: "/games/category-sort",
     color: "var(--color-teal)",
     unlockLevel: 6,
   },
   {
     key: "counting_quiz",
-    name: "Counting Quiz",
-    tagline: "Count the pictures and tap the number word!",
+    nameKey: "game.countingQuiz.name",
+    taglineKey: "game.countingQuiz.tagline",
     href: "/games/counting-quiz",
     color: "var(--color-gk-gold)",
     unlockLevel: 7,
   },
   {
     key: "missing_letter",
-    name: "Missing Letter",
-    tagline: "Tap the letter that completes the word!",
+    nameKey: "game.missingLetter.name",
+    taglineKey: "game.missingLetter.tagline",
     href: "/games/missing-letter",
     color: "var(--color-gk-coral)",
     unlockLevel: 8,
   },
   {
     key: "sequence_memory",
-    name: "Sequence Memory",
-    tagline: "Watch the pattern, then tap it back in order!",
+    nameKey: "game.sequenceMemory.name",
+    taglineKey: "game.sequenceMemory.tagline",
     href: "/games/sequence-memory",
     color: "var(--color-teal)",
     unlockLevel: 9,
   },
   {
     key: "balloon_pop",
-    name: "Balloon Pop",
-    tagline: "Pop the balloon that matches before time runs out!",
+    nameKey: "game.balloonPop.name",
+    taglineKey: "game.balloonPop.tagline",
     href: "/games/balloon-pop",
     color: "var(--color-gk-gold)",
     unlockLevel: 10,
   },
   {
     key: "fast_picks",
-    name: "Fast Picks",
-    tagline: "Pick the right word fast — the clock keeps speeding up!",
+    nameKey: "game.fastPicks.name",
+    taglineKey: "game.fastPicks.tagline",
     href: "/games/fast-picks",
     color: "var(--color-gk-coral)",
     unlockLevel: 11,
   },
   {
     key: "word_rush",
-    name: "Word Rush",
-    tagline: "Answer as many as you can in 30 seconds!",
+    nameKey: "game.wordRush.name",
+    taglineKey: "game.wordRush.tagline",
     href: "/games/word-rush",
     color: "var(--color-teal)",
     unlockLevel: 12,
   },
   {
     key: "category_blitz",
-    name: "Category Blitz",
-    tagline: "Sort as many as you can in 30 seconds!",
+    nameKey: "game.categoryBlitz.name",
+    taglineKey: "game.categoryBlitz.tagline",
     href: "/games/category-blitz",
     color: "var(--color-gk-gold)",
     unlockLevel: 13,

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { ChestIcon, CoinIcon, StarIcon } from "@/components/icons";
 import { playChime } from "@/lib/sound";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 export interface GameRewardResult {
   rewarded: boolean;
@@ -18,6 +19,7 @@ export interface GameRewardResult {
  * "surprise chest" reveal for the small bonus roll — reused instead of each
  * game re-implementing its own version. */
 export function GameRewardSummary({ result }: { result: GameRewardResult }) {
+  const { t } = useTranslation();
   const [chestOpen, setChestOpen] = useState(false);
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export function GameRewardSummary({ result }: { result: GameRewardResult }) {
 
       {result.rewarded && result.streakMultiplier > 1 && (
         <p className="text-xs font-bold text-coral">
-          🔥 {Math.round((result.streakMultiplier - 1) * 100)}% streak bonus applied!
+          {t("games.streakBonusApplied", { percent: Math.round((result.streakMultiplier - 1) * 100) })}
         </p>
       )}
 
@@ -59,14 +61,14 @@ export function GameRewardSummary({ result }: { result: GameRewardResult }) {
             <ChestIcon size={56} open={chestOpen} />
           </motion.div>
           <p className="text-xs font-bold text-ink/60">
-            {chestOpen ? `Surprise chest: +${result.spinBonusCoins} coins!` : "Opening your bonus chest..."}
+            {chestOpen
+              ? t("games.surpriseChest", { coins: result.spinBonusCoins })
+              : t("games.openingBonusChest")}
           </p>
         </motion.div>
       )}
 
-      {!result.rewarded && (
-        <p className="text-xs text-ink/50">Practice round — come back tomorrow for more rewarded rounds!</p>
-      )}
+      {!result.rewarded && <p className="text-xs text-ink/50">{t("games.practiceRound")}</p>}
     </div>
   );
 }

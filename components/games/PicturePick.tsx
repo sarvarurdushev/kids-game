@@ -10,6 +10,7 @@ import { playCorrect, playWrong, playGameOver } from "@/lib/sound";
 import { randomWords, shuffle, type WordEntry } from "@/lib/games/wordBank";
 import { curriculumWordsUpToDifficulty } from "@/lib/games/curriculum";
 import { GameRewardSummary } from "./GameRewardSummary";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 const TOTAL_ROUNDS = 10;
 const RESULT_PAUSE_MS = 900;
@@ -50,6 +51,7 @@ function buildRound(roundIndex: number, usedWords: Set<string>): RoundData {
 
 // Same refs-for-synchronous-state pattern as EmojiQuiz/WordCatch.
 export function PicturePick({ equippedKeys }: { equippedKeys: AvatarEquippedKeys }) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>("ready");
   const [roundIndex, setRoundIndexState] = useState(0);
   const [round, setRound] = useState<RoundData | null>(null);
@@ -137,21 +139,19 @@ export function PicturePick({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
       <div className="flex flex-col items-center gap-5 text-center">
         <Avatar3D equippedKeys={equippedKeys} size={130} mood="happy" />
         <div>
-          <h1 className="font-display text-2xl font-bold text-gold-dark">Picture Pick</h1>
-          <p className="mt-1 text-sm text-ink/60">
-            A word shows up — tap the picture that matches it!
-          </p>
+          <h1 className="font-display text-2xl font-bold text-gold-dark">{t("game.picturePick.name")}</h1>
+          <p className="mt-1 text-sm text-ink/60">{t("game.picturePick.instructions")}</p>
         </div>
-        <Button onClick={() => startRound(0)}>Start Game</Button>
+        <Button onClick={() => startRound(0)}>{t("games.startGame")}</Button>
         <Link href="/games" className="text-sm font-semibold text-teal underline-offset-2 hover:underline">
-          Back to arcade
+          {t("games.backToArcade")}
         </Link>
       </div>
     );
   }
 
   if (phase === "submitting") {
-    return <p className="text-center font-display text-lg">Saving your score...</p>;
+    return <p className="text-center font-display text-lg">{t("games.savingScore")}</p>;
   }
 
   if (phase === "gameover") {
@@ -162,16 +162,15 @@ export function PicturePick({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
           size={120}
           mood={correctCount >= finalRoundsPlayed * 0.6 ? "happy" : "neutral"}
         />
-        <h1 className="font-display text-2xl font-bold text-gold-dark">Nice work!</h1>
+        <h1 className="font-display text-2xl font-bold text-gold-dark">{t("games.niceWork")}</h1>
         <p className="text-ink/70">
-          You got <span className="font-bold text-ink">{correctCount}</span> of{" "}
-          <span className="font-bold text-ink">{finalRoundsPlayed}</span> right!
+          {t("games.scoreOutOf", { correct: correctCount, total: finalRoundsPlayed })}
         </p>
         {result && <GameRewardSummary result={result} />}
         <div className="flex gap-3">
-          <Button onClick={playAgain}>Play Again</Button>
+          <Button onClick={playAgain}>{t("games.playAgain")}</Button>
           <Link href="/games">
-            <Button variant="ghost">Back to Arcade</Button>
+            <Button variant="ghost">{t("games.backToArcade")}</Button>
           </Link>
         </div>
       </div>
@@ -184,7 +183,7 @@ export function PicturePick({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <Link href="/games" className="text-sm font-semibold text-ink/50">
-          ← Exit
+          {t("games.exit")}
         </Link>
         <div className="flex items-center gap-2">
           {streak >= 3 && (
@@ -201,7 +200,7 @@ export function PicturePick({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
       <div className="flex flex-col items-center gap-2 rounded-3xl bg-white/80 py-4 shadow-sm">
         <Avatar3D equippedKeys={equippedKeys} size={72} mood={avatarMood} />
         <p className="font-display text-2xl font-bold capitalize text-ink">{round.target.word}</p>
-        <p className="text-sm font-semibold text-ink/60">Which picture is this?</p>
+        <p className="text-sm font-semibold text-ink/60">{t("game.picturePick.whichPicture")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -238,7 +237,7 @@ export function PicturePick({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
             exit={{ opacity: 0 }}
             className={`text-center text-sm font-bold ${lastCorrect ? "text-teal" : "text-coral"}`}
           >
-            {lastCorrect ? "Great job!" : "Not quite!"}
+            {lastCorrect ? t("games.greatJob") : t("games.notQuite")}
           </motion.p>
         )}
       </AnimatePresence>

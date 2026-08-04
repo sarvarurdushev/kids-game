@@ -11,6 +11,7 @@ import { Sparx } from "@/components/mascot/Sparx";
 import { playCardFlip, playFanfare, playWhoosh } from "@/lib/sound";
 import { RARITY_COLOR_VAR } from "@/lib/visuals";
 import type { Rarity } from "@/lib/reward-engine/types";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 interface RevealedItem {
   key: string;
@@ -23,6 +24,7 @@ interface RevealedItem {
 type Phase = "loading" | "shaking" | "burst" | "revealed" | "error";
 
 export function CharacterCaseOpenFlow({ grantId }: { grantId: string }) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>("loading");
   const [item, setItem] = useState<RevealedItem | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export function CharacterCaseOpenFlow({ grantId }: { grantId: string }) {
         const res = await fetch(`/api/avatar-cases/${grantId}/open`, { method: "POST" });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          setError(data.error ?? "That case couldn't be opened");
+          setError(data.error ?? t("cases.openError"));
           setPhase("error");
           return;
         }
@@ -56,7 +58,7 @@ export function CharacterCaseOpenFlow({ grantId }: { grantId: string }) {
           playCardFlip();
         }, 1500);
       } catch {
-        setError("Something went wrong. Try again!");
+        setError(t("common.somethingWrong"));
         setPhase("error");
       }
     }
@@ -75,7 +77,7 @@ export function CharacterCaseOpenFlow({ grantId }: { grantId: string }) {
   }, [showMascotCheer]);
 
   if (phase === "loading") {
-    return <p className="text-center font-display text-lg">Getting your case ready...</p>;
+    return <p className="text-center font-display text-lg">{t("cases.gettingReady")}</p>;
   }
 
   if (phase === "error") {
@@ -83,7 +85,7 @@ export function CharacterCaseOpenFlow({ grantId }: { grantId: string }) {
       <div className="flex flex-col items-center gap-4">
         <p className="text-center font-semibold text-coral">{error}</p>
         <Link href="/cases">
-          <Button variant="ghost">Back to cases</Button>
+          <Button variant="ghost">{t("cases.backToCases")}</Button>
         </Link>
       </div>
     );
@@ -114,7 +116,7 @@ export function CharacterCaseOpenFlow({ grantId }: { grantId: string }) {
         >
           <ChestIcon size={140} open={phase === "burst"} />
         </motion.div>
-        {phase === "shaking" && <p className="font-display text-lg">Opening...</p>}
+        {phase === "shaking" && <p className="font-display text-lg">{t("packs.opening")}</p>}
       </div>
     );
   }
@@ -150,7 +152,7 @@ export function CharacterCaseOpenFlow({ grantId }: { grantId: string }) {
           </span>
           {item.bundledItems.length > 0 && (
             <p className="text-center text-xs font-semibold text-ink/60">
-              Comes with {item.bundledItems.map((b) => b.name).join(", ")}!
+              {t("cases.comesWith", { items: item.bundledItems.map((b) => b.name).join(", ") })}
             </p>
           )}
         </CardFrame>
@@ -164,16 +166,16 @@ export function CharacterCaseOpenFlow({ grantId }: { grantId: string }) {
           className="flex flex-col items-center gap-1"
         >
           <Sparx expression="cheer" bounce size={72} />
-          <p className="font-display text-sm font-bold text-gold-dark">Amazing pull!</p>
+          <p className="font-display text-sm font-bold text-gold-dark">{t("packs.amazingPull")}</p>
         </motion.div>
       )}
 
       <div className="flex gap-3">
         <Link href="/avatar">
-          <Button>Wear it</Button>
+          <Button>{t("collection.wearIt")}</Button>
         </Link>
         <Link href="/cases">
-          <Button variant="ghost">Back to cases</Button>
+          <Button variant="ghost">{t("cases.backToCases")}</Button>
         </Link>
       </div>
     </div>

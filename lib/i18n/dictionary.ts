@@ -173,6 +173,167 @@ const en = {
 
   // --- Pet / room poke reactions ---------------------------------------
   "pet.feedError": "Couldn't feed your pet",
+
+  // --- Room/Avatar shop (additions) -------------------------------------
+  "common.featuredDiscount": "★ 25% OFF",
+  "common.errorEquip": "Couldn't equip that",
+  "common.errorBuy": "Couldn't buy that",
+  "common.errorPlace": "Couldn't place that",
+  "common.errorRemove": "Couldn't remove that",
+  "room.errorBuySet": "Couldn't buy that room set",
+  "avatar.errorUnlockDance": "Couldn't unlock that",
+  "avatar.danceButton": "Dance!",
+  "avatar.dancingButton": "Dancing! 🎉",
+  "avatar.unlockDanceParty": "🎉 Unlock Dance Party —",
+  "avatar.collected": "Collected",
+
+  // --- Games: shared chrome reused across multiple mini-games -----------
+  "games.savingScore": "Saving your score...",
+  "games.exit": "← Exit",
+  "games.whatIsThis": "What is this?",
+  "games.whichGroup": "Which group is this?",
+  "games.scoreOutOf": "You got {correct} of {total} right!",
+  "games.notQuiteWasCategory": "Not quite! It's {category}.",
+  "games.correctCount": "{count} correct",
+  "games.streakBonusApplied": "🔥 {percent}% streak bonus applied!",
+  "games.surpriseChest": "Surprise chest: +{coins} coins!",
+  "games.openingBonusChest": "Opening your bonus chest...",
+  "games.practiceRound": "Practice round — come back tomorrow for more rewarded rounds!",
+
+  // --- Games: catalog names/taglines (lib/games/catalog.ts) + per-game
+  // chrome specific to a single mini-game (components/games/*.tsx) --------
+  "game.wordCatch.name": "Word Catch",
+  "game.wordCatch.tagline": "Catch the right word before it drops!",
+  "game.wordCatch.instructions":
+    "A word drops in each lane. Tap the one that matches the picture before it lands!",
+  "game.wordCatch.result": "You caught {correct} of {total} words correctly!",
+
+  "game.memoryMatch.name": "Memory Match",
+  "game.memoryMatch.tagline": "Flip cards and find every matching pair!",
+  "game.memoryMatch.instructions": "Flip two cards at a time and find every picture-and-word pair!",
+  "game.memoryMatch.gameOverTitle": "All matched!",
+  "game.memoryMatch.result": "You found all {pairs} pairs in {moves} moves!",
+  "game.memoryMatch.progress": "{matched}/{total} pairs · {moves} moves",
+  "game.memoryMatch.matchFound": "Match found!",
+  "game.memoryMatch.notAMatch": "Not a match, try again!",
+
+  "game.wordScramble.name": "Word Scramble",
+  "game.wordScramble.tagline": "Unscramble the letters before time runs out!",
+  "game.wordScramble.instructions": "Tap the letters in order to spell the word before time runs out!",
+  "game.wordScramble.gameOverTitle": "All done!",
+  "game.wordScramble.result": "You spelled {correct} of {total} words correctly!",
+  "game.wordScramble.progress": "Word {current}/{total}",
+  "game.wordScramble.tapLettersBelow": "Tap letters below",
+  "game.wordScramble.undo": "⌫ Undo",
+
+  "game.emojiQuiz.name": "Emoji Quiz",
+  "game.emojiQuiz.tagline": "Pick the word that matches the picture!",
+  "game.emojiQuiz.instructions": "A picture shows up — tap the word that matches it!",
+
+  "game.picturePick.name": "Picture Pick",
+  "game.picturePick.tagline": "A word shows up — tap the picture that matches!",
+  "game.picturePick.instructions": "A word shows up — tap the picture that matches it!",
+  "game.picturePick.whichPicture": "Which picture is this?",
+
+  "game.trueOrFalse.name": "True or False",
+  "game.trueOrFalse.tagline": "Does the word match the picture? Tap yes or no!",
+  "game.trueOrFalse.instructions": "Does the word match the picture? Tap ✅ or ❌!",
+  "game.trueOrFalse.yes": "✅ Yes",
+  "game.trueOrFalse.no": "❌ No",
+
+  "game.oddOneOut.name": "Odd One Out",
+  "game.oddOneOut.tagline": "Three belong together — find the one that doesn't!",
+  "game.oddOneOut.instructions": "Three pictures belong together — tap the one that doesn't!",
+  "game.oddOneOut.whichOne": "Which one doesn't belong?",
+  "game.oddOneOut.notQuiteDidntBelong": "Not quite! The {word} didn't belong.",
+
+  "game.categorySort.name": "Category Sort",
+  "game.categorySort.tagline": "Tap the group each picture belongs to!",
+  "game.categorySort.instructions": "A picture shows up — tap the group it belongs to!",
+
+  "game.countingQuiz.name": "Counting Quiz",
+  "game.countingQuiz.tagline": "Count the pictures and tap the number word!",
+  "game.countingQuiz.instructions": "Count the pictures — tap the matching number word!",
+  "game.countingQuiz.howMany": "How many are there?",
+  "game.countingQuiz.notQuiteWasNumber": "Not quite! It was {word}.",
+
+  "game.missingLetter.name": "Missing Letter",
+  "game.missingLetter.tagline": "Tap the letter that completes the word!",
+  "game.missingLetter.instructions": "A word is missing a letter — tap the one that fits!",
+
+  "game.sequenceMemory.name": "Sequence Memory",
+  "game.sequenceMemory.tagline": "Watch the pattern, then tap it back in order!",
+  "game.sequenceMemory.instructions": "Watch the pattern, then tap it back in the same order!",
+  "game.sequenceMemory.result": "You remembered {correct} of {total} patterns!",
+  "game.sequenceMemory.watchClosely": "Watch closely...",
+  "game.sequenceMemory.yourTurn": "Your turn — tap it back!",
+  "game.sequenceMemory.greatMemory": "Great memory!",
+  "game.sequenceMemory.notQuiteWatchCloser": "Not quite! Watch closely next time.",
+
+  "game.balloonPop.name": "Balloon Pop",
+  "game.balloonPop.tagline": "Pop the balloon that matches before time runs out!",
+  "game.balloonPop.instructions": "Pop the balloon that matches the word before time runs out!",
+  "game.balloonPop.result": "You popped {correct} of {total} correctly!",
+
+  "game.fastPicks.name": "Fast Picks",
+  "game.fastPicks.tagline": "Pick the right word fast — the clock keeps speeding up!",
+  "game.fastPicks.instructions": "Pick the right word fast — the clock keeps getting quicker!",
+
+  "game.wordRush.name": "Word Rush",
+  "game.wordRush.tagline": "Answer as many as you can in 30 seconds!",
+  "game.wordRush.instructions": "Answer as many as you can before the 30-second clock runs out!",
+
+  "game.categoryBlitz.name": "Category Blitz",
+  "game.categoryBlitz.tagline": "Sort as many as you can in 30 seconds!",
+  "game.categoryBlitz.instructions": "Sort as many pictures as you can before the 30-second clock runs out!",
+  "pet.tickles": "Hehe, that tickles!",
+  "pet.wheee": "Wheee!",
+  "pet.foundMe": "You found me!",
+  "pet.giggleGiggle": "Giggle giggle!",
+  "pet.againAgain": "Again, again!",
+  "pet.hiThere": "Hi there!",
+  "pet.yumYum": "Yum yum!",
+  "pet.delicious": "Delicious!",
+  "pet.morePlease": "More please!",
+  "pet.tasty": "Tasty!",
+  "pet.happyTapToPlay": "{happiness}% happy — tap to play!",
+  "pet.feedButton": "Feed ({cost})",
+
+  // --- Additions: Home / Quests / WordBook / Packs / Cases / Collection / Games chrome ---
+  "home.xpToNextLevel": "{current}/{total} XP to next level",
+  "home.claimError": "Couldn't claim right now — try again!",
+  "home.seeYouTomorrow": "See you tomorrow for another reward!",
+  "home.rewardLine": "+{xp} XP · +{coins} coins",
+  "home.freePackSuffix": " · free pack!",
+
+  "quests.playToFinish": "Play games to finish your quests.",
+  "quests.claimError": "Couldn't claim that yet",
+
+  "wordbook.subtitle": "Review words you've learned to keep them in your memory!",
+  "wordbook.dueInTotal": "{count} due in total",
+  "wordbook.saveError": "Couldn't save that review — it may not count yet.",
+  "wordbook.backToWordBook": "Back to Word Book",
+
+  "packs.openError": "That pack couldn't be opened",
+  "packs.buyError": "Couldn't buy that pack",
+  "packs.cardsCount": "{count} cards",
+
+  "cases.openError": "That case couldn't be opened",
+  "cases.buyError": "Couldn't buy that case",
+  "cases.comesWith": "Comes with {items}!",
+
+  "common.buy": "Buy",
+  "common.closePreview": "Close preview",
+
+  "collection.redeemError": "Couldn't redeem that card",
+  "collection.needMoreShards": "Need {count} more shards",
+  "collection.redeemForShards": "✨ Redeem for {count} shards",
+  "collection.characters": "Characters",
+  "collection.styles": "Styles",
+  "collection.unlocksIn": "🔒 Unlocks in {month}",
+  "collection.buyError": "Couldn't buy that",
+
+  "games.streakBonus": "🔥 {percent}% streak bonus applied!",
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -308,6 +469,162 @@ const ko: Record<TranslationKey, string> = {
   "curriculum.letsGo": "시작하기!",
 
   "pet.feedError": "펫에게 먹이를 줄 수 없어요",
+
+  // --- Room/Avatar shop (additions) -------------------------------------
+  "common.featuredDiscount": "★ 25% 할인",
+  "common.errorEquip": "적용할 수 없어요",
+  "common.errorBuy": "구매할 수 없어요",
+  "common.errorPlace": "놓을 수 없어요",
+  "common.errorRemove": "뺄 수 없어요",
+  "room.errorBuySet": "방 세트를 구매할 수 없어요",
+  "avatar.errorUnlockDance": "잠금을 해제할 수 없어요",
+  "avatar.danceButton": "춤춰요!",
+  "avatar.dancingButton": "춤추는 중! 🎉",
+  "avatar.unlockDanceParty": "🎉 댄스 파티 잠금 해제 —",
+  "avatar.collected": "모았어요",
+
+  "games.savingScore": "점수를 저장하는 중...",
+  "games.exit": "← 나가기",
+  "games.whatIsThis": "이건 뭘까요?",
+  "games.whichGroup": "어느 그룹일까요?",
+  "games.scoreOutOf": "{total}개 중 {correct}개 맞혔어요!",
+  "games.notQuiteWasCategory": "아쉬워요! 정답은 {category}예요.",
+  "games.correctCount": "{count}개 정답",
+  "games.streakBonusApplied": "🔥 연속 보너스 {percent}%가 적용됐어요!",
+  "games.surpriseChest": "깜짝 상자: 코인 +{coins}개!",
+  "games.openingBonusChest": "보너스 상자를 여는 중...",
+  "games.practiceRound": "연습 라운드예요 — 내일 다시 오면 보상 라운드를 더 플레이할 수 있어요!",
+
+  "game.wordCatch.name": "단어 잡기",
+  "game.wordCatch.tagline": "떨어지기 전에 알맞은 단어를 잡아보세요!",
+  "game.wordCatch.instructions": "각 레인에 단어가 떨어져요. 그림과 맞는 단어가 바닥에 닿기 전에 탭하세요!",
+  "game.wordCatch.result": "{total}개 중 {correct}개 단어를 맞게 잡았어요!",
+
+  "game.memoryMatch.name": "기억력 짝맞추기",
+  "game.memoryMatch.tagline": "카드를 뒤집어 짝을 모두 찾아보세요!",
+  "game.memoryMatch.instructions": "한 번에 카드 두 장을 뒤집어서 그림과 단어 짝을 모두 찾아보세요!",
+  "game.memoryMatch.gameOverTitle": "모두 맞췄어요!",
+  "game.memoryMatch.result": "{moves}번 만에 {pairs}쌍을 모두 찾았어요!",
+  "game.memoryMatch.progress": "{matched}/{total} 쌍 · {moves}번",
+  "game.memoryMatch.matchFound": "짝을 찾았어요!",
+  "game.memoryMatch.notAMatch": "짝이 아니에요, 다시 해보세요!",
+
+  "game.wordScramble.name": "단어 조합",
+  "game.wordScramble.tagline": "시간이 끝나기 전에 글자를 맞춰보세요!",
+  "game.wordScramble.instructions": "시간이 끝나기 전에 글자를 순서대로 탭해서 단어를 완성하세요!",
+  "game.wordScramble.gameOverTitle": "다 끝냈어요!",
+  "game.wordScramble.result": "{total}개 중 {correct}개 단어를 맞게 완성했어요!",
+  "game.wordScramble.progress": "단어 {current}/{total}",
+  "game.wordScramble.tapLettersBelow": "아래 글자를 탭하세요",
+  "game.wordScramble.undo": "⌫ 지우기",
+
+  "game.emojiQuiz.name": "이모지 퀴즈",
+  "game.emojiQuiz.tagline": "그림과 맞는 단어를 골라보세요!",
+  "game.emojiQuiz.instructions": "그림이 나타나요 — 그림과 맞는 단어를 탭하세요!",
+
+  "game.picturePick.name": "그림 찾기",
+  "game.picturePick.tagline": "단어가 나타나요 — 맞는 그림을 탭하세요!",
+  "game.picturePick.instructions": "단어가 나타나요 — 단어와 맞는 그림을 탭하세요!",
+  "game.picturePick.whichPicture": "이건 어느 그림일까요?",
+
+  "game.trueOrFalse.name": "참 또는 거짓",
+  "game.trueOrFalse.tagline": "단어가 그림과 맞나요? 예 또는 아니오를 탭하세요!",
+  "game.trueOrFalse.instructions": "단어가 그림과 맞나요? ✅ 또는 ❌를 탭하세요!",
+  "game.trueOrFalse.yes": "✅ 네",
+  "game.trueOrFalse.no": "❌ 아니요",
+
+  "game.oddOneOut.name": "다른 하나 찾기",
+  "game.oddOneOut.tagline": "셋은 같은 그룹이에요 — 다른 하나를 찾아보세요!",
+  "game.oddOneOut.instructions": "그림 셋은 같은 그룹이에요 — 다른 하나를 탭하세요!",
+  "game.oddOneOut.whichOne": "어느 것이 다를까요?",
+  "game.oddOneOut.notQuiteDidntBelong": "아쉬워요! 정답은 {word}였어요.",
+
+  "game.categorySort.name": "카테고리 분류",
+  "game.categorySort.tagline": "그림이 속한 그룹을 탭하세요!",
+  "game.categorySort.instructions": "그림이 나타나요 — 그림이 속한 그룹을 탭하세요!",
+
+  "game.countingQuiz.name": "숫자 세기 퀴즈",
+  "game.countingQuiz.tagline": "그림 개수를 세고 숫자 단어를 탭하세요!",
+  "game.countingQuiz.instructions": "그림 개수를 세어보고 맞는 숫자 단어를 탭하세요!",
+  "game.countingQuiz.howMany": "몇 개가 있을까요?",
+  "game.countingQuiz.notQuiteWasNumber": "아쉬워요! 정답은 {word}였어요.",
+
+  "game.missingLetter.name": "빠진 글자 찾기",
+  "game.missingLetter.tagline": "단어를 완성하는 글자를 탭하세요!",
+  "game.missingLetter.instructions": "단어에 글자 하나가 빠졌어요 — 알맞은 글자를 탭하세요!",
+
+  "game.sequenceMemory.name": "순서 기억하기",
+  "game.sequenceMemory.tagline": "패턴을 보고 순서대로 따라 탭하세요!",
+  "game.sequenceMemory.instructions": "패턴을 잘 보고 같은 순서로 따라 탭하세요!",
+  "game.sequenceMemory.result": "{total}개 중 {correct}개 패턴을 기억했어요!",
+  "game.sequenceMemory.watchClosely": "잘 보세요...",
+  "game.sequenceMemory.yourTurn": "이제 당신 차례예요 — 따라 탭하세요!",
+  "game.sequenceMemory.greatMemory": "기억력이 대단해요!",
+  "game.sequenceMemory.notQuiteWatchCloser": "아쉬워요! 다음엔 더 잘 보세요.",
+
+  "game.balloonPop.name": "풍선 터뜨리기",
+  "game.balloonPop.tagline": "시간이 끝나기 전에 맞는 풍선을 터뜨리세요!",
+  "game.balloonPop.instructions": "시간이 끝나기 전에 단어와 맞는 풍선을 터뜨리세요!",
+  "game.balloonPop.result": "{total}개 중 {correct}개를 맞게 터뜨렸어요!",
+
+  "game.fastPicks.name": "빠른 선택",
+  "game.fastPicks.tagline": "시계가 점점 빨라져요 — 알맞은 단어를 빠르게 고르세요!",
+  "game.fastPicks.instructions": "시계가 점점 더 빨라져요 — 알맞은 단어를 빠르게 고르세요!",
+
+  "game.wordRush.name": "단어 러시",
+  "game.wordRush.tagline": "30초 안에 최대한 많이 맞혀보세요!",
+  "game.wordRush.instructions": "30초 타이머가 끝나기 전에 최대한 많이 맞혀보세요!",
+
+  "game.categoryBlitz.name": "카테고리 블리츠",
+  "game.categoryBlitz.tagline": "30초 안에 최대한 많이 분류해보세요!",
+  "game.categoryBlitz.instructions": "30초 타이머가 끝나기 전에 그림을 최대한 많이 분류해보세요!",
+  "pet.tickles": "히히, 간지러워요!",
+  "pet.wheee": "우와아!",
+  "pet.foundMe": "저를 찾았네요!",
+  "pet.giggleGiggle": "키득키득!",
+  "pet.againAgain": "또 해줘요, 또!",
+  "pet.hiThere": "안녕하세요!",
+  "pet.yumYum": "냠냠!",
+  "pet.delicious": "진짜 맛있어요!",
+  "pet.morePlease": "더 주세요!",
+  "pet.tasty": "꿀맛이에요!",
+  "pet.happyTapToPlay": "행복도 {happiness}% — 눌러서 놀아주세요!",
+  "pet.feedButton": "먹이 주기 ({cost})",
+
+  "home.xpToNextLevel": "다음 레벨까지 XP {current}/{total}",
+  "home.claimError": "지금은 받을 수 없어요 — 다시 시도해 주세요!",
+  "home.seeYouTomorrow": "내일 또 다른 보상을 받으러 오세요!",
+  "home.rewardLine": "+{xp} XP · +{coins} 코인",
+  "home.freePackSuffix": " · 무료 팩도 있어요!",
+
+  "quests.playToFinish": "게임을 플레이해서 퀘스트를 완료해요.",
+  "quests.claimError": "아직 받을 수 없어요",
+
+  "wordbook.subtitle": "배운 단어를 복습해서 기억 속에 오래 남겨보세요!",
+  "wordbook.dueInTotal": "총 {count}개 복습 필요",
+  "wordbook.saveError": "복습 결과를 저장하지 못했어요 — 반영되지 않을 수 있어요.",
+  "wordbook.backToWordBook": "단어장으로 돌아가기",
+
+  "packs.openError": "팩을 열 수 없었어요",
+  "packs.buyError": "팩을 구매할 수 없었어요",
+  "packs.cardsCount": "카드 {count}장",
+
+  "cases.openError": "케이스를 열 수 없었어요",
+  "cases.buyError": "케이스를 구매할 수 없었어요",
+  "cases.comesWith": "{items}도 함께 와요!",
+
+  "common.buy": "구매",
+  "common.closePreview": "미리보기 닫기",
+
+  "collection.redeemError": "카드를 교환할 수 없었어요",
+  "collection.needMoreShards": "조각이 {count}개 더 필요해요",
+  "collection.redeemForShards": "✨ 조각 {count}개로 교환하기",
+  "collection.characters": "캐릭터",
+  "collection.styles": "스타일",
+  "collection.unlocksIn": "🔒 {month}에 열려요",
+  "collection.buyError": "구매할 수 없었어요",
+
+  "games.streakBonus": "🔥 스트릭 보너스 {percent}%가 적용됐어요!",
 };
 
 export const translations: Record<Language, Record<TranslationKey, string>> = { en, ko };

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { playCoin } from "@/lib/sound";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 export function BuyCaseButton({
   caseTypeId,
@@ -13,6 +14,7 @@ export function BuyCaseButton({
   affordable: boolean;
 }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,7 +29,7 @@ export function BuyCaseButton({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Couldn't buy that case");
+        setError(data.error ?? t("cases.buyError"));
         return;
       }
       playCoin();
@@ -45,7 +47,7 @@ export function BuyCaseButton({
         disabled={loading || !affordable}
         className="w-full"
       >
-        {loading ? "..." : affordable ? "Buy" : "Not enough coins"}
+        {loading ? "..." : affordable ? t("common.buy") : t("common.notEnoughCoins")}
       </Button>
       {error && <p className="text-xs font-semibold text-coral">{error}</p>}
     </div>

@@ -10,6 +10,7 @@ import { playCorrect, playWrong, playGameOver, playPop } from "@/lib/sound";
 import { shuffle, type WordEntry } from "@/lib/games/wordBank";
 import { curriculumWordsUpToDifficulty } from "@/lib/games/curriculum";
 import { GameRewardSummary } from "./GameRewardSummary";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 const TOTAL_ROUNDS = 6;
 const PAD_COUNT = 4;
@@ -47,6 +48,7 @@ function buildRound(roundIndex: number): RoundData {
 // Same refs-for-synchronous-state pattern as EmojiQuiz/WordCatch, plus a
 // timeouts array so leaving mid-playback doesn't leak scheduled highlights.
 export function SequenceMemory({ equippedKeys }: { equippedKeys: AvatarEquippedKeys }) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>("ready");
   const [pads, setPads] = useState<WordEntry[]>([]);
   const [roundIndex, setRoundIndexState] = useState(0);
@@ -180,21 +182,19 @@ export function SequenceMemory({ equippedKeys }: { equippedKeys: AvatarEquippedK
       <div className="flex flex-col items-center gap-5 text-center">
         <Avatar3D equippedKeys={equippedKeys} size={130} mood="happy" />
         <div>
-          <h1 className="font-display text-2xl font-bold text-gold-dark">Sequence Memory</h1>
-          <p className="mt-1 text-sm text-ink/60">
-            Watch the pattern, then tap it back in the same order!
-          </p>
+          <h1 className="font-display text-2xl font-bold text-gold-dark">{t("game.sequenceMemory.name")}</h1>
+          <p className="mt-1 text-sm text-ink/60">{t("game.sequenceMemory.instructions")}</p>
         </div>
-        <Button onClick={startGame}>Start Game</Button>
+        <Button onClick={startGame}>{t("games.startGame")}</Button>
         <Link href="/games" className="text-sm font-semibold text-teal underline-offset-2 hover:underline">
-          Back to arcade
+          {t("games.backToArcade")}
         </Link>
       </div>
     );
   }
 
   if (phase === "submitting") {
-    return <p className="text-center font-display text-lg">Saving your score...</p>;
+    return <p className="text-center font-display text-lg">{t("games.savingScore")}</p>;
   }
 
   if (phase === "gameover") {
@@ -205,16 +205,15 @@ export function SequenceMemory({ equippedKeys }: { equippedKeys: AvatarEquippedK
           size={120}
           mood={correctCount >= finalRoundsPlayed * 0.6 ? "happy" : "neutral"}
         />
-        <h1 className="font-display text-2xl font-bold text-gold-dark">Nice work!</h1>
+        <h1 className="font-display text-2xl font-bold text-gold-dark">{t("games.niceWork")}</h1>
         <p className="text-ink/70">
-          You remembered <span className="font-bold text-ink">{correctCount}</span> of{" "}
-          <span className="font-bold text-ink">{finalRoundsPlayed}</span> patterns!
+          {t("game.sequenceMemory.result", { correct: correctCount, total: finalRoundsPlayed })}
         </p>
         {result && <GameRewardSummary result={result} />}
         <div className="flex gap-3">
-          <Button onClick={startGame}>Play Again</Button>
+          <Button onClick={startGame}>{t("games.playAgain")}</Button>
           <Link href="/games">
-            <Button variant="ghost">Back to Arcade</Button>
+            <Button variant="ghost">{t("games.backToArcade")}</Button>
           </Link>
         </div>
       </div>
@@ -227,7 +226,7 @@ export function SequenceMemory({ equippedKeys }: { equippedKeys: AvatarEquippedK
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <Link href="/games" className="text-sm font-semibold text-ink/50">
-          ← Exit
+          {t("games.exit")}
         </Link>
         <div className="flex items-center gap-2">
           {streak >= 2 && (
@@ -244,7 +243,7 @@ export function SequenceMemory({ equippedKeys }: { equippedKeys: AvatarEquippedK
       <div className="flex flex-col items-center gap-2 rounded-3xl bg-white/80 py-3 shadow-sm">
         <Avatar3D equippedKeys={equippedKeys} size={64} mood={avatarMood} />
         <p className="text-sm font-semibold text-ink/60">
-          {phase === "watching" ? "Watch closely..." : phase === "input" ? "Your turn — tap it back!" : " "}
+          {phase === "watching" ? t("game.sequenceMemory.watchClosely") : phase === "input" ? t("game.sequenceMemory.yourTurn") : " "}
         </p>
       </div>
 
@@ -274,7 +273,7 @@ export function SequenceMemory({ equippedKeys }: { equippedKeys: AvatarEquippedK
             exit={{ opacity: 0 }}
             className={`text-center text-sm font-bold ${lastCorrect ? "text-teal" : "text-coral"}`}
           >
-            {lastCorrect ? "Great memory!" : "Not quite! Watch closely next time."}
+            {lastCorrect ? t("game.sequenceMemory.greatMemory") : t("game.sequenceMemory.notQuiteWatchCloser")}
           </motion.p>
         )}
       </AnimatePresence>

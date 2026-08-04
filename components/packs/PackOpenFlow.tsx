@@ -9,6 +9,7 @@ import { BoosterPackIcon } from "@/components/icons";
 import { Sparx } from "@/components/mascot/Sparx";
 import { playCardFlip, playFanfare, playWhoosh } from "@/lib/sound";
 import type { Rarity } from "@/lib/reward-engine/types";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 interface RevealedCard {
   characterId: string;
@@ -25,6 +26,7 @@ type Phase = "loading" | "shaking" | "burst" | "revealing" | "error";
 const BEST_RARITY_RANK: Record<Rarity, number> = { common: 0, rare: 1, epic: 2, legendary: 3 };
 
 export function PackOpenFlow({ grantId }: { grantId: string }) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>("loading");
   const [cards, setCards] = useState<RevealedCard[]>([]);
   const [revealedCount, setRevealedCount] = useState(0);
@@ -48,7 +50,7 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
         const res = await fetch(`/api/packs/${grantId}/open`, { method: "POST" });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          setError(data.error ?? "That pack couldn't be opened");
+          setError(data.error ?? t("packs.openError"));
           setPhase("error");
           return;
         }
@@ -62,7 +64,7 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
           setPhase("revealing");
         }, 1500);
       } catch {
-        setError("Something went wrong. Try again!");
+        setError(t("common.somethingWrong"));
         setPhase("error");
       }
     }
@@ -95,7 +97,7 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
   }, [showMascotCheer]);
 
   if (phase === "loading") {
-    return <p className="text-center font-display text-lg">Getting your pack ready...</p>;
+    return <p className="text-center font-display text-lg">{t("packs.gettingReady")}</p>;
   }
 
   if (phase === "error") {
@@ -103,7 +105,7 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
       <div className="flex flex-col items-center gap-4">
         <p className="text-center font-semibold text-coral">{error}</p>
         <Link href="/packs">
-          <Button variant="ghost">Back to packs</Button>
+          <Button variant="ghost">{t("packs.backToPacks")}</Button>
         </Link>
       </div>
     );
@@ -134,7 +136,7 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
         >
           <BoosterPackIcon size={140} />
         </motion.div>
-        {phase === "shaking" && <p className="font-display text-lg">Opening...</p>}
+        {phase === "shaking" && <p className="font-display text-lg">{t("packs.opening")}</p>}
       </div>
     );
   }
@@ -170,13 +172,13 @@ export function PackOpenFlow({ grantId }: { grantId: string }) {
           className="flex flex-col items-center gap-1"
         >
           <Sparx expression="cheer" bounce size={72} />
-          <p className="font-display text-sm font-bold text-gold-dark">Amazing pull!</p>
+          <p className="font-display text-sm font-bold text-gold-dark">{t("packs.amazingPull")}</p>
         </motion.div>
       )}
 
       {allRevealed && (
         <Link href="/packs">
-          <Button>Back to packs</Button>
+          <Button>{t("packs.backToPacks")}</Button>
         </Link>
       )}
     </div>

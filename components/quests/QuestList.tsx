@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { CoinIcon } from "@/components/icons";
 import { playCoin } from "@/lib/sound";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 export interface QuestListItem {
   key: string;
@@ -29,6 +30,7 @@ function QuestRow({
   busy: boolean;
   onClaim: (key: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Card className={`flex items-center gap-3 !p-4 ${quest.claimed ? "opacity-60" : ""}`}>
       <span className="text-3xl" aria-hidden>
@@ -52,7 +54,7 @@ function QuestRow({
         </p>
       </div>
       {quest.claimed ? (
-        <span className="shrink-0 text-xs font-bold text-gold-dark">Claimed ✓</span>
+        <span className="shrink-0 text-xs font-bold text-gold-dark">{t("common.claimed")} ✓</span>
       ) : quest.complete ? (
         <Button
           variant="secondary"
@@ -60,7 +62,7 @@ function QuestRow({
           onClick={() => onClaim(quest.key)}
           disabled={busy}
         >
-          Claim!
+          {t("common.claim")}
         </Button>
       ) : null}
     </Card>
@@ -69,6 +71,7 @@ function QuestRow({
 
 export function QuestList({ daily, weekly }: { daily: QuestListItem[]; weekly: QuestListItem[] }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -83,7 +86,7 @@ export function QuestList({ daily, weekly }: { daily: QuestListItem[]; weekly: Q
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Couldn't claim that yet");
+        setError(data.error ?? t("quests.claimError"));
         return;
       }
       playCoin();
@@ -98,14 +101,14 @@ export function QuestList({ daily, weekly }: { daily: QuestListItem[]; weekly: Q
       {error && <p className="text-center text-sm font-semibold text-coral">{error}</p>}
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-display text-lg font-semibold">Today</h2>
+        <h2 className="font-display text-lg font-semibold">{t("quests.today")}</h2>
         {daily.map((q) => (
           <QuestRow key={q.key} quest={q} busy={busyKey === q.key} onClaim={claim} />
         ))}
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-display text-lg font-semibold">This week</h2>
+        <h2 className="font-display text-lg font-semibold">{t("quests.thisWeek")}</h2>
         {weekly.map((q) => (
           <QuestRow key={q.key} quest={q} busy={busyKey === q.key} onClaim={claim} />
         ))}

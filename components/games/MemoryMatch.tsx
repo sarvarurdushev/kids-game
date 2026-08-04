@@ -11,6 +11,7 @@ import { shuffle, type WordEntry } from "@/lib/games/wordBank";
 import { curriculumWordsUpToDifficulty } from "@/lib/games/curriculum";
 import { MemoryMatchScene3D } from "./MemoryMatchScene3D";
 import { GameRewardSummary } from "./GameRewardSummary";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 const PAIR_COUNT = 6;
 const MISMATCH_PAUSE_MS = 800;
@@ -46,6 +47,7 @@ function buildDeck(): MatchCard[] {
 }
 
 export function MemoryMatch({ equippedKeys }: { equippedKeys: AvatarEquippedKeys }) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<Phase>("ready");
   const [deck, setDeck] = useState<MatchCard[]>([]);
   const [flippedIds, setFlippedIds] = useState<string[]>([]);
@@ -142,36 +144,32 @@ export function MemoryMatch({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
       <div className="flex flex-col items-center gap-5 text-center">
         <Avatar3D equippedKeys={equippedKeys} size={130} mood="happy" />
         <div>
-          <h1 className="font-display text-2xl font-bold text-gold-dark">Memory Match</h1>
-          <p className="mt-1 text-sm text-ink/60">
-            Flip two cards at a time and find every picture-and-word pair!
-          </p>
+          <h1 className="font-display text-2xl font-bold text-gold-dark">{t("game.memoryMatch.name")}</h1>
+          <p className="mt-1 text-sm text-ink/60">{t("game.memoryMatch.instructions")}</p>
         </div>
-        <Button onClick={startGame}>Start Game</Button>
+        <Button onClick={startGame}>{t("games.startGame")}</Button>
         <Link href="/games" className="text-sm font-semibold text-teal underline-offset-2 hover:underline">
-          Back to arcade
+          {t("games.backToArcade")}
         </Link>
       </div>
     );
   }
 
   if (phase === "submitting") {
-    return <p className="text-center font-display text-lg">Saving your score...</p>;
+    return <p className="text-center font-display text-lg">{t("games.savingScore")}</p>;
   }
 
   if (phase === "gameover") {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
         <Avatar3D equippedKeys={equippedKeys} size={120} mood="happy" />
-        <h1 className="font-display text-2xl font-bold text-gold-dark">All matched!</h1>
-        <p className="text-ink/70">
-          You found all {PAIR_COUNT} pairs in <span className="font-bold text-ink">{moves}</span> moves!
-        </p>
+        <h1 className="font-display text-2xl font-bold text-gold-dark">{t("game.memoryMatch.gameOverTitle")}</h1>
+        <p className="text-ink/70">{t("game.memoryMatch.result", { pairs: PAIR_COUNT, moves })}</p>
         {result && <GameRewardSummary result={result} />}
         <div className="flex gap-3">
-          <Button onClick={startGame}>Play Again</Button>
+          <Button onClick={startGame}>{t("games.playAgain")}</Button>
           <Link href="/games">
-            <Button variant="ghost">Back to Arcade</Button>
+            <Button variant="ghost">{t("games.backToArcade")}</Button>
           </Link>
         </div>
       </div>
@@ -182,7 +180,7 @@ export function MemoryMatch({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <Link href="/games" className="text-sm font-semibold text-ink/50">
-          ← Exit
+          {t("games.exit")}
         </Link>
         <div className="flex items-center gap-2">
           {streak >= 2 && (
@@ -191,7 +189,7 @@ export function MemoryMatch({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
             </span>
           )}
           <span className="text-sm font-bold text-ink/60">
-            {matchedPairIds.size}/{PAIR_COUNT} pairs · {moves} moves
+            {t("game.memoryMatch.progress", { matched: matchedPairIds.size, total: PAIR_COUNT, moves })}
           </span>
         </div>
       </div>
@@ -222,7 +220,7 @@ export function MemoryMatch({ equippedKeys }: { equippedKeys: AvatarEquippedKeys
             exit={{ opacity: 0 }}
             className={`text-center text-sm font-bold ${feedback === "match" ? "text-teal" : "text-coral"}`}
           >
-            {feedback === "match" ? "Match found!" : "Not a match, try again!"}
+            {feedback === "match" ? t("game.memoryMatch.matchFound") : t("game.memoryMatch.notAMatch")}
           </motion.p>
         )}
       </AnimatePresence>

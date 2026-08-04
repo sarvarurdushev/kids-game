@@ -7,17 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { RoomScene3D } from "@/components/three/RoomScene3D";
 import type { AvatarEquippedKeys, AvatarMood } from "@/components/avatar/AvatarCharacter";
 import { playCoin, playGiggle } from "@/lib/sound";
-
-const REACTIONS = [
-  "Hehe, that tickles!",
-  "Wheee!",
-  "You found me!",
-  "Giggle giggle!",
-  "Again, again!",
-  "Hi there!",
-];
-
-const FEED_REACTIONS = ["Yum yum!", "Delicious!", "More please!", "Tasty!"];
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 const REACTION_MS = 1400;
 const FEED_COST = 15;
@@ -34,11 +24,24 @@ interface PokeableRoomProps {
 
 export function PokeableRoom({ equippedKeys, baseMood = "neutral", happiness, coinsBalance = 0 }: PokeableRoomProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [mood, setMood] = useState<AvatarMood>(baseMood);
   const [message, setMessage] = useState<string | null>(null);
   const [feedBusy, setFeedBusy] = useState(false);
   const [feedError, setFeedError] = useState<string | null>(null);
   const lockRef = useRef(false);
+
+  // Built from t() rather than module-level consts so a language toggle
+  // picks up the right reaction text on the very next poke.
+  const reactions = [
+    t("pet.tickles"),
+    t("pet.wheee"),
+    t("pet.foundMe"),
+    t("pet.giggleGiggle"),
+    t("pet.againAgain"),
+    t("pet.hiThere"),
+  ];
+  const feedReactions = [t("pet.yumYum"), t("pet.delicious"), t("pet.morePlease"), t("pet.tasty")];
 
   // baseMood can change after a poke's own router.refresh() lands (fresh
   // happiness from the server) — pick that up whenever we're not mid-poke.
@@ -62,7 +65,7 @@ export function PokeableRoom({ equippedKeys, baseMood = "neutral", happiness, co
   function poke() {
     if (lockRef.current) return;
     playGiggle();
-    flourish(REACTIONS[Math.floor(Math.random() * REACTIONS.length)]);
+    flourish(reactions[Math.floor(Math.random() * reactions.length)]);
     // A poke doubles as "petting" the animal — the same tap that plays the
     // giggle reaction also feeds the care loop, so there's no separate
     // "feed" button to teach. Fire-and-forget: the visual reaction doesn't
@@ -79,11 +82,11 @@ export function PokeableRoom({ equippedKeys, baseMood = "neutral", happiness, co
       const res = await fetch("/api/pet/feed", { method: "POST" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setFeedError(data.error ?? "Couldn't feed your pet");
+        setFeedError(data.error ?? t("pet.feedError"));
         return;
       }
       playCoin();
-      flourish(FEED_REACTIONS[Math.floor(Math.random() * FEED_REACTIONS.length)]);
+      flourish(feedReactions[Math.floor(Math.random() * feedReactions.length)]);
       router.refresh();
     } finally {
       setFeedBusy(false);
@@ -112,7 +115,7 @@ export function PokeableRoom({ equippedKeys, baseMood = "neutral", happiness, co
           <div className="flex items-center gap-2">
             {happiness !== undefined && (
               <span className="flex items-center gap-1 text-xs font-semibold text-ink/50">
-                <span aria-hidden>❤️</span> {happiness}% happy — tap to play!
+                <span aria-hidden>❤️</span> {t("pet.happyTapToPlay", { happiness })}
               </span>
             )}
             {(happiness ?? 0) < 100 && (
@@ -122,7 +125,7 @@ export function PokeableRoom({ equippedKeys, baseMood = "neutral", happiness, co
                 disabled={feedBusy || coinsBalance < FEED_COST || (happiness ?? 0) >= 100}
                 className="rounded-full bg-teal px-2 py-0.5 text-[11px] font-bold text-white shadow-sm disabled:opacity-40"
               >
-                🍎 Feed ({FEED_COST})
+                🍎 {t("pet.feedButton", { cost: FEED_COST })}
               </button>
             )}
           </div>
@@ -132,7 +135,7 @@ export function PokeableRoom({ equippedKeys, baseMood = "neutral", happiness, co
           href="/room"
           className="self-end text-xs font-semibold text-teal underline-offset-2 hover:underline"
         >
-          Decorate room →
+          {t("home.decorateRoom")}
         </Link>
       </div>
     </div>

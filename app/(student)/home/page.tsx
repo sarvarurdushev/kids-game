@@ -9,6 +9,7 @@ import { DailyClaimButton } from "@/components/home/DailyClaimButton";
 import { Sparx } from "@/components/mascot/Sparx";
 import { PokeableRoom } from "@/components/room/PokeableRoom";
 import { BoosterPackIcon, CoinIcon, FlameIcon } from "@/components/icons";
+import { T } from "@/components/i18n/T";
 
 export default async function HomePage() {
   const student = await requireStudent();
@@ -26,8 +27,12 @@ export default async function HomePage() {
       <div className="flex items-center gap-3 lg:gap-5">
         <Sparx size={64} className="lg:h-24 lg:w-24" />
         <div className="relative flex-1 rounded-2xl rounded-bl-none bg-white/90 px-4 py-3 shadow-sm lg:px-6 lg:py-5">
-          <h1 className="font-display text-lg font-bold lg:text-3xl">Hi, {dashboard.displayName}!</h1>
-          <p className="text-sm text-ink/60 lg:text-lg">Ready for today&apos;s adventure?</p>
+          <h1 className="font-display text-lg font-bold lg:text-3xl">
+            <T k="home.greeting" vars={{ name: dashboard.displayName }} />
+          </h1>
+          <p className="text-sm text-ink/60 lg:text-lg">
+            <T k="home.readyForAdventure" />
+          </p>
         </div>
       </div>
 
@@ -43,25 +48,32 @@ export default async function HomePage() {
           <span className="font-display text-2xl leading-none font-bold text-gold-dark lg:text-4xl">
             {dashboard.level.level}
           </span>
-          <span className="text-[9px] font-bold tracking-wide text-ink/40 uppercase lg:text-xs">Level</span>
+          <span className="text-[9px] font-bold tracking-wide text-ink/40 uppercase lg:text-xs">
+            <T k="home.level" />
+          </span>
         </LevelRing>
         <div className="flex flex-1 flex-col gap-2 lg:gap-3">
           <div className="flex items-center gap-2 text-sm font-semibold lg:text-xl">
             <CoinIcon size={22} className="lg:h-8 lg:w-8" />
-            {dashboard.coinsBalance} coins
+            {dashboard.coinsBalance} <T k="home.coins" />
           </div>
           <div className="flex items-center gap-2 text-sm font-semibold lg:text-xl">
             <FlameIcon size={22} className="lg:h-8 lg:w-8" />
-            {dashboard.currentStreak} day streak
+            {dashboard.currentStreak} <T k="home.dayStreak" />
           </div>
           <div className="flex items-center gap-2 text-sm font-semibold lg:text-xl">
             <span aria-hidden>✨</span>
-            {dashboard.cardShards} shards
+            {dashboard.cardShards} <T k="home.shards" />
           </div>
           <p className="text-xs text-ink/50">
-            {dashboard.level.xpForNextLevel !== null
-              ? `${dashboard.level.xpIntoLevel}/${dashboard.level.xpForNextLevel} XP to next level`
-              : "Max level!"}
+            {dashboard.level.xpForNextLevel !== null ? (
+              <T
+                k="home.xpToNextLevel"
+                vars={{ current: dashboard.level.xpIntoLevel, total: dashboard.level.xpForNextLevel }}
+              />
+            ) : (
+              <T k="home.maxLevel" />
+            )}
           </p>
         </div>
       </Card>
@@ -78,8 +90,7 @@ export default async function HomePage() {
         >
           <BoosterPackIcon size={44} />
           <span className="flex-1">
-            You have {dashboard.unopenedPackCount} pack
-            {dashboard.unopenedPackCount > 1 ? "s" : ""} to open!
+            <T k="home.packsToOpen" vars={{ count: dashboard.unopenedPackCount }} />
           </span>
           <span>→</span>
         </Link>
@@ -101,7 +112,7 @@ export default async function HomePage() {
             📖
           </span>
           <span className="flex-1">
-            {dashboard.wordBookDueCount} word{dashboard.wordBookDueCount > 1 ? "s are" : " is"} ready to review!
+            <T k="home.wordsReady" vars={{ count: dashboard.wordBookDueCount }} />
           </span>
           <span>→</span>
         </Link>

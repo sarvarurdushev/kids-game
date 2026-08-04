@@ -3,6 +3,7 @@ import { requireStudent } from "@/lib/auth/requireStudent";
 import { getQuestStates } from "@/lib/reward-engine/quests";
 import { QuestList } from "@/components/quests/QuestList";
 import { CoinIcon } from "@/components/icons";
+import { T } from "@/components/i18n/T";
 
 export default async function QuestsPage() {
   const student = await requireStudent();
@@ -15,11 +16,15 @@ export default async function QuestsPage() {
     <div className="flex flex-col gap-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold lg:text-4xl">Quests</h1>
+          <h1 className="font-display text-2xl font-bold lg:text-4xl">
+            <T k="quests.title" />
+          </h1>
           <p className="text-ink/60">
-            {claimable > 0
-              ? `${claimable} reward${claimable === 1 ? "" : "s"} ready to claim!`
-              : "Play games to finish your quests."}
+            {claimable > 0 ? (
+              <T k="quests.claimableCount" vars={{ count: claimable }} />
+            ) : (
+              <T k="quests.playToFinish" />
+            )}
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-0.5 text-sm font-semibold text-ink/60">

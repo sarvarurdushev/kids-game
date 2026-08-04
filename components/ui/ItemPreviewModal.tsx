@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { Modal } from "./Modal";
 import { RARITY_COLOR_VAR } from "@/lib/visuals";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 interface ItemPreviewModalProps {
   open: boolean;
@@ -19,13 +20,14 @@ interface ItemPreviewModalProps {
  * the avatar/room customizers and the card collection. Ownership stays
  * enforced wherever equip/purchase actually happens; this is preview-only. */
 export function ItemPreviewModal({ open, onClose, name, rarity, preview, reason, action }: ItemPreviewModalProps) {
+  const { t } = useTranslation();
   return (
     <Modal open={open} onClose={onClose}>
       <div className="relative flex flex-col items-center gap-3 text-center">
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close preview"
+          aria-label={t("common.closePreview")}
           className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-ink/10 text-sm font-bold text-ink/60"
         >
           ✕

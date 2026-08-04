@@ -7,6 +7,7 @@ import { ChestIcon, CoinIcon } from "@/components/icons";
 import { Sparx } from "@/components/mascot/Sparx";
 import { ConfettiOverlay } from "@/components/feedback/ConfettiOverlay";
 import { playChime } from "@/lib/sound";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 interface DailyClaimButtonProps {
   claimedToday: boolean;
@@ -21,6 +22,7 @@ const CELEBRATION_MS = 2600;
 
 export function DailyClaimButton({ claimedToday, nextReward }: DailyClaimButtonProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [claiming, setClaiming] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
   const [result, setResult] = useState<{ xpAwarded: number; coinsAwarded: number } | null>(null);
@@ -34,7 +36,7 @@ export function DailyClaimButton({ claimedToday, nextReward }: DailyClaimButtonP
       const res = await fetch("/api/daily-claim/claim", { method: "POST" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? "Couldn't claim right now — try again!");
+        setError(data.error ?? t("home.claimError"));
         return;
       }
       setResult({ xpAwarded: data.xpAwarded, coinsAwarded: data.coinsAwarded });
@@ -53,7 +55,7 @@ export function DailyClaimButton({ claimedToday, nextReward }: DailyClaimButtonP
         <ConfettiOverlay show />
         <ChestIcon size={72} open />
         <div className="flex-1">
-          <p className="font-display text-lg font-bold text-ink">Nice work!</p>
+          <p className="font-display text-lg font-bold text-ink">{t("games.niceWork")}</p>
           <p className="flex items-center gap-1 font-semibold text-ink/80">
             +{result.xpAwarded} XP, +{result.coinsAwarded} <CoinIcon size={16} />
           </p>
@@ -67,7 +69,7 @@ export function DailyClaimButton({ claimedToday, nextReward }: DailyClaimButtonP
     return (
       <div className="flex items-center gap-4 rounded-3xl bg-white/70 p-5">
         <ChestIcon size={64} className="opacity-40 grayscale" />
-        <p className="font-display font-semibold text-ink/50">See you tomorrow for another reward!</p>
+        <p className="font-display font-semibold text-ink/50">{t("home.seeYouTomorrow")}</p>
       </div>
     );
   }
@@ -89,12 +91,12 @@ export function DailyClaimButton({ claimedToday, nextReward }: DailyClaimButtonP
         </motion.div>
         <div className="flex-1">
           <p className="font-display text-lg font-bold text-ink">
-            {claiming ? "Opening..." : "Claim today's reward!"}
+            {claiming ? t("packs.opening") : t("home.claimTodayReward")}
           </p>
           {nextReward && !claiming && (
             <p className="text-sm font-semibold text-ink/70">
-              +{nextReward.xpReward} XP · +{nextReward.coinReward} coins
-              {nextReward.packTypeId ? " · free pack!" : ""}
+              {t("home.rewardLine", { xp: nextReward.xpReward, coins: nextReward.coinReward })}
+              {nextReward.packTypeId ? t("home.freePackSuffix") : ""}
             </p>
           )}
         </div>

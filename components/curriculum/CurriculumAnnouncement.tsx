@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { playFanfare } from "@/lib/sound";
 import { getCurrentCurriculum } from "@/lib/games/curriculum";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 function storageKey(studentId: string): string {
   return `gk_curriculum_seen_${studentId}`;
@@ -27,6 +28,7 @@ function subscribe(): () => void {
 export function CurriculumAnnouncement({ studentId }: { studentId: string }) {
   const topic = getCurrentCurriculum();
   const [dismissed, setDismissed] = useState(false);
+  const { t } = useTranslation();
 
   const notYetSeen = useSyncExternalStore(
     subscribe,
@@ -49,12 +51,9 @@ export function CurriculumAnnouncement({ studentId }: { studentId: string }) {
     <Modal open={open} onClose={dismiss}>
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="text-6xl">{topic.emoji}</div>
-        <h2 className="font-display text-2xl font-bold text-gold-dark">New Month!</h2>
-        <p className="text-ink/70">
-          This month we&apos;re learning about <span className="font-bold text-ink">{topic.label}</span>! New
-          words, new games, and new cards to discover.
-        </p>
-        <Button onClick={dismiss}>Let&apos;s go!</Button>
+        <h2 className="font-display text-2xl font-bold text-gold-dark">{t("curriculum.newMonth")}</h2>
+        <p className="text-ink/70">{t("curriculum.thisMonthLearning", { topic: topic.label })}</p>
+        <Button onClick={dismiss}>{t("curriculum.letsGo")}</Button>
       </div>
     </Modal>
   );
