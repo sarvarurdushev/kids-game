@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 // The bottom-nav tabs are the "home base" screens — no back button there.
 // Every other route (collection/[universeKey], games/[slug], word-book, etc.)
@@ -23,6 +24,7 @@ const TOP_LEVEL_PATHS = new Set([
 export function BackButton() {
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useTranslation();
 
   if (TOP_LEVEL_PATHS.has(pathname)) return null;
 
@@ -30,7 +32,7 @@ export function BackButton() {
     <button
       type="button"
       onClick={() => router.back()}
-      aria-label="Go back"
+      aria-label={t("nav.back")}
       className="fixed top-4 left-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-xl font-bold text-ink shadow-sm transition-transform active:scale-90"
     >
       ←

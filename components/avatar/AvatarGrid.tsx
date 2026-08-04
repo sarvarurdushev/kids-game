@@ -2,6 +2,7 @@
 
 import { AvatarRenderer } from "./AvatarRenderer";
 import type { AvatarEquippedKeys } from "./AvatarCharacter";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 interface FamilyMember {
   id: string;
@@ -16,6 +17,7 @@ interface AvatarGridProps {
 }
 
 export function AvatarGrid({ members, onSelect, onAddAnother }: AvatarGridProps) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
       {members.map((m) => (
@@ -35,7 +37,7 @@ export function AvatarGrid({ members, onSelect, onAddAnother }: AvatarGridProps)
         className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-ink/20 p-4 text-ink/50 transition-transform active:scale-95"
       >
         <span className="text-4xl">➕</span>
-        <span className="font-display text-sm font-semibold">Add a kid</span>
+        <span className="font-display text-sm font-semibold">{t("auth.addKid")}</span>
       </button>
     </div>
   );

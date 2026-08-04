@@ -3,23 +3,30 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GameControllerIcon } from "@/components/icons";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
+import type { TranslationKey } from "@/lib/i18n/dictionary";
 
-const TABS = [
-  { href: "/home", label: "Home", emoji: "🏠" },
-  { href: "/games", label: "Games", icon: GameControllerIcon },
-  { href: "/quests", label: "Quests", emoji: "📋" },
-  { href: "/packs", label: "Packs", emoji: "🎁" },
-  { href: "/collection", label: "Collection", emoji: "📚" },
-  { href: "/avatar", label: "Avatar", emoji: "🐾" },
-  { href: "/room", label: "Room", emoji: "🛋️" },
-  { href: "/achievements", label: "Badges", emoji: "🏅" },
-] as const;
+type Tab =
+  | { href: string; labelKey: TranslationKey; emoji: string }
+  | { href: string; labelKey: TranslationKey; icon: typeof GameControllerIcon };
+
+const TABS: Tab[] = [
+  { href: "/home", labelKey: "nav.home", emoji: "🏠" },
+  { href: "/games", labelKey: "nav.games", icon: GameControllerIcon },
+  { href: "/quests", labelKey: "nav.quests", emoji: "📋" },
+  { href: "/packs", labelKey: "nav.packs", emoji: "🎁" },
+  { href: "/collection", labelKey: "nav.collection", emoji: "📚" },
+  { href: "/avatar", labelKey: "nav.avatar", emoji: "🐾" },
+  { href: "/room", labelKey: "nav.room", emoji: "🛋️" },
+  { href: "/achievements", labelKey: "nav.badges", emoji: "🏅" },
+];
 
 /** `questBadge` is the count of finished-but-unclaimed quests — the standard
  * "there's something waiting for you" dot that makes a daily loop worth
  * opening. Passed down from the layout so it stays a server-side lookup. */
 export function BottomNav({ questBadge = 0 }: { questBadge?: number }) {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 bg-white/95 backdrop-blur">
@@ -43,7 +50,7 @@ export function BottomNav({ questBadge = 0 }: { questBadge?: number }) {
                 {"icon" in tab && (
                   <tab.icon size={30} className={`hidden lg:block ${active ? "" : "opacity-70"}`} />
                 )}
-                {tab.label}
+                {t(tab.labelKey)}
                 {badge > 0 && (
                   <span className="absolute top-0.5 right-1/2 translate-x-4 rounded-full bg-coral px-1.5 py-0.5 text-[10px] leading-none font-bold text-white shadow">
                     {badge}

@@ -7,6 +7,7 @@ import { Avatar3D } from "@/components/three/Avatar3D";
 import type { AvatarEquippedKeys } from "@/components/avatar/AvatarCharacter";
 import { PinPad } from "@/components/auth/PinPad";
 import { Card } from "@/components/ui/Card";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 interface FamilyMember {
   id: string;
@@ -16,6 +17,7 @@ interface FamilyMember {
 
 export function LoginFlow({ members }: { members: FamilyMember[] }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<FamilyMember | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -43,10 +45,10 @@ export function LoginFlow({ members }: { members: FamilyMember[] }) {
         if (res.status === 423) {
           // Locked: stop taking PIN input entirely rather than letting a
           // locked-out kid keep tapping digits against a dead end.
-          setLockedMessage(data.error ?? "Too many tries. Ask a grown-up for help.");
+          setLockedMessage(data.error ?? t("auth.pinLockedError"));
           return;
         }
-        setError(data.error ?? "That didn't work. Try again!");
+        setError(data.error ?? t("auth.pinError"));
         return;
       }
       router.push("/home");
@@ -60,7 +62,7 @@ export function LoginFlow({ members }: { members: FamilyMember[] }) {
     return (
       <div className="w-full max-w-sm">
         <h1 className="font-display mb-6 text-center text-2xl font-bold text-gold-dark">
-          Who&apos;s playing?
+          {t("auth.whosPlaying")}
         </h1>
         <AvatarGrid
           members={members}
@@ -74,12 +76,12 @@ export function LoginFlow({ members }: { members: FamilyMember[] }) {
   return (
     <Card className="flex w-full max-w-sm flex-col items-center gap-4">
       <Avatar3D equippedKeys={selected.equippedKeys} size={110} />
-      <h1 className="font-display text-xl font-bold">Hi, {selected.displayName}!</h1>
+      <h1 className="font-display text-xl font-bold">{t("home.greeting", { name: selected.displayName })}</h1>
       {lockedMessage ? (
         <p className="text-center text-sm font-semibold text-coral">{lockedMessage}</p>
       ) : (
         <>
-          <p className="text-sm text-ink/60">Enter your secret PIN</p>
+          <p className="text-sm text-ink/60">{t("auth.enterPin")}</p>
           <PinPad onSubmit={handlePin} error={error} disabled={submitting} />
         </>
       )}
@@ -88,7 +90,7 @@ export function LoginFlow({ members }: { members: FamilyMember[] }) {
         onClick={() => setSelected(null)}
         className="text-sm font-semibold text-teal underline-offset-2 hover:underline"
       >
-        Not me — pick someone else
+        {t("auth.notMe")}
       </button>
     </Card>
   );
